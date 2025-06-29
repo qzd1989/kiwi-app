@@ -3,6 +3,8 @@ import { load, Store } from "@tauri-apps/plugin-store";
 import { App } from "@kiwi/App";
 import { Project } from "@kiwi/Project";
 import { Common } from "@kiwi/Common";
+import { Capture } from "@kiwi/Capture";
+import { Size } from "./common";
 
 type LocalStoreKey = "projectRootDirectory" | "isPythonAttributed";
 
@@ -34,59 +36,16 @@ const useStateStore = defineStore("store", {
   state: () => ({
     enable: Enable.init(),
     zoom: Zoom.init(),
+    monitorSize: Size.from(0, 0),
 
     //kiwi object
     app: new App(),
     common: new Common(),
     project: new Project(),
+    capture: new Capture(),
   }),
   persist: true,
 });
-
-// class StateStore {
-//   data: ReturnType<typeof useStateStore> | null = null;
-
-//   init() {
-//     if (this.data == null) {
-//       this.data = useStateStore();
-//     }
-//   }
-
-//   get enable(): Enable {
-//     if (!this.data) {
-//       throw new Error("StateStore not initialized");
-//     }
-//     return this.data.enable;
-//   }
-
-//   get app(): App {
-//     if (!this.data) {
-//       throw new Error("StateStore not initialized");
-//     }
-//     return this.data.app;
-//   }
-
-//   get zoom(): Zoom {
-//     if (!this.data) {
-//       throw new Error("StateStore not initialized");
-//     }
-//     return this.data.zoom;
-//   }
-
-//   get project(): Project {
-//     if (!this.data) {
-//       throw new Error("StateStore not initialized");
-//     }
-//     return this.data.project;
-//   }
-
-//   set project(value: Project) {
-//     if (!this.data) {
-//       throw new Error("StateStore not initialized");
-//     }
-//     this.data.project = value;
-//   }
-// }
 
 class LocalStore {
   instance: Store | null = null;

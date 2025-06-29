@@ -6,6 +6,7 @@ import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { isWebsocketAlive, openWebsocket } from "@utils/common";
 import { msgError } from "@utils/msg";
 import { listen } from "@tauri-apps/api/event";
+import { onUnmounted } from "vue";
 const stateStore = useStateStore();
 
 const init = async () => {
@@ -86,6 +87,10 @@ listen("msg:error", (event: any) => {
 onMounted(async () => {
   await init();
   window.addEventListener("keyup", shortcutZoom);
+});
+
+onUnmounted(async () => {
+  window.removeEventListener("keyup", shortcutZoom);
 });
 </script>
 <template>
