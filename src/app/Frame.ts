@@ -1,8 +1,0 @@
-// commands::frontend::frame::find_image,
-// commands::frontend::frame::find_images,
-// commands::frontend::frame::find_relative_colors,
-// commands::frontend::frame::find_colors,
-// commands::frontend::frame::recognize_text,
-// commands::frontend::frame::generate_uuid,
-// commands::frontend::capture::capture_screenshot,
-// commands::frontend::capture::get_monitor_size,

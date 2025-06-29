@@ -1,7 +1,7 @@
+import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
-// @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vitejs.dev/config/
@@ -27,6 +27,13 @@ export default defineConfig(async () => ({
     watch: {
       // 3. tell vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
+    },
+  },
+  resolve: {
+    alias: {
+      "@utils": fileURLToPath(new URL("./src/utils", import.meta.url)),
+      "@views": fileURLToPath(new URL("./src/views", import.meta.url)),
+      "@kiwi": fileURLToPath(new URL("./src/kiwi", import.meta.url)),
     },
   },
 }));
