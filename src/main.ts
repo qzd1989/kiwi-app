@@ -1,8 +1,10 @@
 import { createApp } from "vue";
 import Main from "@views/Main.vue";
 import Home from "@views/main/Home.vue";
+import Setting from "@views/main/Setting.vue";
 import ProjectCreate from "@views/main/project/Create.vue";
 import ProjectDetail from "@views/main/project/Detail.vue";
+
 import Monitor from "@views/Monitor.vue";
 import "./css/default.css";
 const app = createApp(Main);
@@ -21,6 +23,7 @@ import { createRouter, createWebHistory } from "vue-router";
 const routes = [
   { path: "/", redirect: "/main/home" },
   { path: "/main/home", component: Home },
+  { path: "/main/setting", component: Setting },
   { path: "/main/project/create", component: ProjectCreate },
   { path: "/main/project/detail", component: ProjectDetail },
   { path: "/monitor", component: Monitor },

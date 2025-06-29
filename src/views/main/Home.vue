@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, computed } from "vue";
 import { useRouter } from "vue-router";
-import { stateStore, localStore } from "@utils/store";
+import { useStateStore, localStore } from "@utils/store";
 import { open } from "@tauri-apps/plugin-dialog";
-import { msgErrorObject } from "@utils/msg";
+import { msgError } from "@utils/msg";
 
+const stateStore = useStateStore();
 const isDev = import.meta.env.DEV;
 const router = useRouter();
+const isEnabled = computed(() => {
+  return Object.values(stateStore.enable).every((v) => v === true);
+});
 
 const selectProject = async () => {
   try {
@@ -17,12 +21,12 @@ const selectProject = async () => {
     });
     if (selectedPath) {
       router.push({
-        path: "/main/project/panel",
+        path: "/main/project/detail",
         query: { path: selectedPath },
       });
     }
-  } catch (e: Error) {
-    msgErrorObject(e);
+  } catch (e: unknown) {
+    msgError(e);
   }
 };
 
@@ -38,7 +42,16 @@ const goToSetting = () => {
   });
 };
 
-onMounted(async () => {});
+const clearLocalStore = async () => {
+  await localStore.clear();
+};
+
+onMounted(async () => {
+  // router.push({
+  //   path: "/main/project/detail",
+  //   query: { path: "/Users/kiwi/Downloads/project/2" },
+  // });
+});
 
 onUnmounted(async () => {});
 </script>
@@ -56,14 +69,20 @@ onUnmounted(async () => {});
       </el-row>
       <el-row :gutter="0">
         <el-col :span="24">
-          <el-button type="primary" @click="goToCreateProject"
+          <el-button
+            type="primary"
+            @click="goToCreateProject"
+            :disabled="!isEnabled"
             >Create Project</el-button
           >
         </el-col>
       </el-row>
       <el-row :gutter="0">
         <el-col :span="24">
-          <el-button type="primary" @click="selectProject"
+          <el-button
+            type="primary"
+            @click="selectProject"
+            :disabled="!isEnabled"
             >Open Project</el-button
           >
         </el-col>
@@ -75,7 +94,7 @@ onUnmounted(async () => {});
       </el-row>
       <el-row :gutter="0">
         <el-col :span="24">
-          <el-button type="primary" @click="localStore.clear" v-if="isDev"
+          <el-button type="primary" @click="clearLocalStore" v-if="isDev"
             >ClearLocalStore</el-button
           >
         </el-col>

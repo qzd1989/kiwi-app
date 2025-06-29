@@ -1,5 +1,11 @@
 use super::{CommandResult, utils::get_relative_image_data_path_buf};
+use crate::APP_NAME;
 use crate::app::{App, Config as AppConfig};
+
+#[tauri::command]
+pub fn get_app_name() -> CommandResult<String> {
+    Ok(APP_NAME.to_string())
+}
 
 #[tauri::command]
 pub fn get_app_config() -> CommandResult<AppConfig> {
@@ -8,19 +14,16 @@ pub fn get_app_config() -> CommandResult<AppConfig> {
 }
 
 #[tauri::command]
-pub fn save_app_config(websocket_port: String) -> CommandResult<()> {
-    let websocket_port = websocket_port
-        .parse::<u16>()
-        .map_err(|error| error.to_string())?;
-
-    if websocket_port == 0 {
+pub fn save_app_config(config: AppConfig) -> CommandResult<()> {
+    if config.app.websocket_port == 0 {
         return Err("WebSocket port must be greater than 0.".into());
     }
 
-    App::with_config_mut(|config| {
-        config.app.websocket_port = websocket_port;
-        config.save()
+    App::with_config_mut(|app_config| {
+        app_config.app.websocket_port = config.app.websocket_port;
+        app_config.save()
     })?;
+
     Ok(())
 }
 

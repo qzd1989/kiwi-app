@@ -1,3 +1,6 @@
+import { invoke } from "@tauri-apps/api/core";
+import { getAllWindows } from "@tauri-apps/api/window";
+
 type u32 = number;
 type i32 = number;
 type u8 = number;
@@ -6,6 +9,7 @@ type Base64Png = string;
 type RgbaBuffer = Uint8Array;
 type Language = "python" | "lua";
 type HexColor = `#${string}`;
+type WindowLabel = "main" | "monitor";
 
 namespace u32 {
   export const MIN = 0 as u32;
@@ -215,6 +219,69 @@ namespace HexColor {
   };
 }
 
+interface Progress {
+  percentage: u32;
+  message: string;
+}
+
+const delay = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+const minimizeAll = async () => {
+  const windows = await getAllWindows();
+  for (const window of windows) {
+    await window.minimize();
+  }
+};
+
+const unminimizeAll = async () => {
+  const windows = await getAllWindows();
+  for (const window of windows) {
+    window.unminimize().then(() => {
+      return window.setFocus();
+    });
+  }
+};
+
+interface EmitData {
+  data: string;
+  time: number;
+}
+
+class Stack<T> {
+  limit: number;
+  stack: T[];
+
+  constructor(limit: number) {
+    this.stack = [];
+    this.limit = limit;
+  }
+
+  push(element: T) {
+    if (this.stack.length >= this.limit) {
+      this.stack.shift();
+    }
+    this.stack.push(element);
+  }
+
+  clear(): void {
+    this.stack = [];
+  }
+}
+
+const openWebsocket = async (port: number) => {
+  return await invoke("open_websocket", { port });
+};
+
+const shutdownWebsocket = async () => {
+  return await invoke("shutdown_websocket");
+};
+
+const isWebsocketAlive = async (port: number): Promise<boolean> => {
+  return await invoke("is_websocket_alive", { port });
+};
+
 export {
   u32,
   i32,
@@ -227,5 +294,12 @@ export {
   WeightPoint,
   ColoredPoint,
   Size,
+  Stack,
+  delay,
+  minimizeAll,
+  unminimizeAll,
+  openWebsocket,
+  shutdownWebsocket,
+  isWebsocketAlive,
 };
-export type { Language };
+export type { Language, Progress, EmitData, WindowLabel };

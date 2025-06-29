@@ -42,6 +42,7 @@ impl Display for VerifyStatus {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProjectInfo {
     pub name: String,
     pub language: String,

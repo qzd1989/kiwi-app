@@ -14,6 +14,7 @@ pub mod utils;
 pub mod websocket;
 
 const APP_VERSION: &str = "1.0.0";
+const APP_NAME: &str = "Kiwi";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -66,6 +67,7 @@ pub fn run() {
             commands::frontend::common::open_websocket,
             commands::frontend::common::shutdown_websocket,
             commands::frontend::common::is_websocket_alive,
+            commands::frontend::app::get_app_name,
             commands::frontend::app::get_app_version,
             commands::frontend::app::save_app_config,
             commands::frontend::app::get_app_config,
@@ -81,7 +83,7 @@ pub fn run() {
             commands::frontend::project::save_image,
             commands::frontend::project::get_image,
             commands::frontend::project::get_image_size,
-            commands::frontend::project::run_project,
+            commands::frontend::project::run_script,
             commands::frontend::project::run_recorder,
             commands::frontend::project::stop_all,
             commands::frontend::frame::find_image,

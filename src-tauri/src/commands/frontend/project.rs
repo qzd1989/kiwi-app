@@ -180,7 +180,7 @@ pub fn get_image_size(name: String, data_path: String) -> CommandResult<Size> {
 }
 
 #[tauri::command]
-pub fn run_project(app_handle: AppHandle, path: String) {
+pub fn run_script(app_handle: AppHandle, path: String) {
     let app_handle = Arc::new(app_handle);
 
     if let Err(error) = App::try_with_project(|_| {}) {

@@ -1,27 +1,47 @@
 <script setup lang="ts">
-import { onMounted, ref, watchEffect } from "vue";
+import { onMounted, watchEffect } from "vue";
 import { homeDir } from "@tauri-apps/api/path";
-import { stateStore, localStore } from "@utils/store";
+import { useStateStore, localStore } from "@utils/store";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
-import { invoke } from "@tauri-apps/api/core";
-const isMounted = ref(false);
+import { isWebsocketAlive, openWebsocket } from "@utils/common";
+import { msgError } from "@utils/msg";
+import { listen } from "@tauri-apps/api/event";
+const stateStore = useStateStore();
 
 const init = async () => {
-  stateStore.init();
+  await focus();
+
+  await stateStore.app.init();
   await localStoreInit();
+  if (!(await websocketInit())) {
+    return;
+  }
+};
+
+const focus = async () => {
+  await getCurrentWebview().setFocus();
+};
+
+const websocketInit = async () => {
+  try {
+    const port = stateStore.app.config.app.websocket_port;
+    await openWebsocket(port);
+    stateStore.enable.isWebsocketAlive = await isWebsocketAlive(port);
+  } catch (e: unknown) {
+    msgError(e);
+    return false;
+  }
+  return true;
 };
 
 const localStoreInit = async () => {
   await localStore.init();
-  // projectRootDirectory
-  const projectRootDirectory = await localStore.get("projectRootDirectory");
-  const projectRootDirectoryExists = await invoke("path_exists", {
-    path: projectRootDirectory,
-  });
-  const defaultProjectRootDirectory = await homeDir();
-  if (projectRootDirectory == null || !projectRootDirectoryExists) {
-    await localStore.set("projectRootDirectory", defaultProjectRootDirectory);
-    return;
+  const savedPath = await localStore.get("projectRootDirectory");
+  const defaultPath = await homeDir();
+  const exists =
+    savedPath && (await stateStore.common.pathExists(savedPath as string));
+  if (!exists) {
+    await localStore.set("projectRootDirectory", defaultPath);
   }
 };
 
@@ -56,14 +76,16 @@ const shortcutZoom = async (event: KeyboardEvent) => {
 };
 
 watchEffect(async () => {
-  if (!isMounted.value) return;
   await getCurrentWebview().setZoom(stateStore.zoom.factor);
+});
+
+listen("msg:error", (event: any) => {
+  msgError(event.payload.data);
 });
 
 onMounted(async () => {
   await init();
   window.addEventListener("keyup", shortcutZoom);
-  isMounted.value = true;
 });
 </script>
 <template>

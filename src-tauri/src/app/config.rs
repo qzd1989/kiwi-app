@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+
 pub struct Config {
     pub app: ConfigApp,
 }

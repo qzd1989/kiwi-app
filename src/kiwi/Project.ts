@@ -16,7 +16,6 @@
 // commands::frontend::code::generate_find_images_code,
 // commands::frontend::code::generate_find_relative_colors_code,
 // commands::frontend::code::generate_find_colors_code,
-
 // commands::frontend::code::generate_recognize_text_code,
 
 import { Language } from "@utils/common";
@@ -24,11 +23,39 @@ import { Language } from "@utils/common";
 type VerifyStatus = "valid" | "invalid" | "moved";
 
 interface ProjectInfo {
-  name: string;
+  name: string | null;
   language: Language;
-  main_file: string;
-  path: string;
-  kiwi_version: string;
+  mainFile: string | null;
+  path: string | null;
+  kiwiVersion: string | null;
+  mainFileFullPath?: string;
 }
 
-export type { VerifyStatus, ProjectInfo };
+class Project implements ProjectInfo {
+  name: string | null;
+  language: Language;
+  mainFile: string | null;
+  path: string | null;
+  kiwiVersion: string | null;
+  mainFileFullPath?: string | undefined;
+  constructor() {
+    this.name = null;
+    this.language = "python";
+    this.mainFile = null;
+    this.path = null;
+    this.kiwiVersion = null;
+  }
+}
+
+// namespace Project {
+//   export const init = (): Project => ({
+//     name: null,
+//     language: "python",
+//     path: null,
+//     mainFile: null,
+//     kiwiVersion: null,
+//   });
+// }
+
+export { Project };
+export type { VerifyStatus };

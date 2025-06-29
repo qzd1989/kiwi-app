@@ -1,9 +1,5 @@
 import { ElMessage } from "element-plus";
 
-const msgErrorObject = (e: Error, duration?: number) => {
-  msgError(e.message, duration);
-};
-
 const msgInfo = (msg: string) => {
   ElMessage({
     showClose: true,
@@ -31,11 +27,29 @@ const msgSuccess = (msg: string) => {
   });
 };
 
-const msgError = (msg: string, duration?: number) => {
+const msgError = (e: unknown, duration?: number) => {
+  let message: string;
+
+  if (e instanceof Error) {
+    message = e.message;
+  } else if (typeof e === "object" && e !== null) {
+    if ("message" in e) {
+      message = e.message as string;
+    } else {
+      try {
+        message = JSON.stringify(e, null, 2);
+      } catch {
+        message = "Can't parse error object.";
+      }
+    }
+  } else {
+    message = String(e);
+  }
+
   if (duration) {
     ElMessage({
       showClose: true,
-      message: `${msg}`,
+      message: `${message}`,
       type: "error",
       grouping: true,
       duration,
@@ -43,7 +57,7 @@ const msgError = (msg: string, duration?: number) => {
   } else {
     ElMessage({
       showClose: true,
-      message: `${msg}`,
+      message: `${message}`,
       type: "error",
       grouping: true,
       duration: 0,
@@ -51,4 +65,4 @@ const msgError = (msg: string, duration?: number) => {
   }
 };
 
-export { msgError, msgErrorObject, msgSuccess, msgWarn, msgInfo };
+export { msgError, msgSuccess, msgWarn, msgInfo };

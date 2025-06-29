@@ -16,7 +16,7 @@ class Frame {
 
   // async init() {
   //   try {
-  //     const frame: any = await invoke("get_frame");
+  //     const frame: unknown = await invoke("get_frame");
   //     this.width = frame?.width;
   //     this.height = frame?.height;
   //     this.data = frame?.
@@ -40,7 +40,7 @@ class Frame {
 
 //   get(): Promise<Frame | null> {
 //     try {
-//     } catch (e: any) {
+//     } catch (e: unknown) {
 //       msgErrorObject(e);
 //     }
 //     return Promise.resolve(null);

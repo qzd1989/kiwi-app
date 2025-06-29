@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { Language } from "@utils/common";
+import { Language, Progress } from "@utils/common";
 import { ref, onMounted, onUnmounted, reactive } from "vue";
 import { open } from "@tauri-apps/plugin-dialog";
 import { join, sep } from "@tauri-apps/api/path";
 import { localStore } from "@utils/store";
-import { msgErrorObject } from "@utils/msg";
+import { msgError, msgSuccess } from "@utils/msg";
 import { FormInstance, ElLoading, FormRules } from "element-plus";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
+import { useRouter } from "vue-router";
 
 interface Form {
   name: string;
@@ -15,6 +17,8 @@ interface Form {
   fullPath: string;
   rootDirectory: string;
 }
+
+const router = useRouter();
 const formRef = ref<FormInstance>();
 const form = reactive<Form>({
   name: "",
@@ -27,13 +31,20 @@ const rules = reactive<FormRules<Form>>({
   name: [
     {
       required: true,
-      message: "Project name is required",
+      message: "Project name is required.",
       trigger: "blur",
     },
     {
       pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9]+$/,
       message:
         "Can only contain Chinese characters, English letters, digits, and underscores.",
+      trigger: "blur",
+    },
+  ],
+  path: [
+    {
+      required: true,
+      message: "Project path is required.",
       trigger: "blur",
     },
   ],
@@ -55,8 +66,8 @@ const openSelector = async () => {
       form.rootDirectory = selectedPath + (await sep());
       await localStore.set("projectRootDirectory", selectedPath);
     }
-  } catch (e: any) {
-    msgErrorObject(e);
+  } catch (e: unknown) {
+    msgError(e);
   }
 };
 
@@ -80,15 +91,30 @@ const save = async (formEl: FormInstance | undefined) => {
     await invoke("save_project", { name, language, path });
     await invoke("init_project", { path });
     form.fullPath = path;
-  } catch (e: any) {
-    console.error("Save failed:", e);
-    msgErrorObject(e);
+  } catch (e: unknown) {
+    msgError(e);
   }
 };
+
+listen("msg:error", () => {
+  loading.value?.close();
+});
+
+listen<Progress>("progress:init_project", async (event) => {
+  if (event.payload.percentage == 100) {
+    loading.value?.close();
+    msgSuccess("Project created successfully.");
+    router.push({
+      path: "/main/project/detail",
+      query: { path: form.fullPath },
+    });
+  }
+});
 
 onMounted(async () => {
   form.rootDirectory = (await localStore.get("projectRootDirectory")) as string;
 });
+
 onUnmounted(async () => {});
 </script>
 <template>

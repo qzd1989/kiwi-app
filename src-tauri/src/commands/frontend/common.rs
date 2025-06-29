@@ -44,8 +44,7 @@ pub fn protect_windows(app_handle: AppHandle, windows: Vec<String>) -> CommandRe
 }
 
 #[tauri::command]
-pub async fn is_websocket_alive(port: String) -> CommandResult<bool> {
-    let port = port.parse::<u16>().map_err(|error| error.to_string())?;
+pub async fn is_websocket_alive(port: u16) -> CommandResult<bool> {
     websocket::is_alive(port)
         .await
         .map_err(|error| error.into())
@@ -58,9 +57,7 @@ pub async fn shutdown_websocket() -> CommandResult<()> {
 }
 
 #[tauri::command]
-pub async fn open_websocket(port: String) -> CommandResult<()> {
-    let port = port.parse::<u16>().map_err(|error| error.to_string())?;
-
+pub async fn open_websocket(port: u16) -> CommandResult<()> {
     if port == 0 {
         return Err("WebSocket port must be greater than 0.".into());
     }

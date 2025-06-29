@@ -1,0 +1,22 @@
+{
+  "identifier": "kiwi",
+  "bundle": {
+    "copyright": "© 2025 Biexi. All rights reserved.",
+    "resources":{
+        "assets/windows/dlls/*.dll": ""
+    },
+    "targets": [
+      "nsis"
+    ],
+    "windows": {
+        "digestAlgorithm": "sha256",
+        "nsis": {
+          "languages": ["English", "SimpChinese"],
+          "displayLanguageSelector": true,
+          "installerIcon": "icons/icon.ico",
+          "installMode": "perMachine",
+          "installerHooks": "./assets/windows/hooks.nsi"
+        }
+      }
+  }
+}
