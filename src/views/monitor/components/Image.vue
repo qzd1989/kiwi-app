@@ -92,11 +92,11 @@ const eraserMedium = 10;
 const eraserLarge = 20;
 const eraserSideLength = ref(eraserLarge);
 const relativePosition = reactive({ x: 0, y: 0 }); //相对于截图的位置
-const hiddenCanvasRef = ref(null);
 const result = ref<string | null>(null);
 const code = ref<string | null>(null);
 const findType = ref("findImage");
 const loading = ref(false);
+const hiddenCanvasRef = ref<HTMLCanvasElement | null>(null);
 const magnifyingGlassCanvasRef = ref<HTMLCanvasElement | null>(null);
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const filePath = computed(() => {
@@ -269,7 +269,7 @@ const findImage = async () => {
       endPoint,
       threshold
     );
-  } catch (e) {
+  } catch (e: unknown) {
     clearAllItems();
     result.value = code.value = null;
     msgError(e);
@@ -368,7 +368,7 @@ const saveAndCopy = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   try {
     await formEl.validate();
-  } catch (e) {
+  } catch (e: unknown) {
     return;
   }
   if (!code.value?.trim()) {

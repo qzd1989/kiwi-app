@@ -341,15 +341,81 @@ const findImage = async () => {
 };
 
 const findRelativeColor = async () => {
+  // guard
+  if (!form.target) return null;
+  // init
   closeFind();
+  initParams();
+  rightWidth.value = 420;
+  drawItemsCallback.value = null;
+  // set params
+  const startX = Math.min(form.findArea.start.x, form.findArea.end.x);
+  const startY = Math.min(form.findArea.start.y, form.findArea.end.y);
+  const width = Math.abs(form.findArea.start.x - form.findArea.end.x);
+  const height = Math.abs(form.findArea.start.y - form.findArea.end.y);
+  const start = Point.from(startX, startY);
+  const size = Size.from(width, height);
+  params.start = start;
+  params.size = size;
+  params.base64Png = (await cropBase64Png(
+    form.target.originalBase64Png as Base64Png,
+    start,
+    size
+  )) as Base64Png;
+  cancelCapture();
+  showRelativeColor.value = true;
 };
 
 const findColor = async () => {
+  // guard
+  if (!form.target) return null;
+  // init
   closeFind();
+  initParams();
+  rightWidth.value = 420;
+  drawItemsCallback.value = null;
+  // set params
+  const startX = Math.min(form.findArea.start.x, form.findArea.end.x);
+  const startY = Math.min(form.findArea.start.y, form.findArea.end.y);
+  const width = Math.abs(form.findArea.start.x - form.findArea.end.x);
+  const height = Math.abs(form.findArea.start.y - form.findArea.end.y);
+  const start = Point.from(startX, startY);
+  const size = Size.from(width, height);
+  params.start = start;
+  params.size = size;
+  params.base64Png = (await cropBase64Png(
+    form.target.originalBase64Png as Base64Png,
+    start,
+    size
+  )) as Base64Png;
+  cancelCapture();
+  showColor.value = true;
 };
 
 const findText = async () => {
+  // guard
+  if (!form.target) return null;
+  // init
   closeFind();
+  initParams();
+  rightWidth.value = 420;
+  drawItemsCallback.value = null;
+  // set params
+  const startX = Math.min(form.findArea.start.x, form.findArea.end.x);
+  const startY = Math.min(form.findArea.start.y, form.findArea.end.y);
+  const width = Math.abs(form.findArea.start.x - form.findArea.end.x);
+  const height = Math.abs(form.findArea.start.y - form.findArea.end.y);
+  const start = Point.from(startX, startY);
+  const size = Size.from(width, height);
+  params.start = start;
+  params.size = size;
+  params.base64Png = (await cropBase64Png(
+    form.target.originalBase64Png as Base64Png,
+    start,
+    size
+  )) as Base64Png;
+  cancelCapture();
+  showText.value = true;
 };
 
 const closeFind = () => {
@@ -408,9 +474,9 @@ watch(
   },
   async (newVal) => {
     if (newVal) {
-      form.findArea.start = Point.from(921, 127);
-      form.findArea.end = Point.from(942, 148);
-      findImage();
+      // form.findArea.start = Point.from(697, 1045);
+      // form.findArea.end = Point.from(747, 1098);
+      // findColor();
     }
   }
 );
@@ -504,11 +570,11 @@ onUnmounted(async () => {
               <Picture />
             </el-icon>
             <!-- find locating colors -->
-            <el-icon title="find locating colors" @click="findRelativeColor()">
+            <el-icon title="find relative colors" @click="findRelativeColor()">
               <Orange />
             </el-icon>
             <!-- find colors-->
-            <el-icon title="find color" @click="findColor()">
+            <el-icon title="find colors" @click="findColor()">
               <Pointer />
             </el-icon>
             <!-- recognize text -->

@@ -3,13 +3,31 @@ import { getAllWindows } from "@tauri-apps/api/window";
 
 type u32 = number;
 type i32 = number;
-type u8 = number;
 type f64 = number;
 type Base64Png = string;
 type RgbaBuffer = Uint8Array;
 type Language = "python" | "lua";
 type HexColor = `#${string}`;
 type WindowLabel = "main" | "monitor";
+type u8 = number;
+type RgbColor = {
+  r: u8;
+  g: u8;
+  b: u8;
+};
+
+namespace RgbColor {
+  export const from = (r: number, g: number, b: number): RgbColor => {
+    const rU8 = u8.from(r);
+    const gU8 = u8.from(g);
+    const bU8 = u8.from(b);
+    return {
+      r: rU8,
+      g: gU8,
+      b: bU8,
+    };
+  };
+}
 
 namespace u32 {
   export const MIN = 0 as u32;
@@ -217,6 +235,19 @@ namespace HexColor {
       .padStart(6, "0");
     return `#${hex}` as HexColor;
   };
+
+  export const fromRgbColor = (rgbPixelColor: RgbColor): HexColor => {
+    function toHex(colorValue: u8) {
+      var hex = colorValue.toString(16);
+      return hex.length === 1 ? "0" + hex : hex;
+    }
+    const hexString =
+      "#" +
+      toHex(rgbPixelColor.r) +
+      toHex(rgbPixelColor.g) +
+      toHex(rgbPixelColor.b);
+    return HexColor.from(hexString);
+  };
 }
 
 interface Progress {
@@ -383,6 +414,71 @@ const drawRect = (ctx: CanvasRenderingContext2D, point: Point, size: Size) => {
   ctx.strokeRect(point.x, point.y, size.width, size.height);
 };
 
+const base64PngToRgbPixels = (base64Png: Base64Png): Promise<RgbColor[]> => {
+  // 创建一个HTML图像对象
+  let img = new Image();
+  // 解码Base64字符串并设置为图像源
+  img.src = base64Png;
+
+  return new Promise((resolve, reject) => {
+    // 确保图像加载完成后再处理
+    img.onload = function () {
+      // 创建一个canvas元素
+      let canvas = document.createElement("canvas");
+      // 设置canvas大小与图像一致
+      canvas.width = img.width;
+      canvas.height = img.height;
+      // 获取2D渲染上下文
+      let ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      // 将图像绘制到canvas上
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      // 获取图像数据
+      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+      // 创建一个二维数组来存储像素点颜色
+      let pixels = [];
+      for (let i = 0; i < imageData.length; i += 4) {
+        // 每四个元素代表一个像素点的RGB值
+        let pixel = RgbColor.from(
+          imageData[i],
+          imageData[i + 1],
+          imageData[i + 2]
+        );
+        pixels.push(pixel);
+      }
+
+      resolve(pixels); // 解析Promise，返回像素数组
+    };
+
+    img.onerror = function () {
+      reject(
+        new Error("Failed to load image from the provided Base64Png String.")
+      );
+    };
+  });
+};
+
+const rgbToHex = (rgbPixelColor: RgbColor) => {
+  /**
+   * 将单个RGB颜色值转换为两位的十六进制字符串
+   * @param {number} colorValue - 单个RGB颜色值（0-255之间的整数）
+   * @returns {string} - 两位的十六进制颜色值
+   */
+  function toHex(colorValue: u8) {
+    var hex = colorValue.toString(16); // 将数字转换为十六进制字符串
+    return hex.length === 1 ? "0" + hex : hex; // 确保两位字符，如果只有一位则前面加0
+  }
+
+  // 构建最终的十六进制颜色值
+  var hexColor =
+    "#" +
+    toHex(rgbPixelColor.r) +
+    toHex(rgbPixelColor.g) +
+    toHex(rgbPixelColor.b);
+  return hexColor; // 返回转换后的十六进制颜色值
+};
+
 export {
   u32,
   i32,
@@ -391,6 +487,7 @@ export {
   Base64Png,
   RgbaBuffer,
   HexColor,
+  RgbColor,
   Point,
   WeightPoint,
   ColoredPoint,
@@ -398,6 +495,8 @@ export {
   Stack,
   cropBase64Png,
   drawBase64PngImageOnCanvas,
+  base64PngToRgbPixels,
+  rgbToHex,
   delay,
   minimizeAll,
   unminimizeAll,
