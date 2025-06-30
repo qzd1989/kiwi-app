@@ -330,7 +330,7 @@ const drawItems = (items: Item[]) => {
   emits("drawItems", {
     callback: (ctx: CanvasRenderingContext2D) => {
       for (let item of items) {
-        const point = item.start.clone();
+        const point = Point.clone(item.start);
         const size = {
           width: item.size.width,
           height: item.size.height,

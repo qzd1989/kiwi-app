@@ -119,7 +119,7 @@ const onCanvasMouseMove = (event: MouseEvent) => {
   hoveredPixelPoint.x = event.clientX - left;
   hoveredPixelPoint.y = event.clientY - top;
   if (isCapturing.value == true) {
-    form.findArea.end = hoveredPixelPoint.clone();
+    form.findArea.end = Point.clone(hoveredPixelPoint);
   }
   draw();
 };
@@ -141,7 +141,7 @@ const onCanvasMouseUp = (event: MouseEvent) => {
   if (event.button != 0) {
     return;
   }
-  form.findArea.end = hoveredPixelPoint.clone();
+  form.findArea.end = Point.clone(hoveredPixelPoint);
   isCaptured.value = true;
   isCapturing.value = false;
   shouldDrawCapture.value = true;

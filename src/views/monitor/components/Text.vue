@@ -116,7 +116,7 @@ const copy = async () => {
 };
 
 const loadData = () => {
-  form.findArea.start = props.params.start.clone();
+  form.findArea.start = Point.clone(props.params.start);
   form.findArea.end = Point.from(
     props.params.start.x + props.params.size.width,
     props.params.start.y + props.params.size.height

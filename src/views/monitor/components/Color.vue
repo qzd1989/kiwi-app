@@ -180,7 +180,7 @@ const drawItems = (items: ColoredPoint[]) => {
       for (const item of items) {
         const title = `color:${item.hex}`;
         const titlePoint = Point.from(item.point.x - 5, item.point.y - 10);
-        const arcPoint = item.point.clone();
+        const arcPoint = Point.from(item.point.x, item.point.y);
         drawArc(ctx, arcPoint, 5);
         drawText(ctx, title, titlePoint);
       }

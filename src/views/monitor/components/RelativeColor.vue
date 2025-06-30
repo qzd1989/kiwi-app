@@ -14,27 +14,30 @@ interface RelativeColorPoint {
   point: Point;
   relativePoint: Point;
 }
-class RelativeColorPoint {
-  key: string;
-  hex: HexColor;
-  point: Point;
-  relativePoint: Point;
-  constructor(hex: HexColor, point: Point, relativePoint: Point) {
-    this.key = point.x + "," + point.y;
-    this.hex = hex;
-    this.point = point;
-    this.relativePoint = relativePoint;
-  }
-  static from(
+namespace RelativeColorPoint {
+  export const from = (
     hex: HexColor,
     point: Point,
     relativePoint: Point
-  ): RelativeColorPoint {
-    return new RelativeColorPoint(hex, point, relativePoint);
-  }
-  clone(): RelativeColorPoint {
-    return RelativeColorPoint.from(this.hex, this.point, this.relativePoint);
-  }
+  ): RelativeColorPoint => {
+    const key = point.x + "," + point.y;
+    return {
+      key,
+      hex,
+      point,
+      relativePoint,
+    };
+  };
+
+  export const clone = (
+    relativeColorPoint: RelativeColorPoint
+  ): RelativeColorPoint => {
+    return RelativeColorPoint.from(
+      relativeColorPoint.hex,
+      Point.clone(relativeColorPoint.point),
+      Point.clone(relativeColorPoint.relativePoint)
+    );
+  };
 }
 interface Form {
   points: RelativeColorPoint[];
@@ -155,7 +158,7 @@ const caculateRelativePoints = () => {
   }
   const points: RelativeColorPoint[] = [];
   form.points.forEach((item) => {
-    points.push(item.clone());
+    points.push(RelativeColorPoint.clone(item));
   });
   points.sort((a, b) => {
     if (a.point.y == b.point.y) {
