@@ -4,21 +4,47 @@ import { listen } from "@tauri-apps/api/event";
 import { join } from "@tauri-apps/api/path";
 import { msgError } from "@utils/msg";
 import { useStateStore } from "@utils/store";
-import { ref, onMounted, onUnmounted, reactive } from "vue";
+import { ref, onMounted, onUnmounted, reactive, watch } from "vue";
 import { ElLoading, ElContainer } from "element-plus";
-import { Base64Png, HexColor, Point, Size, Stack } from "@utils/common";
+import {
+  Base64Png,
+  HexColor,
+  Point,
+  Size,
+  Stack,
+  cropBase64Png,
+} from "@utils/common";
 import { useResizeObserver } from "@vueuse/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
-interface CaptureTarget {
+import FindImage from "@views/monitor/components/Image.vue";
+import FindRelativeColor from "@views/monitor/components/RelativeColor.vue";
+import FindColor from "@views/monitor/components/Color.vue";
+import FindText from "@views/monitor/components/Text.vue";
+
+interface Target {
   name: string;
   key: string;
   size: Size;
   base64Png: Base64Png | null;
   originalBase64Png: Base64Png | null;
 }
+interface Params {
+  start: Point;
+  size: Size;
+  base64Png: Base64Png | null;
+}
+namespace Params {
+  export const init = (): Params => {
+    return {
+      start: Point.from(0, 0),
+      size: Size.from(0, 0),
+      base64Png: null,
+    };
+  };
+}
 interface Form {
-  capturedTarget: CaptureTarget | null;
+  target: Target | null;
   findArea: {
     start: Point;
     end: Point;
@@ -27,7 +53,7 @@ interface Form {
 
 const stateStore = useStateStore();
 const loading = ref<ReturnType<typeof ElLoading.service> | null>(null);
-const capturedTargets = ref<CaptureTarget[]>([
+const targets = ref<Target[]>([
   {
     name: "Primary Monitor",
     key: "primary_monitor",
@@ -47,6 +73,10 @@ const isCaptured = ref(false);
 const isCapturing = ref(false);
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const rightRef = ref<HTMLElement | null>(null);
+const showImage = ref(false);
+const showRelativeColor = ref(false);
+const showColor = ref(false);
+const showText = ref(false);
 const drawItemsCallback = ref<((ctx: CanvasRenderingContext2D) => void) | null>(
   null
 );
@@ -57,19 +87,20 @@ const draggingRight = ref(false);
 const pagePoint = reactive<Point>(Point.from(0, 0));
 const mouseVerticalStack = new Stack(2);
 const form = reactive<Form>({
-  capturedTarget: null,
+  target: null,
   findArea: {
     start: Point.from(0, 0),
     end: Point.from(0, 0),
   },
 });
+const params = reactive<Params>(Params.init());
 
 const capture = async () => {
   const action = async () => {
-    if (!form.capturedTarget) return;
+    if (!form.target) return;
     loading.value = null;
     try {
-      form.capturedTarget.size = await stateStore.capture.getMonitorSize();
+      form.target.size = await stateStore.capture.getMonitorSize();
       loading.value = ElLoading.service({
         lock: true,
         text: "Capturing, please wait.",
@@ -81,7 +112,7 @@ const capture = async () => {
       msgError(e);
     }
   };
-  if (!form.capturedTarget) return;
+  if (!form.target) return;
   cancelCapture();
   await action();
 };
@@ -101,10 +132,9 @@ const onCanvasMouseMove = (event: MouseEvent) => {
   }
   draw();
 };
-const onCanvasMouseOut = () => {
-  // hoveredPixelPoint.x = -1;
-  // hoveredPixelPoint.y = -1;
-};
+
+const onCanvasMouseOut = () => {};
+
 const onCanvasMouseDown = (event: MouseEvent) => {
   if (event.button != 0) {
     return;
@@ -144,20 +174,20 @@ const cancelCapture = () => {
 };
 
 const draw = () => {
-  if (!form.capturedTarget) return;
-  if (!form.capturedTarget.base64Png) return;
+  if (!form.target) return;
+  if (!form.target.base64Png) return;
   if (!canvasRef.value) return;
 
   const canvas = canvasRef.value;
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   const img = new window.Image();
-  img.src = form.capturedTarget.base64Png;
+  img.src = form.target.base64Png;
   img.onload = () => {
     if (!ctx) return;
-    if (!form.capturedTarget) return;
-    if (!form.capturedTarget.size) return;
-    canvas.width = form.capturedTarget.size.width;
-    canvas.height = form.capturedTarget.size.height;
+    if (!form.target) return;
+    if (!form.target.size) return;
+    canvas.width = form.target.size.width;
+    canvas.height = form.target.size.height;
     ctx.drawImage(img, 0, 0);
 
     if (drawItemsCallback.value) {
@@ -195,10 +225,9 @@ const drawCapturedRect = () => {
 };
 
 const reset = () => {
-  if (!form.capturedTarget) return;
-  form.capturedTarget.base64Png = form.capturedTarget.originalBase64Png;
+  if (!form.target) return;
+  form.target.base64Png = form.target.originalBase64Png;
   drawItemsCallback.value = null;
-  // items.value = []; todo
   draw();
 };
 
@@ -278,10 +307,68 @@ const drag = (event: MouseEvent, area: string) => {
   }
 };
 
-const findImage = async () => {};
-const findRelativeColors = async () => {};
-const findColors = async () => {};
-const recognizeText = async () => {};
+const initParams = () => {
+  const inited = Params.init();
+  params.start = inited.start;
+  params.base64Png = inited.base64Png;
+  params.size = inited.size;
+};
+
+const findImage = async () => {
+  // guard
+  if (!form.target) return null;
+  // init
+  closeFind();
+  initParams();
+  rightWidth.value = 420;
+  drawItemsCallback.value = null;
+  // set params
+  const startX = Math.min(form.findArea.start.x, form.findArea.end.x);
+  const startY = Math.min(form.findArea.start.y, form.findArea.end.y);
+  const width = Math.abs(form.findArea.start.x - form.findArea.end.x);
+  const height = Math.abs(form.findArea.start.y - form.findArea.end.y);
+  const start = Point.from(startX, startY);
+  const size = Size.from(width, height);
+  params.start = start;
+  params.size = size;
+  params.base64Png = (await cropBase64Png(
+    form.target.originalBase64Png as Base64Png,
+    start,
+    size
+  )) as Base64Png;
+  cancelCapture();
+  showImage.value = true;
+};
+
+const findRelativeColor = async () => {
+  closeFind();
+};
+
+const findColor = async () => {
+  closeFind();
+};
+
+const findText = async () => {
+  closeFind();
+};
+
+const closeFind = () => {
+  showImage.value = false;
+  showRelativeColor.value = false;
+  showColor.value = false;
+  showText.value = false;
+  rightWidth.value = 0;
+};
+
+const drawItems = (data: any) => {
+  drawItemsCallback.value = data.callback;
+  draw();
+};
+
+const clearAllItems = () => {
+  drawItemsCallback.value = null;
+  draw();
+};
 
 useResizeObserver(containerRef, (entries) => {
   if (!rightRef.value) return;
@@ -306,18 +393,31 @@ listen("msg:error", (event: any) => {
 });
 
 listen<Base64Png>("backend:update:frame", async (event) => {
-  if (!form.capturedTarget) return;
-  form.capturedTarget.base64Png = form.capturedTarget.originalBase64Png =
-    event.payload;
+  if (!form.target) return;
+  form.target.base64Png = form.target.originalBase64Png = event.payload;
   drawItemsCallback.value = null;
   draw();
   loading.value?.close();
   stateStore.common.unprotectWindows(["main", "monitor"]);
 });
 
+// test
+watch(
+  () => {
+    return form.target?.base64Png;
+  },
+  async (newVal) => {
+    if (newVal) {
+      form.findArea.start = Point.from(921, 127);
+      form.findArea.end = Point.from(942, 148);
+      findImage();
+    }
+  }
+);
+
 onMounted(async () => {
   // init
-  form.capturedTarget = capturedTargets.value[0];
+  form.target = targets.value[0];
   // gap
   document.addEventListener("mousemove", moveListener);
   document.addEventListener("mouseup", upListener);
@@ -328,6 +428,7 @@ onMounted(async () => {
     await capture();
   }
 });
+
 onUnmounted(async () => {
   window.removeEventListener("keyup", shortcutZoom);
 });
@@ -349,13 +450,13 @@ onUnmounted(async () => {
     >
       <el-header ref="headerRef">
         <el-select
-          v-model="form.capturedTarget"
+          v-model="form.target"
           placeholder="Select"
           class="monitors"
           disabled
         >
           <el-option
-            v-for="target in capturedTargets"
+            v-for="target in targets"
             :key="target.key"
             :label="target.name"
             :value="target.key"
@@ -366,7 +467,7 @@ onUnmounted(async () => {
             type="primary"
             plain
             @click="capture"
-            :disabled="form.capturedTarget == null"
+            :disabled="form.target == null"
           >
             <el-text>capture</el-text>
           </el-button>
@@ -375,7 +476,7 @@ onUnmounted(async () => {
           type="primary"
           plain
           @click="reset"
-          :disabled="form.capturedTarget == null"
+          :disabled="form.target == null"
           style="margin-right: 5px"
         >
           <el-text>reset</el-text>
@@ -403,15 +504,15 @@ onUnmounted(async () => {
               <Picture />
             </el-icon>
             <!-- find locating colors -->
-            <el-icon title="find locating colors" @click="findRelativeColors()">
+            <el-icon title="find locating colors" @click="findRelativeColor()">
               <Orange />
             </el-icon>
             <!-- find colors-->
-            <el-icon title="find color" @click="findColors()">
+            <el-icon title="find color" @click="findColor()">
               <Pointer />
             </el-icon>
             <!-- recognize text -->
-            <el-icon title="recognize text" @click="recognizeText()">
+            <el-icon title="recognize text" @click="findText()">
               <View />
             </el-icon>
             <!-- close -->
@@ -423,8 +524,8 @@ onUnmounted(async () => {
           <canvas
             class="canvas"
             ref="canvasRef"
-            :width="form.capturedTarget?.size.width"
-            :height="form.capturedTarget?.size.height"
+            :width="form.target?.size.width"
+            :height="form.target?.size.height"
             @mousedown="onCanvasMouseDown"
             @mouseup="onCanvasMouseUp"
             @mousemove="onCanvasMouseMove"
@@ -435,24 +536,22 @@ onUnmounted(async () => {
         <!-- work end -->
       </el-main>
       <el-footer>
-        <span v-if="form.capturedTarget?.base64Png">
-          monitor size: ({{ form.capturedTarget?.size.width }},
-          {{ form.capturedTarget?.size.height }})
+        <span v-if="form.target?.base64Png">
+          monitor size: ({{ form.target?.size.width }},
+          {{ form.target?.size.height }})
         </span>
-        <span
-          >position: ({{ hoveredPixelPoint.x }},
-          {{ hoveredPixelPoint.y }})</span
-        >
+        <span>
+          position: ({{ hoveredPixelPoint.x }}, {{ hoveredPixelPoint.y }})
+        </span>
         <span>hex: {{ hoveredPixelHexColor }}</span>
-        <span
-          >beginAt: ({{ form.findArea.start.x }},
-          {{ form.findArea.start.y }})</span
-        >
-        <span
-          >endAt: ({{ form.findArea.end.x }}, {{ form.findArea.end.y }})</span
-        >
-        <span
-          >captured Rect Size: ({{ capturedSize.width }},
+        <span>
+          beginAt: ({{ form.findArea.start.x }}, {{ form.findArea.start.y }})
+        </span>
+        <span>
+          endAt: ({{ form.findArea.end.x }}, {{ form.findArea.end.y }})
+        </span>
+        <span>
+          captured Rect Size: ({{ capturedSize.width }},
           {{ capturedSize.height }})
         </span>
       </el-footer>
@@ -470,39 +569,39 @@ onUnmounted(async () => {
         :class="{ selected: draggingRight }"
       ></div>
       <div class="find-area">
-        <!-- <Image
+        <FindImage
           v-if="showImage"
           @close="closeFind"
           @drawItems="drawItems"
           @clearAllItems="clearAllItems"
           :params="params"
-          :monitor="monitor"
-          :imageDataPath="imageDataPath"
+          :target="form.target"
+          :imageDataPath="stateStore.app.relativeImageDataPath"
         />
-        <RelativeColors
-          v-if="showLocatingColors"
+        <FindRelativeColor
+          v-if="showRelativeColor"
           @close="closeFind"
           @drawItems="drawItems"
           @clearAllItems="clearAllItems"
           :params="params"
-          :monitor="monitor"
+          :target="form.target"
         />
-        <Colors
-          v-if="showColors"
+        <FindColor
+          v-if="showColor"
           @close="closeFind"
           @drawItems="drawItems"
           @clearAllItems="clearAllItems"
           :params="params"
-          :monitor="monitor"
+          :target="form.target"
         />
-        <Text
-          v-if="showTexts"
+        <FindText
+          v-if="showText"
           @close="closeFind"
           @drawItems="drawItems"
           @clearAllItems="clearAllItems"
           :params="params"
-          :monitor="monitor"
-        /> -->
+          :target="form.target"
+        />
       </div>
     </el-aside>
   </el-container>

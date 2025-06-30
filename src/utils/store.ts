@@ -5,6 +5,8 @@ import { Project } from "@kiwi/Project";
 import { Common } from "@kiwi/Common";
 import { Capture } from "@kiwi/Capture";
 import { Size } from "./common";
+import { Frame } from "@kiwi/Frame";
+import { Code } from "@kiwi/Code";
 
 type LocalStoreKey = "projectRootDirectory" | "isPythonAttributed";
 
@@ -43,6 +45,8 @@ const useStateStore = defineStore("store", {
     common: new Common(),
     project: new Project(),
     capture: new Capture(),
+    frame: new Frame(),
+    code: new Code(),
   }),
   persist: true,
 });

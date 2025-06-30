@@ -1,19 +1,17 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Base64Png, f64, Point, WeightPoint } from "@utils/common";
+import { f64, Point } from "@utils/common";
 import { msgError } from "@utils/msg";
 
-class Frame {
-  async findImage(
-    origin: Base64Png,
-    template: Base64Png,
+class Code {
+  async generateFindImageCode(
+    subpath: string,
     startPoint: Point,
     endPoint: Point,
     threshold: f64
-  ): Promise<WeightPoint | null> {
+  ): Promise<string> {
     try {
-      return await invoke("find_image", {
-        origin,
-        template,
+      return await invoke("generate_find_image_code", {
+        subpath,
         startPoint,
         endPoint,
         threshold,
@@ -24,17 +22,15 @@ class Frame {
     }
   }
 
-  async findImages(
-    origin: Base64Png,
-    template: Base64Png,
+  async generateFindImagesCode(
+    subpath: string,
     startPoint: Point,
     endPoint: Point,
     threshold: f64
-  ): Promise<WeightPoint[]> {
+  ): Promise<string> {
     try {
-      return await invoke("find_images", {
-        origin,
-        template,
+      return await invoke("generate_find_images_code", {
+        subpath,
         startPoint,
         endPoint,
         threshold,
@@ -46,4 +42,4 @@ class Frame {
   }
 }
 
-export { Frame };
+export { Code };

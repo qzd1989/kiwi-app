@@ -18,7 +18,9 @@
 // commands::frontend::code::generate_find_colors_code,
 // commands::frontend::code::generate_recognize_text_code,
 
-import { Language } from "@utils/common";
+import { invoke } from "@tauri-apps/api/core";
+import { Base64Png, Language } from "@utils/common";
+import { msgError } from "@utils/msg";
 
 type VerifyStatus = "valid" | "invalid" | "moved";
 
@@ -38,6 +40,7 @@ class Project implements ProjectInfo {
   path: string | null;
   kiwiVersion: string | null;
   mainFileFullPath?: string | undefined;
+
   constructor() {
     this.name = null;
     this.language = "python";
@@ -45,17 +48,19 @@ class Project implements ProjectInfo {
     this.path = null;
     this.kiwiVersion = null;
   }
-}
 
-// namespace Project {
-//   export const init = (): Project => ({
-//     name: null,
-//     language: "python",
-//     path: null,
-//     mainFile: null,
-//     kiwiVersion: null,
-//   });
-// }
+  async saveImage(name: string, base64Png: Base64Png): Promise<void> {
+    try {
+      return await invoke("save_image", {
+        name,
+        data: base64Png,
+      });
+    } catch (e: unknown) {
+      msgError(e);
+      throw e;
+    }
+  }
+}
 
 export { Project };
 export type { VerifyStatus };

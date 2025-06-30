@@ -10,7 +10,6 @@ class Common {
       msgError(e);
       throw e;
     }
-    return false;
   }
 
   async xattrPython(): Promise<void> {
@@ -65,7 +64,6 @@ class Common {
       msgError(e);
       throw e;
     }
-    return false;
   }
 }
 
