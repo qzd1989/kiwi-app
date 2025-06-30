@@ -455,16 +455,16 @@ listen<Base64Png>("backend:update:frame", async (event) => {
   commonModel.unprotectWindows(["main", "monitor"]);
 });
 
-// test
+// test todo
 watch(
   () => {
     return form.target?.base64Png;
   },
   async (newVal) => {
     if (newVal) {
-      form.findArea.start = Point.from(697, 1045);
-      form.findArea.end = Point.from(747, 1098);
-      findRelativeColor();
+      // form.findArea.start = Point.from(697, 1045);
+      // form.findArea.end = Point.from(747, 1098);
+      // findRelativeColor();
     }
   }
 );
