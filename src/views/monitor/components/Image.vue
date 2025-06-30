@@ -12,6 +12,7 @@ import {
 import { Base64Png, f64, Point, WeightPoint, Size } from "@types";
 import { sep } from "@tauri-apps/api/path";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { codeModel, frameModel, ProjectModel } from "@kiwi";
 
 interface Form {
   name: string | null;
@@ -256,7 +257,7 @@ const findImage = async () => {
   const threshold = form.threshold;
   try {
     loading.value = true;
-    const weightPoint = await stateStore.frame.findImage(
+    const weightPoint = await frameModel.findImage(
       origin,
       template,
       startPoint,
@@ -269,7 +270,7 @@ const findImage = async () => {
       result.value = JSON.stringify(weightPoint);
       drawItems(formatItems([weightPoint]));
     }
-    code.value = await stateStore.code.generateFindImageCode(
+    code.value = await codeModel.generateFindImageCode(
       formatImageName(form.name),
       startPoint,
       endPoint,
@@ -296,7 +297,7 @@ const findImages = async () => {
   const threshold = form.threshold;
   try {
     loading.value = true;
-    const weightPoints = await stateStore.frame.findImages(
+    const weightPoints = await frameModel.findImages(
       origin,
       template,
       templateSize,
@@ -310,7 +311,7 @@ const findImages = async () => {
       result.value = JSON.stringify(weightPoints);
       drawItems(formatItems(weightPoints));
     }
-    code.value = await stateStore.code.generateFindImagesCode(
+    code.value = await codeModel.generateFindImagesCode(
       formatImageName(form.name),
       startPoint,
       endPoint,
@@ -381,7 +382,8 @@ const saveAndCopy = async (formEl: FormInstance | undefined) => {
     props.params.size
   );
   try {
-    await stateStore.project.saveImage(form.name as string, data);
+    const model = new ProjectModel(stateStore.project);
+    await model.saveImage(form.name as string, data);
     await writeText(code.value);
     msgSuccess("Copy successed.");
   } catch (e: unknown) {

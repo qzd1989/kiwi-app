@@ -6,6 +6,7 @@ import { useStateStore } from "@utils/store";
 import { base64PngToRgbPixels, drawArc, drawText } from "@utils/common";
 import { Base64Png, ColoredPoint, RgbColor, HexColor, Point } from "@types";
 import { FormInstance, FormRules } from "element-plus";
+import { codeModel, frameModel } from "@kiwi";
 
 interface RelativeColorPoint {
   key: string;
@@ -230,7 +231,7 @@ const generateCode = async () => {
   const endPoint = form.findArea.end;
   const rgbOffset = form.offset;
   try {
-    code.value = await stateStore.code.generateFindRelativeColorsCode(
+    code.value = await codeModel.generateFindRelativeColorsCode(
       vertexHex,
       relativePoints,
       startPoint,
@@ -275,7 +276,7 @@ const findRelativeColors = async (formEl: FormInstance | undefined) => {
   const rgbOffset = form.offset;
   try {
     loading.value = true;
-    const peak = await stateStore.frame.findRelativeColors(
+    const peak = await frameModel.findRelativeColors(
       origin,
       vertexHex,
       relativePoints,

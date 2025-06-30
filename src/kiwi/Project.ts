@@ -14,7 +14,7 @@ interface Project {
 }
 
 namespace Project {
-  export const init = (): Project => ({
+  export const empty = (): Project => ({
     name: null,
     language: "python",
     mainFile: null,

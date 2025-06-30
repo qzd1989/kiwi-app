@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { WindowLabel } from "@types";
 import { msgError } from "@utils/msg";
 
-class Common {
+class CommonModel {
   async pathExists(path: string): Promise<boolean> {
     try {
       return await invoke("path_exists", { path });
@@ -67,4 +67,5 @@ class Common {
   }
 }
 
-export { Common };
+const commonModel = new CommonModel();
+export { commonModel };

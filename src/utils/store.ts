@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { load, Store } from "@tauri-apps/plugin-store";
 import { Size } from "@types";
-import { App, Project, Common, Capture, Frame, Code } from "@kiwi";
+import { App, Project } from "@kiwi";
 
 type LocalStoreKey = "projectRootDirectory" | "isPythonAttributed";
 interface Enable {
@@ -32,12 +32,8 @@ const useStateStore = defineStore("store", {
     monitorSize: Size.from(0, 0),
 
     //kiwi object
-    app: new App(),
-    common: new Common(),
-    project: Project.init(),
-    capture: new Capture(),
-    frame: new Frame(),
-    code: new Code(),
+    app: App.empty(),
+    project: Project.empty(),
   }),
   persist: true,
 });

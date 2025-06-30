@@ -6,6 +6,7 @@ import { msgError, msgSuccess } from "@utils/msg";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useStateStore } from "@utils/store";
 import { FormInstance, FormRules } from "element-plus";
+import { codeModel, frameModel } from "@kiwi";
 
 interface Form {
   coloredPoints: ColoredPoint[];
@@ -116,7 +117,7 @@ const generateCode = async () => {
   const endPoint = form.findArea.end;
   const rgbOffset = form.offset;
   try {
-    code.value = await stateStore.code.generateFindColorsCode(
+    code.value = await codeModel.generateFindColorsCode(
       hexColors,
       startPoint,
       endPoint,
@@ -150,7 +151,7 @@ const findColor = async (formEl: FormInstance | undefined) => {
   const rgbOffset = form.offset;
   try {
     loading.value = true;
-    const coloredPoints = await stateStore.frame.findColors(
+    const coloredPoints = await frameModel.findColors(
       origin,
       hexColors,
       startPoint,

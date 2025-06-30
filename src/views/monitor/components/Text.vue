@@ -4,8 +4,8 @@ import { drawRect, drawText, drawBase64PngImageOnCanvas } from "@utils/common";
 import { Base64Png, Point } from "@types";
 import { msgError, msgSuccess } from "@utils/msg";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
-import { useStateStore } from "@utils/store";
 import { FormInstance, FormRules } from "element-plus";
+import { codeModel, frameModel } from "@kiwi";
 
 interface Form {
   base64Png: Base64Png | null;
@@ -17,7 +17,6 @@ interface Form {
 
 const props = defineProps(["params", "target"]);
 const emits = defineEmits(["close", "drawItems", "clearAllItems"]);
-const stateStore = useStateStore();
 const result = ref<string | null>(null);
 const code = ref<string | null>(null);
 const loading = ref(false);
@@ -53,10 +52,7 @@ const drawImage = async () => {
 const generateCode = async () => {
   const startPoint = form.findArea.start;
   const endPoint = form.findArea.end;
-  code.value = await stateStore.code.generateRecognizeTextCode(
-    startPoint,
-    endPoint
-  );
+  code.value = await codeModel.generateRecognizeTextCode(startPoint, endPoint);
 };
 
 const recognize = async (formEl: FormInstance | undefined) => {
@@ -75,11 +71,7 @@ const recognize = async (formEl: FormInstance | undefined) => {
   const endPoint = form.findArea.end;
   try {
     loading.value = true;
-    const text = await stateStore.frame.recognizeText(
-      origin,
-      startPoint,
-      endPoint
-    );
+    const text = await frameModel.recognizeText(origin, startPoint, endPoint);
     drawItem(text);
     result.value = text;
     await generateCode();

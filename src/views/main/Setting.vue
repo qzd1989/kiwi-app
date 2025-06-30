@@ -4,6 +4,7 @@ import { FormRules } from "element-plus";
 import { useStateStore } from "@utils/store";
 import { delay } from "@utils/common";
 import { msgError, msgInfo, msgSuccess } from "@utils/msg";
+import { AppModel, commonModel } from "@kiwi";
 
 interface Form {
   originalWebsocketPort: number;
@@ -11,6 +12,7 @@ interface Form {
 }
 
 const stateStore = useStateStore();
+const model = ref<AppModel | null>(null);
 const shouldShowSaveSuccess = ref<boolean>(true);
 const form = reactive<Form>({
   originalWebsocketPort: 0,
@@ -34,27 +36,27 @@ const save = async () => {
     return;
   }
   try {
-    stateStore.app.config.app.websocket_port = form.websocketPort;
-    await stateStore.app.save_config();
+    await model.value?.save();
     if (shouldShowSaveSuccess.value) {
       msgSuccess("Settings saved successfully.");
     }
   } catch (e) {
     msgError(e);
   }
+  stateStore.app.config!.app.websocket_port = form.websocketPort;
 };
 
 const runWebsocket = async () => {
-  const isOriginalPortAlive = await stateStore.common.isWebsocketAlive(
+  const isOriginalPortAlive = await commonModel.isWebsocketAlive(
     form.originalWebsocketPort
   );
   const portChanged = form.originalWebsocketPort !== form.websocketPort;
   if (!portChanged) return;
   stateStore.enable.isWebsocketAlive = false;
   try {
-    await stateStore.common.shutdownWebsocket();
+    await commonModel.shutdownWebsocket();
     await delay(200);
-    await stateStore.common.openWebsocket(form.websocketPort);
+    await commonModel.openWebsocket(form.websocketPort);
     msgSuccess(
       `WebSocket started successfully on port: ${form.websocketPort}.`
     );
@@ -64,9 +66,9 @@ const runWebsocket = async () => {
     if (isOriginalPortAlive) {
       try {
         await delay(200);
-        stateStore.common.shutdownWebsocket();
+        commonModel.shutdownWebsocket();
         await delay(200);
-        stateStore.common.openWebsocket(form.originalWebsocketPort);
+        commonModel.openWebsocket(form.originalWebsocketPort);
         stateStore.enable.isWebsocketAlive = true;
         const infoMsg = `WebSocket failed to start on port: ${form.websocketPort}. Reverted to the original port: ${form.originalWebsocketPort}, which started successfully.`;
         msgInfo(infoMsg);
@@ -89,8 +91,9 @@ const runWebsocket = async () => {
 };
 
 onMounted(async () => {
+  model.value = new AppModel(stateStore.app);
   form.websocketPort = form.originalWebsocketPort =
-    stateStore.app.config.app.websocket_port;
+    model.value.config!.app.websocket_port;
 });
 onUnmounted(async () => {});
 </script>

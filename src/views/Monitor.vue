@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Project } from "@kiwi/Project";
 import { listen } from "@tauri-apps/api/event";
 import { join } from "@tauri-apps/api/path";
 import { msgError } from "@utils/msg";
@@ -15,6 +14,7 @@ import FindImage from "@views/monitor/components/Image.vue";
 import FindRelativeColor from "@views/monitor/components/RelativeColor.vue";
 import FindColor from "@views/monitor/components/Color.vue";
 import FindText from "@views/monitor/components/Text.vue";
+import { captureModel, commonModel, Project } from "@kiwi";
 
 interface Target {
   name: string;
@@ -94,14 +94,14 @@ const capture = async () => {
     if (!form.target) return;
     loading.value = null;
     try {
-      form.target.size = await stateStore.capture.getMonitorSize();
+      form.target.size = await captureModel.getMonitorSize();
       loading.value = ElLoading.service({
         lock: true,
         text: "Capturing, please wait.",
         background: "rgba(0, 0, 0, 0.7)",
       });
-      await stateStore.common.protectWindows(["main", "monitor"]);
-      await stateStore.capture.requestFrameData();
+      await commonModel.protectWindows(["main", "monitor"]);
+      await captureModel.requestFrameData();
     } catch (e: unknown) {
       msgError(e);
     }
@@ -452,7 +452,7 @@ listen<Base64Png>("backend:update:frame", async (event) => {
   drawItemsCallback.value = null;
   draw();
   loading.value?.close();
-  stateStore.common.unprotectWindows(["main", "monitor"]);
+  commonModel.unprotectWindows(["main", "monitor"]);
 });
 
 // test

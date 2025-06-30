@@ -7,12 +7,12 @@ import { isWebsocketAlive, openWebsocket } from "@utils/common";
 import { msgError } from "@utils/msg";
 import { listen } from "@tauri-apps/api/event";
 import { onUnmounted } from "vue";
+import { AppModel, commonModel } from "@kiwi";
 const stateStore = useStateStore();
 
 const init = async () => {
   await focus();
-
-  await stateStore.app.init();
+  stateStore.app = await AppModel.getApp();
   await localStoreInit();
   if (!(await websocketInit())) {
     return;
@@ -25,7 +25,7 @@ const focus = async () => {
 
 const websocketInit = async () => {
   try {
-    const port = stateStore.app.config.app.websocket_port;
+    const port = stateStore.app.config!.app.websocket_port;
     await openWebsocket(port);
     stateStore.enable.isWebsocketAlive = await isWebsocketAlive(port);
   } catch (e: unknown) {
@@ -40,7 +40,7 @@ const localStoreInit = async () => {
   const savedPath = await localStore.get("projectRootDirectory");
   const defaultPath = await homeDir();
   const exists =
-    savedPath && (await stateStore.common.pathExists(savedPath as string));
+    savedPath && (await commonModel.pathExists(savedPath as string));
   if (!exists) {
     await localStore.set("projectRootDirectory", defaultPath);
   }

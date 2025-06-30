@@ -11,7 +11,7 @@ import {
 } from "@types";
 import { msgError } from "@utils/msg";
 
-class Frame {
+class FrameModel {
   async findImage(
     origin: Base64Png,
     template: Base64Png,
@@ -118,4 +118,5 @@ class Frame {
   }
 }
 
-export { Frame };
+const frameModel = new FrameModel();
+export { frameModel };

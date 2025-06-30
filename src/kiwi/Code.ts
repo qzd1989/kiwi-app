@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { ColoredPoint, f64, HexColor, Point, RgbColor } from "@types";
 import { msgError } from "@utils/msg";
 
-class Code {
+class CodeModel {
   async generateFindImageCode(
     subpath: string,
     startPoint: Point,
@@ -97,4 +97,5 @@ class Code {
   }
 }
 
-export { Code };
+const codeModel = new CodeModel();
+export { codeModel };

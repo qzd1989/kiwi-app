@@ -9,31 +9,69 @@ interface Config {
   app: ConfigApp;
 }
 
-class App {
-  name: string;
-  version: string;
-  config: Config;
-  relativeImageDataPath: string;
+interface App {
+  name: string | null;
+  version: string | null;
+  config: Config | null;
+  relativeImageDataPath: string | null;
+}
 
-  constructor() {
-    this.name = "";
-    this.version = "";
-    this.config = { app: { websocket_port: 0 } };
-    this.relativeImageDataPath = "";
+namespace App {
+  export const empty = (): App => ({
+    name: null,
+    version: null,
+    config: null,
+    relativeImageDataPath: null,
+  });
+
+  export const from = (
+    name: string,
+    version: string,
+    config: Config,
+    relativeImageDataPath: string
+  ): App => ({
+    name,
+    version,
+    config,
+    relativeImageDataPath,
+  });
+}
+
+class AppModel {
+  constructor(private app: App) {}
+
+  get name() {
+    return this.app.name;
   }
 
-  async init() {
+  get version() {
+    return this.app.version;
+  }
+
+  get config() {
+    return this.app.config;
+  }
+
+  get relativeImageDataPath() {
+    return this.app.relativeImageDataPath;
+  }
+
+  static async getApp(): Promise<App> {
     try {
-      this.name = await invoke("get_app_name");
-      this.version = await invoke("get_app_version");
-      this.config = await invoke("get_app_config");
-      this.relativeImageDataPath = await invoke("get_relative_image_data_path");
+      const name = (await invoke("get_app_name")) as string;
+      const version = (await invoke("get_app_version")) as string;
+      const config = (await invoke("get_app_config")) as Config;
+      const relativeImageDataPath = (await invoke(
+        "get_relative_image_data_path"
+      )) as string;
+      return App.from(name, version, config, relativeImageDataPath);
     } catch (e: unknown) {
       msgError(e);
+      throw e;
     }
   }
 
-  async save_config(): Promise<void> {
+  async save(): Promise<void> {
     try {
       await invoke("save_app_config", { config: this.config });
     } catch (e: unknown) {
@@ -43,4 +81,4 @@ class App {
   }
 }
 
-export { App };
+export { App, AppModel };

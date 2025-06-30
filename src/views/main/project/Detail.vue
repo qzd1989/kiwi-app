@@ -16,7 +16,7 @@ import {
 } from "@tauri-apps/plugin-global-shortcut";
 import { join } from "@tauri-apps/api/path";
 import { listen } from "@tauri-apps/api/event";
-import { Project, ProjectModel } from "@kiwi/Project";
+import { Project, ProjectModel } from "@kiwi";
 
 type LogType = "info" | "success" | "error";
 interface HotKeys {
@@ -150,7 +150,8 @@ const openProject = async (path: string) => {
       default:
         throw new Error("This is not a valild kiwi project.");
     }
-    stateStore.project = await ProjectModel.open(path);
+    const project = await ProjectModel.open(path); //如果出错最晚在这一步,不会污染 stateStore.project
+    stateStore.project = project;
     stateStore.project.mainFileFullPath = await join(
       stateStore.project.path as string,
       stateStore.project.mainFile as string
@@ -158,7 +159,6 @@ const openProject = async (path: string) => {
     model.value = new ProjectModel(stateStore.project);
     currentFile.value = stateStore.project.mainFile;
   } catch (e: unknown) {
-    stateStore.project = Project.init();
     msgError(e);
     router.push({
       path: "/app/home",

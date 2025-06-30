@@ -89,16 +89,17 @@ const save = async (formEl: FormInstance | undefined) => {
     const path = await join(form.rootDirectory, form.path);
     const name = form.name;
     const language = form.language;
-    stateStore.project.name = name;
-    stateStore.project.language = language;
-    stateStore.project.path = path;
-    const model = new ProjectModel(stateStore.project);
+    const project = Project.empty();
+    project.name = name;
+    project.language = language;
+    project.path = path;
+    const model = new ProjectModel(project);
     await model.save();
-    await model.init();
+    await model.init(); //如果出错最晚在这一步,不会污染 stateStore.project
+    stateStore.project = project;
     form.fullPath = path;
   } catch (e: unknown) {
     msgError(e);
-    stateStore.project = Project.init();
   }
 };
 

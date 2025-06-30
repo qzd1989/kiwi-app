@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { Size } from "@types";
 import { msgError } from "@utils/msg";
 
-class Capture {
+class CaptureModel {
   async getMonitorSize(): Promise<Size> {
     try {
       return await invoke("get_monitor_size");
@@ -22,4 +22,6 @@ class Capture {
   }
 }
 
-export { Capture };
+const captureModel = new CaptureModel();
+
+export { captureModel };
