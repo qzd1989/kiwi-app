@@ -132,7 +132,7 @@ const copy = async () => {
 };
 
 const loadData = () => {
-  form.findArea.start = props.params.start;
+  form.findArea.start = Point.from(props.params.start.x, props.params.start.y);
   form.findArea.end = Point.from(
     props.params.start.x + props.params.size.width,
     props.params.start.y + props.params.size.height
