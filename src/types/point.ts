@@ -7,14 +7,12 @@ interface Point {
 
 class Point {
   constructor(public x: i32, public y: i32) {}
-
+  static from(x: i32, y: i32): Point {
+    return new Point(x, y);
+  }
   clone(): Point {
     return Point.from(this.x, this.y);
   }
-}
-
-namespace Point {
-  export const from = (x: number, y: number): Point => new Point(x, y);
 }
 
 export { Point };

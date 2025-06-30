@@ -25,18 +25,16 @@ class RelativeColorPoint {
     this.point = point;
     this.relativePoint = relativePoint;
   }
-  clone(): RelativeColorPoint {
-    return RelativeColorPoint.from(this.hex, this.point, this.relativePoint);
-  }
-}
-namespace RelativeColorPoint {
-  export const from = (
+  static from(
     hex: HexColor,
     point: Point,
     relativePoint: Point
-  ): RelativeColorPoint => {
+  ): RelativeColorPoint {
     return new RelativeColorPoint(hex, point, relativePoint);
-  };
+  }
+  clone(): RelativeColorPoint {
+    return RelativeColorPoint.from(this.hex, this.point, this.relativePoint);
+  }
 }
 interface Form {
   points: RelativeColorPoint[];
