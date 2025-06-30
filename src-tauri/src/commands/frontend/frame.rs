@@ -1,6 +1,7 @@
 use super::CommandResult;
 use crate::types::{
     Base64Png, Base64PngExt as _, ColoredPoint, HexColor, Point, RgbOffset, Size, WeightPoint,
+    WeightPointsExt as _,
 };
 
 #[tauri::command]
@@ -22,6 +23,7 @@ pub fn find_image(
 pub fn find_images(
     origin: Base64Png,
     template: Base64Png,
+    template_size: Size,
     start_point: Point,
     end_point: Point,
     threshold: f64,
@@ -30,7 +32,8 @@ pub fn find_images(
     let frame = origin.to_frame().unwrap();
     let template = template.to_buffer().unwrap();
     let size = Size::new_from_start_end_points(start_point, end_point)?;
-    Ok(frame.find_images(&template, start_point, size, threshold)?)
+    let weight_points = frame.find_images(&template, start_point, size, threshold)?;
+    Ok(weight_points.filter_close_points(&template_size))
 }
 
 #[tauri::command]

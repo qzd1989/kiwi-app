@@ -31,7 +31,6 @@ interface Item {
   size: Size;
   title: string | null;
 }
-
 namespace Item {
   export const from = (
     start: Point,
@@ -245,7 +244,7 @@ const findImage = async () => {
   findType.value = "findImage";
   result.value = code.value = null;
   const origin = props.target.base64Png;
-  const template = form.base64Png;
+  const template = form.base64Png as Base64Png;
   const startPoint = form.findArea.start;
   const endPoint = form.findArea.end;
   const threshold = form.threshold;
@@ -253,7 +252,7 @@ const findImage = async () => {
     loading.value = true;
     const weightPoint = await stateStore.frame.findImage(
       origin,
-      template as Base64Png,
+      template,
       startPoint,
       endPoint,
       threshold
@@ -284,7 +283,8 @@ const findImages = async () => {
   findType.value = "findImages";
   result.value = code.value = null;
   const origin = props.target.base64Png;
-  const template = form.base64Png;
+  const template = form.base64Png as Base64Png;
+  const templateSize = props.params.size;
   const startPoint = form.findArea.start;
   const endPoint = form.findArea.end;
   const threshold = form.threshold;
@@ -292,7 +292,8 @@ const findImages = async () => {
     loading.value = true;
     const weightPoints = await stateStore.frame.findImages(
       origin,
-      template as Base64Png,
+      template,
+      templateSize,
       startPoint,
       endPoint,
       threshold
@@ -610,7 +611,7 @@ onUnmounted(async () => {});
               <el-form-item style="margin-bottom: 0px" prop="threshold">
                 <el-tooltip
                   effect="dark"
-                  content="min: 0.5, max:1 "
+                  content="min: 0.5, max:1"
                   placement="left-start"
                 >
                   <el-input-number
@@ -618,7 +619,7 @@ onUnmounted(async () => {});
                     :min="0.5"
                     :max="1.0"
                     v-model="form.threshold"
-                    :precision="6"
+                    :precision="8"
                     :style="{ width: '100%' }"
                   >
                     <template #prefix>

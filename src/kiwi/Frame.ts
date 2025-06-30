@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Base64Png, f64, Point, WeightPoint } from "@utils/common";
+import { Base64Png, f64, Point, Size, WeightPoint } from "@utils/common";
 import { msgError } from "@utils/msg";
 
 class Frame {
@@ -27,6 +27,7 @@ class Frame {
   async findImages(
     origin: Base64Png,
     template: Base64Png,
+    templateSize: Size,
     startPoint: Point,
     endPoint: Point,
     threshold: f64
@@ -35,6 +36,7 @@ class Frame {
       return await invoke("find_images", {
         origin,
         template,
+        templateSize,
         startPoint,
         endPoint,
         threshold,
