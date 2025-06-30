@@ -470,15 +470,13 @@ watch(
 );
 
 onMounted(async () => {
-  // init
-  form.target = targets.value[0];
-  // gap
   document.addEventListener("mousemove", moveListener);
   document.addEventListener("mouseup", upListener);
   //zoom
   window.addEventListener("keyup", shortcutZoom);
   // init
   if ((await getCurrentWindow().label) == "monitor") {
+    form.target = targets.value[0];
     await capture();
   }
 });

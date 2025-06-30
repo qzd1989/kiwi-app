@@ -12,7 +12,6 @@ pub fn find_image(
     end_point: Point,
     threshold: f64,
 ) -> CommandResult<Option<WeightPoint>> {
-    dbg!("find_image", &start_point, &end_point, &threshold);
     let frame = origin.to_frame().unwrap();
     let template = template.to_buffer().unwrap();
     let size = Size::new_from_start_end_points(start_point, end_point)?;
@@ -28,7 +27,6 @@ pub fn find_images(
     end_point: Point,
     threshold: f64,
 ) -> CommandResult<Vec<WeightPoint>> {
-    dbg!("find_images", &start_point, &end_point, &threshold);
     let frame = origin.to_frame().unwrap();
     let template = template.to_buffer().unwrap();
     let size = Size::new_from_start_end_points(start_point, end_point)?;
