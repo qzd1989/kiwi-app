@@ -8,7 +8,7 @@ import {
   RgbColor,
   Size,
   WeightPoint,
-} from "@utils/common";
+} from "@types";
 import { msgError } from "@utils/msg";
 
 class Frame {

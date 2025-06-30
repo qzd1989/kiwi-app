@@ -3,22 +3,30 @@ import { ref, onMounted, watch, reactive } from "vue";
 import { msgError, msgSuccess, msgWarn } from "@utils/msg";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useStateStore } from "@utils/store";
-import {
-  base64PngToRgbPixels,
-  drawArc,
-  drawText,
-  Base64Png,
-  ColoredPoint,
-  RgbColor,
-  HexColor,
-  Point,
-} from "@utils/common";
+import { base64PngToRgbPixels, drawArc, drawText } from "@utils/common";
+import { Base64Png, ColoredPoint, RgbColor, HexColor, Point } from "@types";
 import { FormInstance, FormRules } from "element-plus";
+
 interface RelativeColorPoint {
   key: string;
   hex: HexColor;
   point: Point;
   relativePoint: Point;
+}
+class RelativeColorPoint {
+  key: string;
+  hex: HexColor;
+  point: Point;
+  relativePoint: Point;
+  constructor(hex: HexColor, point: Point, relativePoint: Point) {
+    this.key = point.x + "," + point.y;
+    this.hex = hex;
+    this.point = point;
+    this.relativePoint = relativePoint;
+  }
+  clone(): RelativeColorPoint {
+    return RelativeColorPoint.from(this.hex, this.point, this.relativePoint);
+  }
 }
 namespace RelativeColorPoint {
   export const from = (
@@ -26,25 +34,7 @@ namespace RelativeColorPoint {
     point: Point,
     relativePoint: Point
   ): RelativeColorPoint => {
-    const key = point.x + "," + point.y;
-    return {
-      key,
-      hex,
-      point,
-      relativePoint,
-    };
-  };
-  export const empty = (): RelativeColorPoint => {
-    const key = "0,0";
-    const hex = HexColor.from("#ffffff");
-    const point = Point.from(0, 0);
-    const relativePoint = Point.from(-1, -1);
-    return {
-      key,
-      hex,
-      point,
-      relativePoint,
-    };
+    return new RelativeColorPoint(hex, point, relativePoint);
   };
 }
 interface Form {
@@ -133,7 +123,7 @@ const pushColor = async (relativeColorPoint: RelativeColorPoint) => {
     return;
   }
   result.value = code.value = null;
-  relativeColorPoint.relativePoint = { x: -1, y: -1 };
+  relativeColorPoint.relativePoint = Point.from(-1, -1);
   form.points.push(relativeColorPoint);
   caculateRelativePoints();
 };
@@ -166,9 +156,7 @@ const caculateRelativePoints = () => {
   }
   const points: RelativeColorPoint[] = [];
   form.points.forEach((item) => {
-    const color = RelativeColorPoint.empty();
-    Object.assign(color, item);
-    points.push(color);
+    points.push(item.clone());
   });
   points.sort((a, b) => {
     if (a.point.y == b.point.y) {
@@ -315,10 +303,7 @@ const drawItems = (peak: ColoredPoint) => {
   emits("drawItems", {
     callback: (ctx: CanvasRenderingContext2D) => {
       const title = `peak point(${peak.point.x}, ${peak.point.y})`;
-      const titlePoint = {
-        x: peak.point.x - 5,
-        y: peak.point.y - 10,
-      };
+      const titlePoint = Point.from(peak.point.x - 5, peak.point.y - 10);
       drawArc(ctx, peak.point, 5);
       drawText(ctx, title, titlePoint);
     },

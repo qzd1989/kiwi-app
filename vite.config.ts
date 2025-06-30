@@ -34,6 +34,7 @@ export default defineConfig(async () => ({
       "@utils": fileURLToPath(new URL("./src/utils", import.meta.url)),
       "@views": fileURLToPath(new URL("./src/views", import.meta.url)),
       "@kiwi": fileURLToPath(new URL("./src/kiwi", import.meta.url)),
+      "@types": fileURLToPath(new URL("./src/types", import.meta.url)),
     },
   },
 }));

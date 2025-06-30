@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, reactive } from "vue";
-import {
-  drawRect,
-  drawText,
-  Base64Png,
-  Point,
-  drawBase64PngImageOnCanvas,
-} from "@utils/common";
+import { drawRect, drawText, drawBase64PngImageOnCanvas } from "@utils/common";
+import { Base64Png, Point } from "@types";
 import { msgError, msgSuccess } from "@utils/msg";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useStateStore } from "@utils/store";
@@ -105,10 +100,7 @@ const drawItem = (text: string) => {
         width: form.findArea.end.x - form.findArea.start.x,
         height: form.findArea.end.y - form.findArea.start.y,
       };
-      const textPoint = {
-        x: areaPoint.x,
-        y: areaPoint.y - 10,
-      };
+      const textPoint = Point.from(areaPoint.x, areaPoint.y - 10);
       if (text != null) {
         drawText(ctx, text, textPoint);
       }
@@ -132,7 +124,7 @@ const copy = async () => {
 };
 
 const loadData = () => {
-  form.findArea.start = Point.from(props.params.start.x, props.params.start.y);
+  form.findArea.start = props.params.start.clone();
   form.findArea.end = Point.from(
     props.params.start.x + props.params.size.width,
     props.params.start.y + props.params.size.height

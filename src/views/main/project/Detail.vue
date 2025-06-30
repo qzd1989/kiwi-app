@@ -5,17 +5,10 @@ import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { getAllWindows } from "@tauri-apps/api/window";
 import { ElLoading, ElScrollbar } from "element-plus";
 import { useRoute, useRouter } from "vue-router";
-import { invoke } from "@tauri-apps/api/core";
 import { msgError, msgSuccess } from "@utils/msg";
 import { platform } from "@tauri-apps/plugin-os";
-import {
-  delay,
-  EmitData,
-  minimizeAll,
-  Progress,
-  Stack,
-  unminimizeAll,
-} from "@utils/common";
+import { delay, minimizeAll, unminimizeAll } from "@utils/common";
+import { EmitData, Progress, Stack } from "@types";
 import {
   register,
   ShortcutHandler,
@@ -23,7 +16,7 @@ import {
 } from "@tauri-apps/plugin-global-shortcut";
 import { join } from "@tauri-apps/api/path";
 import { listen } from "@tauri-apps/api/event";
-import { Project } from "@kiwi/Project";
+import { Project, ProjectModel } from "@kiwi/Project";
 
 type LogType = "info" | "success" | "error";
 interface HotKeys {
@@ -77,6 +70,7 @@ namespace Log {
   });
 }
 
+const model = ref<ProjectModel | null>(null);
 const stateStore = useStateStore();
 const route = useRoute();
 const router = useRouter();
@@ -106,8 +100,7 @@ const openMonitor = async () => {
     url: "/monitor",
     title: "monitor",
   });
-  monitor.once("tauri://created", async () => {
-  });
+  monitor.once("tauri://created", async () => {});
   monitor.once("tauri://error", async () => {
     const windows = await getAllWindows();
     let monitorExists = false;
@@ -141,11 +134,7 @@ const openProjectLoadingFinished = () => {
 const openProject = async (path: string) => {
   reinitProgressLoading.value = null;
   try {
-    let status = await invoke("verify_project", { path });
-    let openAction = async () => {
-      await invoke("open_project", { path });
-      currentFile.value = stateStore.project.mainFile;
-    };
+    let status = await ProjectModel.verify(path);
     switch (status) {
       case "valid":
         break;
@@ -156,13 +145,20 @@ const openProject = async (path: string) => {
           text: "The project has been moved, and is now being reinitialized. Please wait.",
           background: "rgba(0, 0, 0, 0.7)",
         });
-        await invoke("reinit_project", { path });
+        await ProjectModel.reinit(path);
         break;
       default:
         throw new Error("This is not a valild kiwi project.");
     }
-    await openAction();
+    stateStore.project = await ProjectModel.open(path);
+    stateStore.project.mainFileFullPath = await join(
+      stateStore.project.path as string,
+      stateStore.project.mainFile as string
+    );
+    model.value = new ProjectModel(stateStore.project);
+    currentFile.value = stateStore.project.mainFile;
   } catch (e: unknown) {
+    stateStore.project = Project.init();
     msgError(e);
     router.push({
       path: "/app/home",
@@ -226,7 +222,7 @@ const unregisterHotkeys = async () => {
 const record = async () => {
   const action = async () => {
     try {
-      await invoke("run_recorder");
+      await model.value?.runRecorder();
     } catch (e: unknown) {
       msgError(e);
     }
@@ -248,7 +244,7 @@ const runScript = async () => {
         route.query.path as string,
         currentFile.value
       );
-      await invoke("run_script", { path: scriptAbsolutePath });
+      await model.value?.runScript(scriptAbsolutePath);
     } catch (e: unknown) {
       msgError(e);
     }
@@ -265,9 +261,9 @@ const runScript = async () => {
 const runProject = async () => {
   const action = async () => {
     try {
-      await invoke("run_script", {
-        path: stateStore.project.mainFileFullPath,
-      });
+      const path = stateStore.project.mainFileFullPath as string;
+      console.log(stateStore.project);
+      await model.value?.runScript(path);
     } catch (e: unknown) {
       msgError(e);
     }
@@ -283,7 +279,7 @@ const runProject = async () => {
 
 const stopAll = async () => {
   try {
-    await invoke("stop_all");
+    await model.value?.stopAll();
   } catch (e: unknown) {
     msgError(e);
   }
@@ -306,17 +302,17 @@ const clearLog = () => {
   logs.value.clear();
 };
 
-const openProjectInEditor = async () => {
+const openInEditor = async () => {
   try {
-    await invoke("open_project_in_editor");
+    await model.value?.openInEditor();
   } catch (e: unknown) {
     msgError(e);
   }
 };
 
-const revealProject = async () => {
+const reveal = async () => {
   try {
-    await invoke("reveal_project_folder");
+    await model.value?.reveal();
   } catch (e: unknown) {
     msgError(e);
   }
@@ -372,11 +368,11 @@ listen<EmitData>("log:error", (event) => {
 
 listen<Project>("backend:update:project", async (event) => {
   stateStore.project = event.payload;
-  if (!stateStore.project.path || !stateStore.project.mainFile) return;
   stateStore.project.mainFileFullPath = await join(
-    stateStore.project.path,
-    stateStore.project.mainFile
+    stateStore.project.path as string,
+    stateStore.project.mainFile as string
   );
+  model.value = new ProjectModel(stateStore.project);
 });
 
 onMounted(async () => {
@@ -461,12 +457,7 @@ onUnmounted(async () => {
         <el-divider direction="horizontal" class="divider"></el-divider>
         <el-row :gutter="0">
           <el-col :span="24">
-            <el-button
-              type="info"
-              size="large"
-              @click="revealProject"
-              :plain="true"
-            >
+            <el-button type="info" size="large" @click="reveal" :plain="true">
               Open
             </el-button>
           </el-col>
@@ -481,7 +472,7 @@ onUnmounted(async () => {
               <el-button
                 type="info"
                 size="large"
-                @click="openProjectInEditor"
+                @click="openInEditor"
                 :plain="true"
               >
                 Edit

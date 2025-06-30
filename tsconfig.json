@@ -25,7 +25,10 @@
     "paths": {
       "@utils/*":["src/utils/*"],
       "@views/*":["src/views/*"],
+      "@kiwi":["src/kiwi/index.ts"],
       "@kiwi/*":["src/kiwi/*"],
+      "@types": ["src/types/index.ts"],
+      "@types/*":["src/types/*"],
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],

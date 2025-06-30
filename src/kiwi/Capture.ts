@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Size } from "@utils/common";
+import { Size } from "@types";
 import { msgError } from "@utils/msg";
 
 class Capture {

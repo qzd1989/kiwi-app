@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { ColoredPoint, f64, HexColor, Point, RgbColor } from "@utils/common";
+import { ColoredPoint, f64, HexColor, Point, RgbColor } from "@types";
 import { msgError } from "@utils/msg";
 
 class Code {

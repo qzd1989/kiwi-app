@@ -1,15 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, reactive } from "vue";
-import {
-  base64PngToRgbPixels,
-  drawArc,
-  drawText,
-  Base64Png,
-  ColoredPoint,
-  RgbColor,
-  HexColor,
-  Point,
-} from "@utils/common";
+import { base64PngToRgbPixels, drawArc, drawText } from "@utils/common";
+import { Base64Png, ColoredPoint, RgbColor, HexColor, Point } from "@types";
 import { msgError, msgSuccess } from "@utils/msg";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useStateStore } from "@utils/store";
@@ -186,14 +178,8 @@ const drawItems = (items: ColoredPoint[]) => {
     callback: (ctx: CanvasRenderingContext2D) => {
       for (const item of items) {
         const title = `color:${item.hex}`;
-        const titlePoint = {
-          x: item.point.x - 5,
-          y: item.point.y - 10,
-        };
-        const arcPoint = {
-          x: item.point.x,
-          y: item.point.y,
-        };
+        const titlePoint = Point.from(item.point.x - 5, item.point.y - 10);
+        const arcPoint = item.point.clone();
         drawArc(ctx, arcPoint, 5);
         drawText(ctx, title, titlePoint);
       }

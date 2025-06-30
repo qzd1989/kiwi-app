@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { WindowLabel } from "@utils/common";
+import { WindowLabel } from "@types";
 import { msgError } from "@utils/msg";
 
 class Common {

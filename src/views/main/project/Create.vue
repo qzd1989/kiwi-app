@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { Language, Progress } from "@utils/common";
+import { Language, Progress } from "@types";
 import { ref, onMounted, onUnmounted, reactive } from "vue";
 import { open } from "@tauri-apps/plugin-dialog";
 import { join, sep } from "@tauri-apps/api/path";
-import { localStore } from "@utils/store";
+import { localStore, useStateStore } from "@utils/store";
 import { msgError, msgSuccess } from "@utils/msg";
 import { FormInstance, ElLoading, FormRules } from "element-plus";
-import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useRouter } from "vue-router";
+import { Project, ProjectModel } from "@kiwi";
 
 interface Form {
   name: string;
@@ -18,6 +18,7 @@ interface Form {
   rootDirectory: string;
 }
 
+const stateStore = useStateStore();
 const router = useRouter();
 const formRef = ref<FormInstance>();
 const form = reactive<Form>({
@@ -88,11 +89,16 @@ const save = async (formEl: FormInstance | undefined) => {
     const path = await join(form.rootDirectory, form.path);
     const name = form.name;
     const language = form.language;
-    await invoke("save_project", { name, language, path });
-    await invoke("init_project", { path });
+    stateStore.project.name = name;
+    stateStore.project.language = language;
+    stateStore.project.path = path;
+    const model = new ProjectModel(stateStore.project);
+    await model.save();
+    await model.init();
     form.fullPath = path;
   } catch (e: unknown) {
     msgError(e);
+    stateStore.project = Project.init();
   }
 };
 

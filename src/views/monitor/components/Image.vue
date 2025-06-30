@@ -4,16 +4,12 @@ import { msgError, msgSuccess, msgWarn } from "@utils/msg";
 import { useStateStore } from "@utils/store";
 import { FormInstance, FormRules } from "element-plus";
 import {
-  Base64Png,
-  f64,
   drawBase64PngImageOnCanvas,
-  Point,
-  WeightPoint,
   drawRect,
   drawText,
-  Size,
   cropBase64Png,
 } from "@utils/common";
+import { Base64Png, f64, Point, WeightPoint, Size } from "@types";
 import { sep } from "@tauri-apps/api/path";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 
@@ -333,18 +329,12 @@ const drawItems = (items: Item[]) => {
   emits("drawItems", {
     callback: (ctx: CanvasRenderingContext2D) => {
       for (let item of items) {
-        const point = {
-          x: item.start.x,
-          y: item.start.y,
-        };
+        const point = item.start.clone();
         const size = {
           width: item.size.width,
           height: item.size.height,
         };
-        const textPoint = {
-          x: item.start.x,
-          y: item.start.y - 5,
-        };
+        const textPoint = Point.from(item.start.x, item.start.y - 5);
         drawRect(ctx, point, size);
         drawText(ctx, item.title as string, textPoint);
       }

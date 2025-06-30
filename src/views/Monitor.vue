@@ -6,14 +6,8 @@ import { msgError } from "@utils/msg";
 import { useStateStore } from "@utils/store";
 import { ref, onMounted, onUnmounted, reactive, watch } from "vue";
 import { ElLoading, ElContainer } from "element-plus";
-import {
-  Base64Png,
-  HexColor,
-  Point,
-  Size,
-  Stack,
-  cropBase64Png,
-} from "@utils/common";
+import { Base64Png, HexColor, Point, Size, Stack } from "@types";
+import { cropBase64Png } from "@utils/common";
 import { useResizeObserver } from "@vueuse/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
@@ -125,10 +119,7 @@ const onCanvasMouseMove = (event: MouseEvent) => {
   hoveredPixelPoint.x = event.clientX - left;
   hoveredPixelPoint.y = event.clientY - top;
   if (isCapturing.value == true) {
-    form.findArea.end = {
-      x: hoveredPixelPoint.x,
-      y: hoveredPixelPoint.y,
-    };
+    form.findArea.end = hoveredPixelPoint.clone();
   }
   draw();
 };
@@ -150,10 +141,7 @@ const onCanvasMouseUp = (event: MouseEvent) => {
   if (event.button != 0) {
     return;
   }
-  form.findArea.end = {
-    x: hoveredPixelPoint.x,
-    y: hoveredPixelPoint.y,
-  };
+  form.findArea.end = hoveredPixelPoint.clone();
   isCaptured.value = true;
   isCapturing.value = false;
   shouldDrawCapture.value = true;

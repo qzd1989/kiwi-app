@@ -1,36 +1,27 @@
 import { defineStore } from "pinia";
 import { load, Store } from "@tauri-apps/plugin-store";
-import { App } from "@kiwi/App";
-import { Project } from "@kiwi/Project";
-import { Common } from "@kiwi/Common";
-import { Capture } from "@kiwi/Capture";
-import { Size } from "./common";
-import { Frame } from "@kiwi/Frame";
-import { Code } from "@kiwi/Code";
+import { Size } from "@types";
+import { App, Project, Common, Capture, Frame, Code } from "@kiwi";
 
 type LocalStoreKey = "projectRootDirectory" | "isPythonAttributed";
-
+interface Enable {
+  isWebsocketAlive: boolean;
+}
+namespace Enable {
+  export const init = (): Enable => ({
+    isWebsocketAlive: false,
+  });
+}
 interface Zoom {
   factor: number;
   min: number;
   max: number;
 }
-
 namespace Zoom {
   export const init = (): Zoom => ({
     factor: 1,
     min: 0.5,
     max: 1.5,
-  });
-}
-
-interface Enable {
-  isWebsocketAlive: boolean;
-}
-
-namespace Enable {
-  export const init = (): Enable => ({
-    isWebsocketAlive: false,
   });
 }
 
@@ -43,7 +34,7 @@ const useStateStore = defineStore("store", {
     //kiwi object
     app: new App(),
     common: new Common(),
-    project: new Project(),
+    project: Project.init(),
     capture: new Capture(),
     frame: new Frame(),
     code: new Code(),
@@ -88,5 +79,4 @@ class LocalStore {
 }
 
 const localStore = new LocalStore();
-
 export { useStateStore, localStore };
