@@ -180,31 +180,10 @@ const base64PngToRgbPixels = (base64Png: Base64Png): Promise<RgbColor[]> => {
   });
 };
 
-const rgbToHex = (rgbPixelColor: RgbColor) => {
-  /**
-   * 将单个RGB颜色值转换为两位的十六进制字符串
-   * @param {number} colorValue - 单个RGB颜色值（0-255之间的整数）
-   * @returns {string} - 两位的十六进制颜色值
-   */
-  function toHex(colorValue: u8) {
-    var hex = colorValue.toString(16); // 将数字转换为十六进制字符串
-    return hex.length === 1 ? "0" + hex : hex; // 确保两位字符，如果只有一位则前面加0
-  }
-
-  // 构建最终的十六进制颜色值
-  var hexColor =
-    "#" +
-    toHex(rgbPixelColor.r) +
-    toHex(rgbPixelColor.g) +
-    toHex(rgbPixelColor.b);
-  return hexColor; // 返回转换后的十六进制颜色值
-};
-
 export {
   cropBase64Png,
   drawBase64PngImageOnCanvas,
   base64PngToRgbPixels,
-  rgbToHex,
   delay,
   minimizeAll,
   unminimizeAll,
