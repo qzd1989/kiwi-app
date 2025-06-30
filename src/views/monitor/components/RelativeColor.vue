@@ -75,11 +75,25 @@ const form = reactive<Form>({
     end: Point.from(0, 0),
   },
 });
+// 动态计算并限制用户能输入的值
+const findArea = reactive({
+  start: {
+    x: { min: 0, max: 0 },
+    y: { min: 0, max: 0 },
+  },
+  end: {
+    x: { min: 0, max: 0 },
+    y: { min: 0, max: 0 },
+  },
+});
 const rules = reactive<FormRules<Form>>({
   "findArea.start.x": [{ required: true, trigger: "blur" }],
   "findArea.start.y": [{ required: true, trigger: "blur" }],
   "findArea.end.x": [{ required: true, trigger: "blur" }],
   "findArea.end.y": [{ required: true, trigger: "blur" }],
+  "offset.r": [{ required: true, trigger: "blur" }],
+  "offset.g": [{ required: true, trigger: "blur" }],
+  "offset.b": [{ required: true, trigger: "blur" }],
 });
 
 const close = () => {
@@ -326,6 +340,11 @@ const clearAllItems = () => {
 };
 
 const loadData = () => {
+  findArea.start.x.max = props.target.size.width - 1;
+  findArea.start.y.max = props.target.size.height - 1;
+  findArea.end.x.max = props.target.size.width;
+  findArea.end.y.max = props.target.size.height;
+
   form.findArea.start = Point.from(0, 0);
   form.findArea.end = Point.from(
     props.target.size.width,
@@ -336,6 +355,36 @@ const loadData = () => {
   result.value = code.value = null;
   setTimeout(drawImage, 100);
 };
+
+watch(
+  () => {
+    return form.findArea.start.x;
+  },
+  (newVal) => {
+    if (newVal) {
+      findArea.end.x.min = Math.max(form.findArea.start.x, 0) + 1;
+      findArea.end.x.max = props.target.size.width;
+      if (form.findArea.end.x <= form.findArea.start.x) {
+        form.findArea.end.x = form.findArea.start.x + 1;
+      }
+    }
+  }
+);
+
+watch(
+  () => {
+    return form.findArea.start.y;
+  },
+  (newVal) => {
+    if (newVal) {
+      findArea.end.y.min = Math.max(form.findArea.start.y, 0) + 1;
+      findArea.end.y.max = props.target.size.height;
+      if (form.findArea.end.y <= form.findArea.start.y) {
+        form.findArea.end.y = form.findArea.start.y + 1;
+      }
+    }
+  }
+);
 
 watch(props.params, async () => {
   loadData();
@@ -456,6 +505,8 @@ onMounted(async () => {
                       v-model="form.findArea.start.x"
                       :controls="false"
                       :style="{ width: '100%' }"
+                      :min="findArea.start.x.min"
+                      :max="findArea.start.x.max"
                       ><template #prefix>
                         <span>start x</span>
                       </template>
@@ -471,6 +522,8 @@ onMounted(async () => {
                       v-model="form.findArea.start.y"
                       :controls="false"
                       :style="{ width: '100%' }"
+                      :min="findArea.start.y.min"
+                      :max="findArea.start.y.max"
                       ><template #prefix>
                         <span>start y</span>
                       </template>
@@ -488,6 +541,8 @@ onMounted(async () => {
                       v-model="form.findArea.end.x"
                       :controls="false"
                       :style="{ width: '100%' }"
+                      :min="findArea.end.x.min"
+                      :max="findArea.end.x.max"
                       ><template #prefix>
                         <span>end x</span>
                       </template>
@@ -503,6 +558,8 @@ onMounted(async () => {
                       v-model="form.findArea.end.y"
                       :controls="false"
                       :style="{ width: '100%' }"
+                      :min="findArea.end.y.min"
+                      :max="findArea.end.y.max"
                       ><template #prefix>
                         <span>end y</span>
                       </template>

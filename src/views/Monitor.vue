@@ -474,9 +474,9 @@ watch(
   },
   async (newVal) => {
     if (newVal) {
-      // form.findArea.start = Point.from(697, 1045);
-      // form.findArea.end = Point.from(747, 1098);
-      // findColor();
+      form.findArea.start = Point.from(697, 1045);
+      form.findArea.end = Point.from(747, 1098);
+      findRelativeColor();
     }
   }
 );
