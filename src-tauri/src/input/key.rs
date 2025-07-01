@@ -913,7 +913,7 @@ impl TryFrom<SystemKey> for Key {
             SystemKey::Other(71) => Key::NumLock,
             #[cfg(target_os = "windows")]
             SystemKey::Numlock => Key::NumLock,
-            unknown_key => return Err(anyhow!(t!("The key is not supported.", key = unknown_key))),
+            _ => return Err(anyhow!(t!("The key is not supported."))),
         };
         Ok(key)
     }

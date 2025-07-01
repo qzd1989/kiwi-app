@@ -132,7 +132,7 @@ pub fn load_template_image(project_dir: &Path, subpath: &str) -> Result<RgbaImag
     if !template_path.exists() {
         return Err(anyhow!(t!(
             "Template image does not exist.",
-            template_path = template_path
+            path = template_path.to_str().unwrap()
         )));
     }
     Ok(ImageReader::open(&template_path)?.decode()?.into_rgba8())

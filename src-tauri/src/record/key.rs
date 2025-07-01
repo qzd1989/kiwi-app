@@ -118,13 +118,14 @@ impl TryFrom<RecordKey> for Key {
             RecordKey::Kp8 | RecordKey::Unknown(91) => Key::Kp8,
             RecordKey::Kp9 | RecordKey::Unknown(92) => Key::Kp9,
             RecordKey::KpDelete => Key::Delete,
-            unknown_key => return Err(anyhow!(t!("The key is not supported.", key = unknown_key))),
-            // IntlBackslash
-            // Unknown(u32),
-            // F21
-            // F22
-            // F23
-            // F24
+            _ => {
+                return Err(anyhow!(t!("The record key is not supported.")));
+            } // IntlBackslash
+              // Unknown(u32),
+              // F21
+              // F22
+              // F23
+              // F24
         };
         Ok(key)
     }
