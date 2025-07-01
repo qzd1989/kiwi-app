@@ -1,3 +1,4 @@
+// done
 use super::Frame;
 use crate::extensions::ImageBufferRgbaExt as _;
 use crate::types::Point;
@@ -29,7 +30,9 @@ impl Frame {
             (w as usize, h as usize)
         };
         if size.width < template_width as u32 || size.height < template_height as u32 {
-            return Err(anyhow!("invalid area"));
+            return Err(anyhow!(t!(
+                "The template size exceeds the cropped frame size."
+            )));
         }
         let image = self.to_buffer()?.crop(point, size).to_mat()?;
         let mask = template.mask()?;
@@ -63,7 +66,9 @@ impl Frame {
             (w as usize, h as usize)
         };
         if size.width < template_width as u32 || size.height < template_height as u32 {
-            return Err(anyhow!("invalid area"));
+            return Err(anyhow!(t!(
+                "The template size exceeds the cropped frame size."
+            )));
         }
         let image = self.to_buffer()?.crop(point, size).to_mat()?;
         let mask = template.mask()?;

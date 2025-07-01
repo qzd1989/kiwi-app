@@ -1,9 +1,35 @@
 import { invoke } from "@tauri-apps/api/core";
 import { msgError } from "@utils/msg";
 import { getVersion, getName } from "@tauri-apps/api/app";
+import { apiFetch } from "@utils/api";
+import { type, arch } from "@tauri-apps/plugin-os";
+
+interface PlatformInfo {
+  signature: string;
+  force_update: boolean;
+  url: string;
+}
+
+interface ReleaseInfo {
+  version: string;
+  notes: string[];
+  pub_date: string; // RFC 3339 格式的字符串
+  platforms: {
+    [platform: string]: PlatformInfo;
+  };
+}
+
+interface Release {
+  version: string;
+  notes: string[];
+  force_update: boolean;
+  pub_date: string;
+  url: string;
+}
 
 interface ConfigApp {
   websocket_port: number;
+  locale: string;
 }
 
 interface Config {
@@ -80,6 +106,25 @@ class AppModel {
       throw e;
     }
   }
+
+  async checkRelease(): Promise<Release | null> {
+    const release = (await apiFetch("/version.json")) as ReleaseInfo;
+    const osName = await type();
+    const archName = await arch();
+    if (this.version == release.version) return null;
+    const platformKey = osName + "-" + archName;
+    if (!(platformKey in release.platforms)) return null;
+    const platformInfo = release.platforms[platformKey];
+    if (platformInfo.url == "") return null;
+    return {
+      version: release.version,
+      notes: release.notes,
+      force_update: platformInfo.force_update,
+      pub_date: release.pub_date,
+      url: platformInfo.url,
+    };
+  }
 }
 
 export { App, AppModel };
+export type { Release };

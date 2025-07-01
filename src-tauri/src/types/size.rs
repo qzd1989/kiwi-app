@@ -1,3 +1,4 @@
+// done
 use super::Point;
 use anyhow::{Result, anyhow};
 use serde::{Deserialize, Serialize};
@@ -17,10 +18,10 @@ impl Size {
         let width = end_point.x - start_point.x;
         let height = end_point.y - start_point.y;
         if width <= 0 {
-            return Err(anyhow!("width must bigger than zero"));
+            return Err(anyhow!(t!("Width must be greater than zero.")));
         }
         if height <= 0 {
-            return Err(anyhow!("height must bigger than zero"));
+            return Err(anyhow!(t!("Height must be greater than zero.")));
         }
         let (width, height) = (width as u32, height as u32);
         Ok(Self { width, height })

@@ -1,3 +1,4 @@
+// done
 use crate::{
     app::App,
     types::{ColoredPoint, HexColor, Point, RgbOffset, Size},
@@ -9,65 +10,113 @@ use std::path::{Path, PathBuf};
 
 pub fn get_required_string(args: &Value, key: &str) -> Result<String> {
     args.get(key)
-        .ok_or_else(|| anyhow!("{} not found", key))
+        .ok_or_else(|| anyhow!(t!("WebSocket argument is missing.", argument = key)))
         .and_then(|v| {
-            serde_json::from_value(v.clone()).map_err(|e| anyhow!("parse {} error: {:?}", key, e))
+            serde_json::from_value(v.clone()).map_err(|e| {
+                anyhow!(t!(
+                    "Failed to deserialize argument.",
+                    argument = key,
+                    error = e.to_string()
+                ))
+            })
         })
 }
 
 pub fn get_required_i32(args: &Value, key: &str) -> Result<i32> {
     args.get(key)
-        .ok_or_else(|| anyhow!("{} not found", key))
+        .ok_or_else(|| anyhow!(t!("WebSocket argument is missing.", argument = key)))
         .and_then(|v| {
-            serde_json::from_value(v.clone()).map_err(|e| anyhow!("parse {} error: {:?}", key, e))
+            serde_json::from_value(v.clone()).map_err(|e| {
+                anyhow!(t!(
+                    "Failed to deserialize argument.",
+                    argument = key,
+                    error = e.to_string()
+                ))
+            })
         })
 }
 
 pub fn get_required_f64(args: &Value, key: &str) -> Result<f64> {
     args.get(key)
-        .ok_or_else(|| anyhow!("{} not found", key))
+        .ok_or_else(|| anyhow!(t!("WebSocket argument is missing.", argument = key)))
         .and_then(|v| {
-            serde_json::from_value(v.clone()).map_err(|e| anyhow!("parse {} error: {:?}", key, e))
+            serde_json::from_value(v.clone()).map_err(|e| {
+                anyhow!(t!(
+                    "Failed to deserialize argument.",
+                    argument = key,
+                    error = e.to_string()
+                ))
+            })
         })
 }
 
 pub fn get_required_hexcolor(args: &Value, key: &str) -> Result<HexColor> {
     args.get(key)
-        .ok_or_else(|| anyhow!("{} not found", key))
+        .ok_or_else(|| anyhow!(t!("WebSocket argument is missing.", argument = key)))
         .and_then(|v| {
-            serde_json::from_value(v.clone()).map_err(|e| anyhow!("parse {} error: {:?}", key, e))
+            serde_json::from_value(v.clone()).map_err(|e| {
+                anyhow!(t!(
+                    "Failed to deserialize argument.",
+                    argument = key,
+                    error = e.to_string()
+                ))
+            })
         })
 }
 
 pub fn get_required_point(args: &Value, key: &str) -> Result<Point> {
     args.get(key)
-        .ok_or_else(|| anyhow!("{} not found", key))
+        .ok_or_else(|| anyhow!(t!("WebSocket argument is missing.", argument = key)))
         .and_then(|v| {
-            serde_json::from_value(v.clone()).map_err(|e| anyhow!("parse {} error: {:?}", key, e))
+            serde_json::from_value(v.clone()).map_err(|e| {
+                anyhow!(t!(
+                    "Failed to deserialize argument.",
+                    argument = key,
+                    error = e.to_string()
+                ))
+            })
         })
 }
 
 pub fn get_required_rgb_offset(args: &Value, key: &str) -> Result<RgbOffset> {
     args.get(key)
-        .ok_or_else(|| anyhow!("{} not found", key))
+        .ok_or_else(|| anyhow!(t!("WebSocket argument is missing.", argument = key)))
         .and_then(|v| {
-            serde_json::from_value(v.clone()).map_err(|e| anyhow!("parse {} error: {:?}", key, e))
+            serde_json::from_value(v.clone()).map_err(|e| {
+                anyhow!(t!(
+                    "Failed to deserialize argument.",
+                    argument = key,
+                    error = e.to_string()
+                ))
+            })
         })
 }
 
 pub fn get_required_relative_points(args: &Value, key: &str) -> Result<Vec<ColoredPoint>> {
     args.get(key)
-        .ok_or_else(|| anyhow!("{} not found", key))
+        .ok_or_else(|| anyhow!(t!("WebSocket argument is missing.", argument = key)))
         .and_then(|v| {
-            serde_json::from_value(v.clone()).map_err(|e| anyhow!("parse {} error: {:?}", key, e))
+            serde_json::from_value(v.clone()).map_err(|e| {
+                anyhow!(t!(
+                    "Failed to deserialize argument.",
+                    argument = key,
+                    error = e.to_string()
+                ))
+            })
         })
 }
 
 pub fn get_required_hex_colors(args: &Value, key: &str) -> Result<Vec<HexColor>> {
     args.get(key)
-        .ok_or_else(|| anyhow!("{} not found", key))
+        .ok_or_else(|| anyhow!(t!("WebSocket argument is missing.", argument = key)))
         .and_then(|v| {
-            serde_json::from_value(v.clone()).map_err(|e| anyhow!("parse {} error: {:?}", key, e))
+            serde_json::from_value(v.clone()).map_err(|e| {
+                anyhow!(t!(
+                    "Failed to deserialize argument.",
+                    argument = key,
+                    error = e.to_string()
+                ))
+            })
         })
 }
 
@@ -81,7 +130,10 @@ pub fn load_template_image(project_dir: &Path, subpath: &str) -> Result<RgbaImag
         .join("images")
         .join(format!("{}.png", subpath));
     if !template_path.exists() {
-        return Err(anyhow!("{:?} does not exist", template_path));
+        return Err(anyhow!(t!(
+            "Template image does not exist.",
+            template_path = template_path
+        )));
     }
     Ok(ImageReader::open(&template_path)?.decode()?.into_rgba8())
 }

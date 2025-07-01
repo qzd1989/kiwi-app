@@ -1,3 +1,4 @@
+// done
 use super::{PyProject, PythonCode};
 use crate::{app::App, project::VerifyStatus};
 use anyhow::{Result, anyhow};
@@ -42,27 +43,51 @@ impl Engine {
         // Check if main.py exists or VerifyStatus::Invalid
         {
             let path = project_path.join("main.py");
-            if let Err(_) = fs::exists(&path).map_err(|error| anyhow!(error)) {
+            if let Err(_) = fs::exists(&path).map_err(|e| {
+                anyhow!(t!(
+                    "Project entry file not found.",
+                    path = path.to_str().unwrap(),
+                    error = e.to_string()
+                ))
+            }) {
                 return VerifyStatus::Invalid;
             }
         }
         // Check if interpreter exists or VerifyStatus::Invalid
         {
             let path = get_project_interpreter(&project_path);
-            if let Err(_) = fs::exists(&path).map_err(|error| anyhow!(error)) {
+            if let Err(_) = fs::exists(&path).map_err(|e| {
+                anyhow!(t!(
+                    "Python interpreter not found.",
+                    path = path.to_str().unwrap(),
+                    error = e.to_string()
+                ))
+            }) {
                 return VerifyStatus::Invalid;
             }
         }
         // Check if data/images exists or VerifyStatus::Invalid
         {
             let path = project_path.join("data").join("images");
-            if let Err(_) = fs::exists(&path).map_err(|error| anyhow!(error)) {
+            if let Err(_) = fs::exists(&path).map_err(|e| {
+                anyhow!(t!(
+                    "Image data directory does not exist.",
+                    path = path.to_str().unwrap(),
+                    error = e.to_string()
+                ))
+            }) {
                 return VerifyStatus::Invalid;
             }
         }
         {
             let path = project_path.join(".venv").join("pyvenv.cfg");
-            if let Err(_) = fs::exists(&path).map_err(|error| anyhow!(error)) {
+            if let Err(_) = fs::exists(&path).map_err(|e| {
+                anyhow!(t!(
+                    "Python virtual environment config file does not exist.",
+                    path = path.to_str().unwrap(),
+                    error = e.to_string()
+                ))
+            }) {
                 return VerifyStatus::Invalid;
             }
             let content = {
@@ -132,8 +157,7 @@ impl Engine {
             let template_dir = App::get_resource_dir()
                 .join("python")
                 .join("project_template");
-            fs_extra::dir::copy(&template_dir, &self.project_path, &options)
-                .map_err(|error| anyhow!("Copy template to project failed.({})", error))?;
+            fs_extra::dir::copy(&template_dir, &self.project_path, &options)?;
         }
         // rename .vscode/settings.json
         {
@@ -146,14 +170,13 @@ impl Engine {
             #[cfg(target_os = "windows")]
             let src = vscode_path_buf.join("settings.json.windows");
 
-            fs::rename(&src, &dst)
-                .map_err(|error| anyhow!("Rename .vscode/settings.json failed.({})", error))?;
+            fs::rename(&src, &dst)?;
         }
         //venv
         {
             let venv_name = ".venv";
             let venv_path = self.project_path.join(venv_name);
-            let result = {
+            let output = {
                 #[cfg(target_os = "macos")]
                 {
                     Command::new(&default_interpreter)
@@ -169,18 +192,13 @@ impl Engine {
                         .creation_flags(CREATE_NO_WINDOW.0)
                         .output()
                 }
-            };
-
-            match result {
-                Ok(output) => {
-                    if !output.status.success() {
-                        let stderr = String::from_utf8_lossy(&output.stderr);
-                        return Err(anyhow!("Command stderr: {}", stderr));
-                    }
-                }
-                Err(error) => {
-                    return Err(anyhow!("Command execution error: {}", error));
-                }
+            }?;
+            if !output.status.success() {
+                let stderr = String::from_utf8_lossy(&output.stderr);
+                return Err(anyhow!(t!(
+                    "Failed to initialize Python virtual environment.",
+                    error = stderr.to_string()
+                )));
             }
         }
         // install kiwi whl
@@ -192,7 +210,7 @@ impl Engine {
                 let whl = format!("kiwi-{}-py3-none-any.whl", version);
                 let kiwi = wheels_path_buf.join(&whl);
                 let find_links = format!("--find-links={}", &wheels_path_buf.to_str().unwrap());
-                let result = {
+                let output = {
                     #[cfg(target_os = "macos")]
                     {
                         Command::new(&self.project_interpreter)
@@ -210,18 +228,14 @@ impl Engine {
                             .creation_flags(CREATE_NO_WINDOW.0)
                             .output()
                     }
-                };
+                }?;
 
-                match result {
-                    Ok(output) => {
-                        if !output.status.success() {
-                            let stderr = String::from_utf8_lossy(&output.stderr);
-                            return Err(anyhow!("Command stderr: {}", stderr));
-                        }
-                    }
-                    Err(error) => {
-                        return Err(anyhow!("Command execution error: {}", error));
-                    }
+                if !output.status.success() {
+                    let stderr = String::from_utf8_lossy(&output.stderr);
+                    return Err(anyhow!(t!(
+                        "Failed to install the Kiwi module.",
+                        error = stderr.to_string()
+                    )));
                 }
             }
         }
@@ -254,10 +268,7 @@ impl Engine {
         {
             command.creation_flags(CREATE_NO_WINDOW.0)
         }
-        let child = command.spawn();
-        let mut child = child.map_err(|error| {
-            return anyhow!("unwrap project python interpreter error.({})", error);
-        })?;
+        let mut child = command.spawn()?;
         let pid = child.id();
         on_spawned(pid);
         self.pid.store(pid, Ordering::SeqCst);
@@ -267,12 +278,8 @@ impl Engine {
         if let Some(stderr) = child.stderr.take() {
             on_stderr(stderr);
         }
-        match child.wait() {
-            Ok(exit_status) => on_exit(pid, exit_status),
-            Err(error) => {
-                return Err(anyhow!("child try wait error.({})", error));
-            }
-        }
+        let exit_status = child.wait()?;
+        on_exit(pid, exit_status);
         self.pid.store(0, Ordering::SeqCst);
         Ok(())
     }

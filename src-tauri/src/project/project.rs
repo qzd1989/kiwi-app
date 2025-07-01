@@ -1,3 +1,4 @@
+// done
 use super::Config;
 use crate::app::App;
 use crate::input::Token;
@@ -116,7 +117,10 @@ impl Project {
         let mut options = DirOptions::new();
         options.depth = 1;
         let Ok(data) = get_dir_content2(self.path.clone(), &options) else {
-            return Err(anyhow!("read project dir failed."));
+            return Err(anyhow!(t!(
+                "Unable to read the project directory.",
+                path = self.path.clone().to_str().unwrap()
+            )));
         };
         let project_dir_with_sep = format!("{}{}", self.path.to_str().unwrap(), MAIN_SEPARATOR);
         let max_num = data
@@ -173,11 +177,10 @@ impl Project {
             &resource_dir,
             &project_folder,
         );
-        let args = shell_words::split(&execute_command_string)
-            .map_err(|error| anyhow!(error.to_string()))?;
+        let args = shell_words::split(&execute_command_string)?;
 
         if args.is_empty() {
-            return Err(anyhow!("The edit command is invalid."));
+            return Err(anyhow!(t!("Invalid edit command.")));
         }
 
         let mut command = Command::new(&args[0]);

@@ -23,8 +23,12 @@ pub fn xattr_python() -> CommandResult<()> {
         .args(&["-r", "-d", "com.apple.quarantine", &interpreter])
         .spawn()
         .and_then(|mut child| child.wait())
-        .map_err(|error| {
-            anyhow!("Failed to remove quarantine attribute.({})", error).to_string()
+        .map_err(|e| {
+            anyhow!(t!(
+                "Failed to remove quarantine attribute from Python.",
+                error = e.to_string()
+            ))
+            .to_string()
         })?;
     Ok(())
 }

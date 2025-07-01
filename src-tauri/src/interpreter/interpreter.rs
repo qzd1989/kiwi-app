@@ -1,3 +1,4 @@
+// done
 use super::Code;
 use super::python::{Engine as PythonEngine, PyProject};
 use crate::project::VerifyStatus;
@@ -34,7 +35,10 @@ impl Interpreter {
             "python" => Ok(Self::Python(PythonEngine::new_from_project_path(
                 project_path,
             ))),
-            _ => Err(anyhow!("Unsupported interpreter")),
+            unknown_interpreter => Err(anyhow!(t!(
+                "The interpreter is not supported.",
+                interpreter = unknown_interpreter
+            ))),
         }
     }
 

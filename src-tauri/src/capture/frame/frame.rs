@@ -1,3 +1,4 @@
+// done
 use anyhow::{Result, anyhow};
 use base64::{Engine as _, engine::general_purpose};
 use capture::Frame as CaptureFrame;
@@ -10,7 +11,7 @@ use crate::types::Base64Png;
 pub struct Frame {
     pub width: u32,
     pub height: u32,
-    pub buffer: Vec<u8>, //format: RGBA
+    pub buffer: Vec<u8>, //default format: RGBA
 }
 
 impl Frame {
@@ -27,21 +28,19 @@ impl Frame {
         if let Some(buffer) = ImageBuffer::from_raw(width, height, self.buffer.to_owned()) {
             Ok(buffer)
         } else {
-            return Err(anyhow!("convert failed"));
+            return Err(anyhow!(t!("Failed to convert frame to buffer.")));
         }
     }
 
     pub fn to_base64_png(&self) -> Result<Base64Png> {
         let mut png_data = Vec::new();
         let encoder = image::codecs::png::PngEncoder::new(&mut png_data);
-        encoder
-            .write_image(
-                &self.buffer,
-                self.width,
-                self.height,
-                image::ExtendedColorType::Rgba8,
-            )
-            .map_err(|error| anyhow!(error.to_string()))?;
+        encoder.write_image(
+            &self.buffer,
+            self.width,
+            self.height,
+            image::ExtendedColorType::Rgba8,
+        )?;
         let base64_str = general_purpose::STANDARD.encode(&png_data);
 
         Ok(format!("data:image/png;base64,{}", base64_str))

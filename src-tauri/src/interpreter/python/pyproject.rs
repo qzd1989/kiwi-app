@@ -1,4 +1,5 @@
-use anyhow::{Result, anyhow};
+// done
+use anyhow::Result;
 use serde::Deserialize;
 use std::io::Read;
 
@@ -29,8 +30,7 @@ impl Default for PyProject {
 
 impl PyProject {
     pub fn load_from_toml_content(toml_content: String) -> Result<PyProject> {
-        let config: PyProject =
-            toml::from_str(&toml_content).map_err(|error| anyhow!(error.to_string()))?;
+        let config: PyProject = toml::from_str(&toml_content)?;
         Ok(config)
     }
 }

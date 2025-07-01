@@ -1,10 +1,10 @@
+// done
 use super::App;
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-
 pub struct Config {
     pub app: ConfigApp,
 }
@@ -21,8 +21,8 @@ impl Default for Config {
 impl Config {
     pub fn save(&self) -> Result<bool> {
         let toml_path = get_config_toml_path();
-        let contents = toml::to_string_pretty(&self).map_err(|error| anyhow!(error.to_string()))?;
-        fs::write(&toml_path, contents).map_err(|error| anyhow!(error.to_string()))?;
+        let contents = toml::to_string_pretty(&self)?;
+        fs::write(&toml_path, contents)?;
         Ok(true)
     }
 }
@@ -30,6 +30,7 @@ impl Config {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConfigApp {
     pub websocket_port: u16,
+    pub locale: String,
 }
 
 pub fn get_config_toml_path() -> PathBuf {

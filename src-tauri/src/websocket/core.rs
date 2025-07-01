@@ -1,3 +1,4 @@
+// done
 use super::message::{error_message, ok_message, probe_request, probe_response};
 use crate::commands::websocket;
 use anyhow::{Error, Result, anyhow};
@@ -29,11 +30,11 @@ pub async fn serve_in_background(
             if is_alive(port).await.unwrap_or(false) {
                 return Ok(());
             }
-            return Err(anyhow!(
-                "Failed to bind and probe WebSocket service on port {}: {}",
-                port,
-                error
-            ));
+            return Err(anyhow!(t!(
+                "Unable to start the WebSocket service.",
+                port = port,
+                error = error.to_string()
+            )));
         }
     };
     let token = CancellationToken::new();

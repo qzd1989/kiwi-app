@@ -1,3 +1,4 @@
+// done
 use crate::input::Key;
 use anyhow::{Result, anyhow};
 use rdev::Key as RecordKey;
@@ -117,7 +118,7 @@ impl TryFrom<RecordKey> for Key {
             RecordKey::Kp8 | RecordKey::Unknown(91) => Key::Kp8,
             RecordKey::Kp9 | RecordKey::Unknown(92) => Key::Kp9,
             RecordKey::KpDelete => Key::Delete,
-            _ => return Err(anyhow!("Unsupported key")),
+            unknown_key => return Err(anyhow!(t!("The key is not supported.", key = unknown_key))),
             // IntlBackslash
             // Unknown(u32),
             // F21

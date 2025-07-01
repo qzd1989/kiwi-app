@@ -301,7 +301,7 @@ static IS_MACOS: OnceLock<bool> = OnceLock::new();
 static IS_WINDOWS: OnceLock<bool> = OnceLock::new();
 
 mod pyproject {
-    use anyhow::{Result, anyhow};
+    use anyhow::Result;
     use serde::Deserialize;
     use std::env;
     use std::fs;
@@ -339,7 +339,7 @@ mod pyproject {
     impl PyProject {
         pub fn load_from_toml_content(toml_content: String) -> Result<PyProject> {
             let config: PyProject =
-                toml::from_str(&toml_content).map_err(|error| anyhow!(error.to_string()))?;
+                toml::from_str(&toml_content).expect("Load config of kiwi module failed.");
             Ok(config)
         }
     }

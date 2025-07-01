@@ -1,3 +1,4 @@
+// done
 use super::PythonKey;
 use crate::input::{Abs, Button, Click, Horizontal, Key, Press, Rel, Release, Token, Vertical};
 use anyhow::{Result, anyhow};
@@ -26,7 +27,9 @@ impl TokenExt for Token {
                 (Button::Right, Press) => format!("press_right()"),
                 (Button::Right, Release) => format!("release_right()"),
                 (Button::Right, Click) => format!("click_right()"),
-                (_, _) => return Err(anyhow!("unsupport button action")),
+                (_, _) => {
+                    return Err(anyhow!(t!("Unsupported button action.")));
+                }
             },
             Token::MoveMouse(x, y, coordinate) => match coordinate {
                 Abs => format!("move_absolute(absolute_point=Point(x={}, y={}))", x, y),
@@ -36,7 +39,7 @@ impl TokenExt for Token {
                 Horizontal => format!("scroll_horizontal(length={})", length),
                 Vertical => format!("scroll_vertical(length={})", length),
             },
-            _ => return Err(anyhow!("unsupport token type")),
+            _ => return Err(anyhow!(t!("Unsupported token."))),
         };
         Ok(python_script)
     }

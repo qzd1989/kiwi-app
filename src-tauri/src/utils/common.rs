@@ -1,3 +1,4 @@
+// done
 use anyhow::{Result, anyhow};
 use regex::Regex;
 use std::fs;
@@ -15,10 +16,10 @@ pub fn find_matching_file(pattern: &str) -> Result<Option<PathBuf>> {
     let path = Path::new(pattern);
     let dir = path
         .parent()
-        .ok_or(anyhow!("Invalid pattern: missing directory"))?;
+        .ok_or(anyhow!(t!("Invalid pattern: no directory specified.")))?;
     let filename_pattern = path
         .file_name()
-        .ok_or(anyhow!("Invalid pattern: missing filename"))?
+        .ok_or(anyhow!(t!("Invalid pattern: no filename specified.")))?
         .to_string_lossy();
 
     // 转换 shell 风格的通配符（*）为正则表达式（.*）

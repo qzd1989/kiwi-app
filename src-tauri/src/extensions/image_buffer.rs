@@ -1,3 +1,4 @@
+// done
 use anyhow::{Result, anyhow};
 use base64::{Engine as _, engine::general_purpose};
 use image::{ImageBuffer, RgbImage, Rgba, imageops};
@@ -23,18 +24,16 @@ impl ImageBufferRgbaExt for ImageBuffer<Rgba<u8>, Vec<u8>> {
                 .collect(),
         ) {
             Some(rgb_image) => Ok(rgb_image),
-            None => Err(anyhow!("convert rgba buffer to rgb failed")),
+            None => Err(anyhow!(t!("Failed to convert RGBA buffer to RGB."))),
         }
     }
     /// too slow, don't use it.
     fn to_base64png(&self) -> Result<Base64Png> {
         let mut bytes = Vec::new();
-        if let Err(error) = self.write_to(
+        self.write_to(
             &mut std::io::Cursor::new(&mut bytes),
             image::ImageFormat::Png,
-        ) {
-            return Err(anyhow!("{}", error));
-        }
+        )?;
         Ok(format!(
             "data:image/png;base64,{}",
             general_purpose::STANDARD.encode(bytes)

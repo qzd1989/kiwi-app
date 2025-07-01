@@ -1,16 +1,24 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, computed } from "vue";
+import { onMounted, onUnmounted, computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useStateStore, localStore } from "@utils/store";
 import { open } from "@tauri-apps/plugin-dialog";
 import { msgError } from "@utils/msg";
+import { AppModel, Release } from "@kiwi/App";
+import ReleaseDialog from "@views/main/components/ReleaseDialog.vue";
 
 const stateStore = useStateStore();
+const release = ref<Release | null>(null);
 const isDev = import.meta.env.DEV;
 const router = useRouter();
 const isEnabled = computed(() => {
   return Object.values(stateStore.enable).every((v) => v === true);
 });
+
+const checkRelease = async () => {
+  const app = new AppModel(stateStore.app);
+  release.value = await app.checkRelease();
+};
 
 const selectProject = async () => {
   try {
@@ -47,6 +55,7 @@ const clearLocalStore = async () => {
 };
 
 onMounted(async () => {
+  await checkRelease();
   // router.push({
   //   path: "/main/project/detail",
   //   query: { path: "/Users/kiwi/Downloads/project/2" },
@@ -111,6 +120,7 @@ onUnmounted(async () => {});
       </el-row>
     </el-main>
   </el-container>
+  <ReleaseDialog v-if="release != null" :release="release" />
 </template>
 <style scoped>
 .el-container {

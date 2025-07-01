@@ -1,3 +1,4 @@
+//done
 use super::Frame;
 use crate::{
     extensions::{EmbeddedFileExt, ImageBufferRgbaExt as _},
@@ -27,20 +28,23 @@ impl Frame {
                     ocr.lock()
                         .unwrap()
                         .init_models_from_memory(det_bytes, cls_bytes, rec_bytes, 2)
-                        .map_err(|error| {
-                            let error_string = match error {
-                                paddle_ocr_rs::ocr_error::OcrError::Ort(error) => {
-                                    error.message().to_string()
+                        .map_err(|e| {
+                            let error_string = match e {
+                                paddle_ocr_rs::ocr_error::OcrError::Ort(e) => {
+                                    e.message().to_string()
                                 }
-                                paddle_ocr_rs::ocr_error::OcrError::Io(error) => error.to_string(),
-                                paddle_ocr_rs::ocr_error::OcrError::ImageError(image_error) => {
-                                    image_error.to_string()
+                                paddle_ocr_rs::ocr_error::OcrError::Io(e) => e.to_string(),
+                                paddle_ocr_rs::ocr_error::OcrError::ImageError(ie) => {
+                                    ie.to_string()
                                 }
                                 paddle_ocr_rs::ocr_error::OcrError::SessionNotInitialized => {
-                                    anyhow!("SessionNotInitialized").to_string()
+                                    anyhow!(t!("OCR session is uninitialized.")).to_string()
                                 }
                             };
-                            anyhow!("init models from memory error.({})", error_string)
+                            anyhow!(t!(
+                                "Failed to initialize OCR models from memory.",
+                                error = error_string
+                            ))
                         })
                         .unwrap();
                 }

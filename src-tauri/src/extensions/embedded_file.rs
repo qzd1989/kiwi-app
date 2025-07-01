@@ -1,4 +1,5 @@
-use anyhow::{Result, anyhow};
+//done
+use anyhow::Result;
 use rust_embed::EmbeddedFile;
 use std::{
     borrow::Cow,
@@ -18,9 +19,8 @@ impl EmbeddedFileExt for EmbeddedFile {
     fn to_tempfile(self, file_path: &str) -> Result<PathBuf> {
         let cursor = Cursor::new(self.data);
         let path = env::temp_dir().join(file_path);
-        let mut file = File::create(&path).map_err(|error| anyhow!("{}", error))?;
-        file.write_all(cursor.get_ref())
-            .map_err(|error| anyhow!("{}", error))?;
+        let mut file = File::create(&path)?;
+        file.write_all(cursor.get_ref())?;
         Ok(path)
     }
 }

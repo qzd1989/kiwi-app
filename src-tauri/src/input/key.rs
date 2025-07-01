@@ -1,3 +1,4 @@
+// done
 use crate::input::SystemKey;
 use anyhow::{Error, Result, anyhow};
 use std::str::FromStr;
@@ -595,7 +596,7 @@ impl From<Key> for SystemKey {
               // F22
               // F23
               // F24
-              // _ => return Err(anyhow!("unsupported key")),
+              // _ => "unsupported key"
         }
     }
 }
@@ -912,7 +913,7 @@ impl TryFrom<SystemKey> for Key {
             SystemKey::Other(71) => Key::NumLock,
             #[cfg(target_os = "windows")]
             SystemKey::Numlock => Key::NumLock,
-            _ => return Err(anyhow!("unsupported key")),
+            unknown_key => return Err(anyhow!(t!("The key is not supported.", key = unknown_key))),
         };
         Ok(key)
     }
@@ -1028,7 +1029,7 @@ impl FromStr for Key {
             "ScrollLock" => Key::ScrollLock,
             "Pause" => Key::Pause,
             "NumLock" => Key::NumLock,
-            _ => return Err(anyhow!("unsupport key")),
+            unknown_key => return Err(anyhow!(t!("The key is not supported.", key = unknown_key))),
         };
         Ok(key)
     }

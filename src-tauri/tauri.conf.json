@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Kiwi",
-  "version": "1.2.3",
+  "version": "1.0.0",
   "identifier": "kiwi.biexi.com",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "kiwi-app",
+        "title": "Kiwi",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "minWidth": 800,
+        "minHeight": 600
       }
     ],
     "security": {
@@ -36,15 +38,6 @@
       "assets/zip/": "zip/",
       "assets/python/wheels/*.whl": "python/wheels/",
       "assets/python/project_template/": "python/project_template/"
-    },
-    "createUpdaterArtifacts": true
-  },
-  "plugins": {
-    "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM1NDczRDczQjgyOUM3MkQKUldRdHh5bTRjejFIeFNLeDJ0eTJwT1JqNmVQVUpVclRGSi9zWkZxZ2Y5aXN5SzI2eEhIanpxTTgK",
-      "endpoints": [
-        "https://kiwi.biexi.com/latest.json"
-      ]
     }
   }
 }

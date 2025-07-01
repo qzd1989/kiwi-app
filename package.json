@@ -1,7 +1,7 @@
 {
   "name": "kiwi-app",
   "private": true,
-  "version": "1.2.3",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "npm run sync-version && vite",
@@ -21,7 +21,6 @@
     "@tauri-apps/plugin-os": "^2.3.0",
     "@tauri-apps/plugin-shell": "^2.3.0",
     "@tauri-apps/plugin-store": "^2.3.0",
-    "@tauri-apps/plugin-updater": "^2.9.0",
     "@tauri-apps/plugin-websocket": "^2.4.0",
     "element-plus": "^2.10.2",
     "pinia": "^3.0.3",

@@ -1,3 +1,4 @@
+// done
 use super::frame::Frame;
 use crate::app::App;
 use crate::types::Size;
@@ -41,7 +42,7 @@ impl Engine {
     pub fn grab(&self, time_out_millis: u64) -> Result<Frame> {
         let frame: Frame = if self.is_running() {
             self.get_frame()
-                .ok_or_else(|| anyhow!("Capturer is running, but frame is none."))?
+                .ok_or_else(|| anyhow!(t!("Capturer is running, but no frame was captured.")))?
         } else {
             self.engine.grab(time_out_millis)?.into()
         };
@@ -49,9 +50,9 @@ impl Engine {
     }
 
     pub fn get_monitor_size(&self) -> Result<Size> {
-        let infos = DisplayInfo::all().map_err(|error| anyhow!(error))?;
+        let infos = DisplayInfo::all()?;
         let Some(primary) = infos.into_iter().find(|info| info.is_primary) else {
-            return Err(anyhow!("No primary display found"));
+            return Err(anyhow!(t!("No primary display found.")));
         };
         let size = Size {
             width: primary.width,
@@ -92,37 +93,60 @@ impl Engine {
 
     #[cfg(target_os = "windows")]
     fn protect_window(app_handle: &AppHandle, label: &str) -> Result<()> {
-        let window = app_handle
-            .get_webview_window(label)
-            .ok_or_else(|| anyhow!("Failed to get webview by label: {}", label))?;
+        let window = app_handle.get_webview_window(label).ok_or_else(|| {
+            anyhow!(t!(
+                "Failed to retrieve webview with the specified label.",
+                label = label
+            ))
+        })?;
         match window.hwnd() {
             Ok(hwnd) => unsafe {
-                SetWindowDisplayAffinity(hwnd, WINDOW_DISPLAY_AFFINITY(17))
-                    .map_err(|error| anyhow!(error))
+                SetWindowDisplayAffinity(hwnd, WINDOW_DISPLAY_AFFINITY(17)).map_err(|e| {
+                    anyhow!(t!(
+                        "Failed to set window display affinity.",
+                        error = e.to_string()
+                    ))
+                })
             },
-            Err(error) => Err(anyhow!(error)),
+            Err(e) => Err(anyhow!(t!(
+                "Failed to find HWND by label.",
+                error = e.to_string()
+            ))),
         }
     }
 
     #[cfg(target_os = "windows")]
     pub fn unprotect_window(app_handle: &AppHandle, label: &str) -> Result<()> {
-        let window = app_handle
-            .get_webview_window(label)
-            .ok_or_else(|| anyhow!("Failed to get webview by label: {}", label))?;
+        let window = app_handle.get_webview_window(label).ok_or_else(|| {
+            anyhow!(t!(
+                "Failed to retrieve webview with the specified label.",
+                label = label
+            ))
+        })?;
         match window.hwnd() {
             Ok(hwnd) => unsafe {
-                SetWindowDisplayAffinity(hwnd, WINDOW_DISPLAY_AFFINITY(0))
-                    .map_err(|error| anyhow!(error))
+                SetWindowDisplayAffinity(hwnd, WINDOW_DISPLAY_AFFINITY(0)).map_err(|e| {
+                    anyhow!(t!(
+                        "Failed to set window display affinity.",
+                        error = e.to_string()
+                    ))
+                })
             },
-            Err(error) => Err(anyhow!(error)),
+            Err(e) => Err(anyhow!(t!(
+                "Failed to find HWND by label.",
+                error = e.to_string()
+            ))),
         }
     }
 
     #[cfg(target_os = "macos")]
     fn protect_window(app_handle: &AppHandle, label: &str) -> Result<()> {
-        let window = app_handle
-            .get_webview_window(label)
-            .ok_or_else(|| anyhow!("Failed to get webview window: {}", label))?;
+        let window = app_handle.get_webview_window(label).ok_or_else(|| {
+            anyhow!(t!(
+                "Failed to retrieve webview with the specified label.",
+                label = label
+            ))
+        })?;
         let ns_window = window.ns_window()?;
         unsafe {
             let ns_object = &*(ns_window as *const NSObject);
@@ -133,9 +157,12 @@ impl Engine {
 
     #[cfg(target_os = "macos")]
     pub fn unprotect_window(app_handle: &AppHandle, label: &str) -> Result<()> {
-        let window = app_handle
-            .get_webview_window(label)
-            .ok_or_else(|| anyhow!("Failed to get webview window: {}", label))?;
+        let window = app_handle.get_webview_window(label).ok_or_else(|| {
+            anyhow!(t!(
+                "Failed to retrieve webview with the specified label.",
+                label = label
+            ))
+        })?;
         let ns_window = window.ns_window()?;
 
         unsafe {

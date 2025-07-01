@@ -23,6 +23,8 @@ pub fn save_app_config(config: AppConfig) -> CommandResult<()> {
         app_config.save()
     })?;
 
+    App::set_locale();
+
     Ok(())
 }
 

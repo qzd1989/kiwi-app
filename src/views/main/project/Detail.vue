@@ -98,7 +98,11 @@ const logs = ref<Stack<Log>>(new Stack(100));
 const openMonitor = async () => {
   const monitor = new WebviewWindow("monitor", {
     url: "/monitor",
-    title: "monitor",
+    title: "Monitor",
+    width: 800,
+    height: 600,
+    minWidth: 800,
+    minHeight: 600,
   });
   monitor.once("tauri://created", async () => {});
   monitor.once("tauri://error", async () => {

@@ -1,3 +1,4 @@
+// done
 use crate::input::Key;
 use anyhow::anyhow;
 
@@ -114,7 +115,7 @@ impl TryFrom<PythonKey> for Key {
             "ScrollLock" => Key::ScrollLock,
             "Pause" => Key::Pause,
             "NumLock" => Key::NumLock,
-            _ => return Err(anyhow!("Unsupported key")),
+            unknown_key => return Err(anyhow!(t!("The key is not supported.", key = unknown_key))),
         };
         Ok(key)
     }

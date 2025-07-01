@@ -1,3 +1,4 @@
+// done
 use super::Config;
 use crate::{
     capture::{Engine as CaptureEngine, Frame},
@@ -33,14 +34,14 @@ impl App {
     }
 
     pub fn get_frame() -> Result<Frame> {
-        Self::with_capturer(|capturer| capturer.get_frame().ok_or(anyhow!("Frame is not found.")))
+        Self::with_capturer(|capturer| capturer.get_frame().ok_or(anyhow!(t!("Frame not found."))))
     }
 
     pub fn get_frame_arc() -> Result<Arc<Frame>> {
         Self::with_capturer(|capturer| {
             capturer
                 .get_frame_arc()
-                .ok_or(anyhow!("Frame is not found."))
+                .ok_or(anyhow!(t!("Frame not found.")))
         })
     }
 
@@ -57,27 +58,39 @@ impl App {
     }
 
     pub fn project(&self) -> Result<RwLockReadGuard<Option<Project>>> {
-        self.project
-            .read()
-            .map_err(|e| anyhow!("Failed to acquire project read lock: {}", e))
+        self.project.read().map_err(|e| {
+            anyhow!(t!(
+                "Failed to acquire read lock on project.",
+                error = e.to_string()
+            ))
+        })
     }
 
     pub fn project_mut(&self) -> Result<RwLockWriteGuard<Option<Project>>> {
-        self.project
-            .write()
-            .map_err(|e| anyhow!("Failed to acquire project write lock: {}", e))
+        self.project.write().map_err(|e| {
+            anyhow!(t!(
+                "Failed to acquire write lock on project.",
+                error = e.to_string()
+            ))
+        })
     }
 
     pub fn config(&self) -> Result<RwLockReadGuard<Config>> {
-        self.config
-            .read()
-            .map_err(|e| anyhow!("Failed to acquire config read lock: {}", e))
+        self.config.read().map_err(|e| {
+            anyhow!(t!(
+                "Failed to acquire read lock on configuration.",
+                error = e.to_string()
+            ))
+        })
     }
 
     pub fn config_mut(&self) -> Result<RwLockWriteGuard<Config>> {
-        self.config
-            .write()
-            .map_err(|e| anyhow!("Failed to acquire config write lock: {}", e))
+        self.config.write().map_err(|e| {
+            anyhow!(t!(
+                "Failed to acquire config write lock on configuration.",
+                error = e.to_string()
+            ))
+        })
     }
 
     pub fn with_capturer<R>(f: impl FnOnce(&CaptureEngine) -> R) -> R {
@@ -99,7 +112,7 @@ impl App {
         if let Some(project) = guard.as_ref() {
             Ok(f(project))
         } else {
-            Err(anyhow!("Project not found"))
+            Err(anyhow!(t!("Project not found.")))
         }
     }
 
@@ -110,7 +123,7 @@ impl App {
         if let Some(project) = guard.as_mut() {
             Ok(f(project))
         } else {
-            Err(anyhow!("Project not found"))
+            Err(anyhow!(t!("Project not found.")))
         }
     }
 
@@ -133,14 +146,14 @@ impl App {
     pub fn init_resource_dir(resource_dir: PathBuf) -> Result<()> {
         RESOURCE_DIR
             .set(resource_dir)
-            .map_err(|_| anyhow!("Failed to init resource dir"))?;
+            .map_err(|_| anyhow!(t!("Failed to initialize resource directory.")))?;
         Ok(())
     }
 
     pub fn init_app_handle(app_handle: Arc<AppHandle>) -> Result<()> {
         APP_HANDLE
             .set(app_handle)
-            .map_err(|_| anyhow!("Failed to init app handle"))?;
+            .map_err(|_| anyhow!(t!("Failed to initialize app handle.")))?;
         Ok(())
     }
 
@@ -151,6 +164,7 @@ impl App {
     pub fn get_version() -> String {
         Self::get_app_handle().config().version.clone().unwrap()
     }
+
     pub fn get_name() -> String {
         Self::get_app_handle()
             .config()
@@ -159,31 +173,13 @@ impl App {
             .unwrap()
     }
 
-    pub async fn update() -> tauri_plugin_updater::Result<()> {
-        use tauri_plugin_updater::UpdaterExt;
-        if let Some(update) = Self::get_app_handle().updater()?.check().await? {
-            let mut downloaded = 0;
+    pub fn get_locale() -> String {
+        Self::with_config(|config| config.app.locale.clone())
+    }
 
-            // alternatively we could also call update.download() and update.install() separately
-            update
-                .download_and_install(
-                    |chunk_length, content_length| {
-                        downloaded += chunk_length;
-                        println!("downloaded {downloaded} from {content_length:?}");
-                    },
-                    || {
-                        println!("download finished");
-                    },
-                )
-                .await?;
-
-            println!("update installed");
-            Self::get_app_handle().restart();
-        } else {
-            println!("no update required.");
-        }
-
-        Ok(())
+    pub fn set_locale() {
+        let locale = Self::with_config(|config| config.app.locale.clone());
+        rust_i18n::set_locale(&locale);
     }
 }
 

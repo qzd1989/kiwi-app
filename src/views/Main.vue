@@ -8,8 +8,8 @@ import { msgError } from "@utils/msg";
 import { listen } from "@tauri-apps/api/event";
 import { onUnmounted } from "vue";
 import { AppModel, commonModel } from "@kiwi";
-const stateStore = useStateStore();
 
+const stateStore = useStateStore();
 const init = async () => {
   await focus();
   stateStore.app = await AppModel.getApp();

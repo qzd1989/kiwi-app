@@ -1,3 +1,8 @@
+#[macro_use]
+extern crate rust_i18n;
+
+i18n!("locales", fallback = "en");
+
 use std::sync::Arc;
 use tauri::Manager;
 
@@ -40,14 +45,10 @@ pub fn run() {
                 }
             });
 
-            // check update
-            tauri::async_runtime::spawn(async move {
-                app::App::update().await.unwrap();
-            });
+            app::App::set_locale();
 
             Ok(())
         })
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_single_instance::init(|app_handle, _, _| {
             let main_window = app_handle
                 .get_webview_window("main")
