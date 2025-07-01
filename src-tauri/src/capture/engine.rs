@@ -110,6 +110,7 @@ impl Engine {
             },
             Err(e) => Err(anyhow!(t!(
                 "Failed to find HWND by label.",
+                label = label,
                 error = e.to_string()
             ))),
         }
@@ -134,6 +135,7 @@ impl Engine {
             },
             Err(e) => Err(anyhow!(t!(
                 "Failed to find HWND by label.",
+                label = label,
                 error = e.to_string()
             ))),
         }

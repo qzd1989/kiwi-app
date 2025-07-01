@@ -14,7 +14,7 @@ pub fn get_required_string(args: &Value, key: &str) -> Result<String> {
         .and_then(|v| {
             serde_json::from_value(v.clone()).map_err(|e| {
                 anyhow!(t!(
-                    "Failed to deserialize argument.",
+                    "Failed to deserialize WebSocket argument.",
                     argument = key,
                     error = e.to_string()
                 ))
@@ -28,7 +28,7 @@ pub fn get_required_i32(args: &Value, key: &str) -> Result<i32> {
         .and_then(|v| {
             serde_json::from_value(v.clone()).map_err(|e| {
                 anyhow!(t!(
-                    "Failed to deserialize argument.",
+                    "Failed to deserialize WebSocket argument.",
                     argument = key,
                     error = e.to_string()
                 ))
@@ -42,7 +42,7 @@ pub fn get_required_f64(args: &Value, key: &str) -> Result<f64> {
         .and_then(|v| {
             serde_json::from_value(v.clone()).map_err(|e| {
                 anyhow!(t!(
-                    "Failed to deserialize argument.",
+                    "Failed to deserialize WebSocket argument.",
                     argument = key,
                     error = e.to_string()
                 ))
@@ -56,7 +56,7 @@ pub fn get_required_hexcolor(args: &Value, key: &str) -> Result<HexColor> {
         .and_then(|v| {
             serde_json::from_value(v.clone()).map_err(|e| {
                 anyhow!(t!(
-                    "Failed to deserialize argument.",
+                    "Failed to deserialize WebSocket argument.",
                     argument = key,
                     error = e.to_string()
                 ))
@@ -70,7 +70,7 @@ pub fn get_required_point(args: &Value, key: &str) -> Result<Point> {
         .and_then(|v| {
             serde_json::from_value(v.clone()).map_err(|e| {
                 anyhow!(t!(
-                    "Failed to deserialize argument.",
+                    "Failed to deserialize WebSocket argument.",
                     argument = key,
                     error = e.to_string()
                 ))
@@ -84,7 +84,7 @@ pub fn get_required_rgb_offset(args: &Value, key: &str) -> Result<RgbOffset> {
         .and_then(|v| {
             serde_json::from_value(v.clone()).map_err(|e| {
                 anyhow!(t!(
-                    "Failed to deserialize argument.",
+                    "Failed to deserialize WebSocket argument.",
                     argument = key,
                     error = e.to_string()
                 ))
@@ -98,7 +98,7 @@ pub fn get_required_relative_points(args: &Value, key: &str) -> Result<Vec<Color
         .and_then(|v| {
             serde_json::from_value(v.clone()).map_err(|e| {
                 anyhow!(t!(
-                    "Failed to deserialize argument.",
+                    "Failed to deserialize WebSocket argument.",
                     argument = key,
                     error = e.to_string()
                 ))
@@ -112,7 +112,7 @@ pub fn get_required_hex_colors(args: &Value, key: &str) -> Result<Vec<HexColor>>
         .and_then(|v| {
             serde_json::from_value(v.clone()).map_err(|e| {
                 anyhow!(t!(
-                    "Failed to deserialize argument.",
+                    "Failed to deserialize WebSocket argument.",
                     argument = key,
                     error = e.to_string()
                 ))

@@ -54,6 +54,7 @@ impl Frame {
         one.point.y += point.y;
         Ok(Some(one))
     }
+
     pub fn find_images(
         &self,
         template: &ImageBuffer<image::Rgba<u8>, Vec<u8>>,

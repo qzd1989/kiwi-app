@@ -180,7 +180,10 @@ impl Project {
         let args = shell_words::split(&execute_command_string)?;
 
         if args.is_empty() {
-            return Err(anyhow!(t!("Invalid edit command.")));
+            return Err(anyhow!(t!(
+                "Invalid edit command.",
+                command = &self.config.project.edit_command
+            )));
         }
 
         let mut command = Command::new(&args[0]);
