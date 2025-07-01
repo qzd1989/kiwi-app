@@ -36,6 +36,15 @@
         "assets/zip/": "zip/",
         "assets/python/wheels/*.whl": "python/wheels/",
         "assets/python/project_template/": "python/project_template/"
+    },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater":{
+      "pubkey":"dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM1NDczRDczQjgyOUM3MkQKUldRdHh5bTRjejFIeFNLeDJ0eTJwT1JqNmVQVUpVclRGSi9zWkZxZ2Y5aXN5SzI2eEhIanpxTTgK",
+      "endpoints":[
+        "https://kiwi.biexi.com/latest.json"
+      ]
     }
   }
 }

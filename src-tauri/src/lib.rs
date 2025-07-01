@@ -21,6 +21,8 @@ pub fn run() {
     let mut builder = tauri::Builder::default()
         .setup(|app| {
             let app_handle = Arc::new(app.app_handle().clone());
+            let app_handle_event = app_handle.clone();
+            let app_handle_updater = app_handle.clone();
             let resource_dir = app.path().resource_dir().expect("Can't find resouce dir.");
             app::App::init_resource_dir(resource_dir)?;
             app::App::init_app_handle(app_handle.clone())?;
@@ -34,7 +36,7 @@ pub fn run() {
                     event,
                     tauri::WindowEvent::CloseRequested { .. } | tauri::WindowEvent::Destroyed
                 ) {
-                    if let Some(monitor) = app_handle.get_webview_window("monitor") {
+                    if let Some(monitor) = app_handle_event.get_webview_window("monitor") {
                         if let Err(e) = monitor.destroy() {
                             eprintln!("Failed to destroy monitor window: {e}");
                         }
@@ -42,8 +44,14 @@ pub fn run() {
                 }
             });
 
+            // check update
+            tauri::async_runtime::spawn(async move {
+                app::App::update(app_handle_updater).await.unwrap();
+            });
+
             Ok(())
         })
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_single_instance::init(|app_handle, _, _| {
             let main_window = app_handle
                 .get_webview_window("main")
