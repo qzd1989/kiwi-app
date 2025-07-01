@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "kiwi-app",
-  "version": "1.0.0",
+  "version": "1.2.3",
   "identifier": "kiwi.biexi.com",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -31,18 +31,18 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources":{
-        "assets/app/config.toml": "config.toml",
-        "assets/zip/": "zip/",
-        "assets/python/wheels/*.whl": "python/wheels/",
-        "assets/python/project_template/": "python/project_template/"
+    "resources": {
+      "assets/app/config.toml": "config.toml",
+      "assets/zip/": "zip/",
+      "assets/python/wheels/*.whl": "python/wheels/",
+      "assets/python/project_template/": "python/project_template/"
     },
     "createUpdaterArtifacts": true
   },
   "plugins": {
-    "updater":{
-      "pubkey":"dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM1NDczRDczQjgyOUM3MkQKUldRdHh5bTRjejFIeFNLeDJ0eTJwT1JqNmVQVUpVclRGSi9zWkZxZ2Y5aXN5SzI2eEhIanpxTTgK",
-      "endpoints":[
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM1NDczRDczQjgyOUM3MkQKUldRdHh5bTRjejFIeFNLeDJ0eTJwT1JqNmVQVUpVclRGSi9zWkZxZ2Y5aXN5SzI2eEhIanpxTTgK",
+      "endpoints": [
         "https://kiwi.biexi.com/latest.json"
       ]
     }

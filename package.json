@@ -1,13 +1,14 @@
 {
   "name": "kiwi-app",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.2.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "npm run sync-version && vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "sync-version": "node sync-version.js"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
