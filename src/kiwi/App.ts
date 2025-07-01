@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { msgError } from "@utils/msg";
+import { getVersion, getName } from "@tauri-apps/api/app";
 
 interface ConfigApp {
   websocket_port: number;
@@ -58,8 +59,8 @@ class AppModel {
 
   static async getApp(): Promise<App> {
     try {
-      const name = (await invoke("get_app_name")) as string;
-      const version = (await invoke("get_app_version")) as string;
+      const name = await getName();
+      const version = await getVersion();
       const config = (await invoke("get_app_config")) as Config;
       const relativeImageDataPath = (await invoke(
         "get_relative_image_data_path"

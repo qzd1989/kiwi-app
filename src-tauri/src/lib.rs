@@ -13,22 +13,18 @@ pub mod types;
 pub mod utils;
 pub mod websocket;
 
-const APP_VERSION: &str = "1.0.0";
-const APP_NAME: &str = "Kiwi";
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut builder = tauri::Builder::default()
         .setup(|app| {
             let app_handle = Arc::new(app.app_handle().clone());
             let app_handle_event = app_handle.clone();
-            let app_handle_updater = app_handle.clone();
             let resource_dir = app.path().resource_dir().expect("Can't find resouce dir.");
             app::App::init_resource_dir(resource_dir)?;
             app::App::init_app_handle(app_handle.clone())?;
 
             //close monitor window when close main window
-            let main_window = app_handle
+            let main_window = app_handle_event
                 .get_webview_window("main")
                 .expect("Main window not found");
             main_window.on_window_event(move |event| {
@@ -46,7 +42,7 @@ pub fn run() {
 
             // check update
             tauri::async_runtime::spawn(async move {
-                app::App::update(app_handle_updater).await.unwrap();
+                app::App::update().await.unwrap();
             });
 
             Ok(())

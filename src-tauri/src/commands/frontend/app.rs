@@ -1,10 +1,9 @@
 use super::{CommandResult, utils::get_relative_image_data_path_buf};
-use crate::APP_NAME;
 use crate::app::{App, Config as AppConfig};
 
 #[tauri::command]
 pub fn get_app_name() -> CommandResult<String> {
-    Ok(APP_NAME.to_string())
+    Ok(App::get_name())
 }
 
 #[tauri::command]

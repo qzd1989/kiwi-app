@@ -63,7 +63,7 @@ onUnmounted(async () => {});
           <div class="logo">
             <el-icon :size="100" color="#1230BA"><Star /></el-icon>
           </div>
-          <div class="title">Kiwi</div>
+          <div class="title">{{ stateStore.app.name }}</div>
           <div class="sologan">Hands-free, everything on autopilot.</div>
         </el-col>
       </el-row>

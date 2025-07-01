@@ -1,14 +1,13 @@
 use super::Config;
 use crate::{
-    APP_VERSION,
     capture::{Engine as CaptureEngine, Frame},
     input::Engine as InputEngine,
     project::Project,
     record::Engine as RecordEngine,
 };
 use anyhow::{Result, anyhow};
+use std::path::PathBuf;
 use std::sync::{Arc, OnceLock, RwLock, RwLockReadGuard, RwLockWriteGuard};
-use std::{path::PathBuf, time::Duration};
 use tauri::AppHandle;
 
 pub struct App {
@@ -149,13 +148,20 @@ impl App {
         APP_HANDLE.get().unwrap().clone()
     }
 
-    pub fn get_version() -> &'static str {
-        APP_VERSION
+    pub fn get_version() -> String {
+        Self::get_app_handle().config().version.clone().unwrap()
+    }
+    pub fn get_name() -> String {
+        Self::get_app_handle()
+            .config()
+            .product_name
+            .clone()
+            .unwrap()
     }
 
-    pub async fn update(app: Arc<AppHandle>) -> tauri_plugin_updater::Result<()> {
+    pub async fn update() -> tauri_plugin_updater::Result<()> {
         use tauri_plugin_updater::UpdaterExt;
-        if let Some(update) = app.updater()?.check().await? {
+        if let Some(update) = Self::get_app_handle().updater()?.check().await? {
             let mut downloaded = 0;
 
             // alternatively we could also call update.download() and update.install() separately
@@ -172,7 +178,7 @@ impl App {
                 .await?;
 
             println!("update installed");
-            app.restart();
+            Self::get_app_handle().restart();
         } else {
             println!("no update required.");
         }
