@@ -1,30 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Base64Png, Language } from "@types";
+import { Base64Png, EmitProject } from "@types";
 import { msgError } from "@utils/msg";
 
 type VerifyStatus = "valid" | "invalid" | "moved";
 
-interface Project {
-  name: string | null;
-  language: Language;
-  mainFile: string | null;
-  path: string | null;
-  kiwiVersion: string | null;
-  mainFileFullPath?: string;
-}
-
-namespace Project {
-  export const empty = (): Project => ({
-    name: null,
-    language: "python",
-    mainFile: null,
-    path: null,
-    kiwiVersion: null,
-  });
-}
-
 class ProjectModel {
-  constructor(private project: Project) {}
+  constructor(private project: EmitProject) {}
 
   get name() {
     return this.project.name;
@@ -91,7 +72,7 @@ class ProjectModel {
     }
   }
 
-  static async open(path: string): Promise<Project> {
+  static async open(path: string): Promise<EmitProject> {
     try {
       return await invoke("open_project", { path });
     } catch (e: unknown) {
@@ -173,5 +154,5 @@ class ProjectModel {
   }
 }
 
-export { ProjectModel, Project };
+export { ProjectModel };
 export type { VerifyStatus };

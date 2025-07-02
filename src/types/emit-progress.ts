@@ -1,8 +1,8 @@
 import { u32 } from ".";
 
-interface Progress {
+interface EmitProgress {
   percentage: u32;
   message: string;
 }
 
-export type { Progress };
+export type { EmitProgress };

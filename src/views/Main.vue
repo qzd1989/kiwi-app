@@ -9,7 +9,7 @@ import { listen } from "@tauri-apps/api/event";
 import { onUnmounted } from "vue";
 import { AppModel, commonModel } from "@kiwi";
 import { useI18n } from "vue-i18n";
-import { EmitEvent, Locale } from "@types";
+import { EmitMsg, Locale } from "@types";
 
 const { locale } = useI18n();
 const stateStore = useStateStore();
@@ -96,11 +96,11 @@ watchEffect(async () => {
   await getCurrentWebview().setZoom(stateStore.zoom.factor);
 });
 
-listen("msg:error", (event: any) => {
+listen<EmitMsg>("msg:error", (event) => {
   msgError(event.payload.data);
 });
 
-listen("backend:update:locale", (event: EmitEvent) => {
+listen<string>("backend:update:locale", (event) => {
   setLocale(event.payload as Locale);
 });
 

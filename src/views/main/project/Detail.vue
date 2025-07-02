@@ -8,7 +8,7 @@ import { useRoute, useRouter } from "vue-router";
 import { msgError, msgSuccess } from "@utils/msg";
 import { platform } from "@tauri-apps/plugin-os";
 import { delay, minimizeAll, unminimizeAll } from "@utils/common";
-import { EmitData, Progress, Stack } from "@types";
+import { EmitLog, EmitProgress, EmitProject, Stack } from "@types";
 import {
   register,
   ShortcutHandler,
@@ -16,7 +16,7 @@ import {
 } from "@tauri-apps/plugin-global-shortcut";
 import { join } from "@tauri-apps/api/path";
 import { listen } from "@tauri-apps/api/event";
-import { Project, ProjectModel } from "@kiwi";
+import { ProjectModel } from "@kiwi";
 import { useI18n } from "vue-i18n";
 
 type LogType = "info" | "success" | "error";
@@ -330,51 +330,51 @@ listen("msg:error", () => {
   reinitProgressLoading.value?.close();
 });
 
-listen<Progress>("progress:reinit_project", async (event) => {
+listen<EmitProgress>("progress:reinit_project", async (event) => {
   if (event.payload.percentage == 100) {
     reinitProgressLoading.value?.close();
     msgSuccess(t("The project has been reinitialized successfully."));
   }
 });
 
-listen<EmitData>("update:record_file", async (event) => {
-  if (event.payload.data.length > 0) {
-    currentFile.value = event.payload.data;
+listen<string>("update:record_file", async (event) => {
+  if (event.payload.length > 0) {
+    currentFile.value = event.payload;
   }
 });
 
-listen<EmitData>("run:status", async (event) => {
-  if (event.payload.data == "running") {
+listen<string>("run:status", async (event) => {
+  if (event.payload == "running") {
     if (hiders.runProject || hiders.runScript) {
       await minimizeAll();
     }
   }
-  if (event.payload.data == "stopped") {
+  if (event.payload == "stopped") {
     if (hiders.recorder || hiders.runProject || hiders.runScript) {
       await unminimizeAll();
     }
   }
 });
 
-listen<EmitData>("log:info", (event) => {
+listen<EmitLog>("log:info", (event) => {
   const log = Log.info(event.payload.data, event.payload.time);
   logs.value.push(log);
   logScrollToBottom();
 });
 
-listen<EmitData>("log:success", (event) => {
+listen<EmitLog>("log:success", (event) => {
   const log = Log.success(event.payload.data, event.payload.time);
   logs.value.push(log);
   logScrollToBottom();
 });
 
-listen<EmitData>("log:error", (event) => {
+listen<EmitLog>("log:error", (event) => {
   const log = Log.error(event.payload.data, event.payload.time);
   logs.value.push(log);
   logScrollToBottom();
 });
 
-listen<Project>("backend:update:project", async (event) => {
+listen<EmitProject>("backend:update:project", async (event) => {
   stateStore.project = event.payload;
   stateStore.project.mainFileFullPath = await join(
     stateStore.project.path as string,

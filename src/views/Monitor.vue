@@ -5,18 +5,26 @@ import { msgError } from "@utils/msg";
 import { useStateStore } from "@utils/store";
 import { ref, onMounted, onUnmounted, reactive, watch } from "vue";
 import { ElLoading, ElContainer } from "element-plus";
-import { Base64Png, HexColor, Point, Size, Stack } from "@types";
+import {
+  Base64Png,
+  EmitMsg,
+  EmitProject,
+  HexColor,
+  Point,
+  Size,
+  Stack,
+} from "@types";
 import { cropBase64Png } from "@utils/common";
 import { useResizeObserver } from "@vueuse/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useI18n } from "vue-i18n";
-import { EmitEvent, Locale } from "@types";
+import { Locale } from "@types";
 
 import FindImage from "@views/monitor/components/Image.vue";
 import FindRelativeColor from "@views/monitor/components/RelativeColor.vue";
 import FindColor from "@views/monitor/components/Color.vue";
 import FindText from "@views/monitor/components/Text.vue";
-import { captureModel, commonModel, Project } from "@kiwi";
+import { captureModel, commonModel } from "@kiwi";
 
 interface Target {
   name: string;
@@ -441,7 +449,7 @@ useResizeObserver(containerRef, (entries) => {
   leftWidth.value = stateStore.monitorSize.width - rightRef.value.offsetWidth;
 });
 
-listen<Project>("backend:update:project", async (event) => {
+listen<EmitProject>("backend:update:project", async (event) => {
   stateStore.project = event.payload;
   if (!stateStore.project.path || !stateStore.project.mainFile) return;
   stateStore.project.mainFileFullPath = await join(
@@ -450,7 +458,7 @@ listen<Project>("backend:update:project", async (event) => {
   );
 });
 
-listen("msg:error", (event: any) => {
+listen<EmitMsg>("msg:error", (event) => {
   msgError(event.payload.data);
 });
 
@@ -463,7 +471,7 @@ listen<Base64Png>("backend:update:frame", async (event) => {
   commonModel.unprotectWindows(["main", "monitor"]);
 });
 
-listen("backend:update:locale", (event: EmitEvent) => {
+listen<Locale>("backend:update:locale", (event) => {
   setLocale(event.payload as Locale);
 });
 

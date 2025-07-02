@@ -3,7 +3,6 @@ use super::{
     utils::{emit, emit_progress, get_relative_image_data_path_buf},
 };
 use crate::app::{App, Log};
-use crate::extensions::AppHandleExt as _;
 use crate::{
     interpreter::Interpreter,
     project::{Config, Project, ProjectInfo, VerifyStatusString},
@@ -202,7 +201,7 @@ pub fn run_script(app_handle: AppHandle, path: String) {
     let app_handle_wait = Arc::clone(&app_handle);
     let on_spawned = move |pid| {
         Log::success(format!("The script is now running, pid: {}.", pid)).send_to_app_log();
-        app_handle_spawned.emit_with_timestamp("run:status", "running");
+        emit(&app_handle_spawned, "run:status", "running");
     };
     let on_stdout = move |stdout| {
         thread::spawn(move || {
@@ -230,7 +229,7 @@ pub fn run_script(app_handle: AppHandle, path: String) {
             pid, exit_status
         ))
         .send_to_app_log();
-        app_handle_wait.emit_with_timestamp("run:status", "stopped");
+        emit(&app_handle_wait, "run:status", "stopped");
     };
 
     if let Err(error) = App::with_capturer(|capturer| {
@@ -276,7 +275,7 @@ pub fn stop_all(app: AppHandle) {
         App::with_recorder(|recorder| {
             recorder.stop();
             Log::success("The recorder has stopped.").send_to_app_log();
-            app_handle.emit_with_timestamp("run:status", "stopped");
+            emit(&app_handle, "run:status", "stopped");
         });
         return;
     }
@@ -295,7 +294,7 @@ pub fn stop_all(app: AppHandle) {
         }
     });
 
-    app_handle.emit_with_timestamp("run:status", "stopped");
+    emit(&app_handle, "run:status", "stopped");
 }
 
 #[tauri::command]
@@ -335,7 +334,7 @@ pub fn run_recorder(app: AppHandle) {
         }
     };
 
-    app_handle.emit_with_timestamp("update:record_file", file_name);
+    emit(&app_handle, "update:record_file", file_name);
 
     let file = match File::create(&file) {
         Ok(f) => f,

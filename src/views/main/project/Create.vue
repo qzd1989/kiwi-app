@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Language, Progress } from "@types";
+import { EmitProgress, EmitProject, Language } from "@types";
 import { ref, onMounted, onUnmounted, reactive } from "vue";
 import { open } from "@tauri-apps/plugin-dialog";
 import { join, sep } from "@tauri-apps/api/path";
@@ -8,7 +8,7 @@ import { msgError, msgSuccess } from "@utils/msg";
 import { FormInstance, ElLoading, FormRules } from "element-plus";
 import { listen } from "@tauri-apps/api/event";
 import { useRouter } from "vue-router";
-import { Project, ProjectModel } from "@kiwi";
+import { ProjectModel } from "@kiwi";
 import { useI18n } from "vue-i18n";
 
 interface Form {
@@ -92,7 +92,7 @@ const save = async (formEl: FormInstance | undefined) => {
     const path = await join(form.rootDirectory, form.path);
     const name = form.name;
     const language = form.language;
-    const project = Project.empty();
+    const project = EmitProject.empty();
     project.name = name;
     project.language = language;
     project.path = path;
@@ -110,7 +110,7 @@ listen("msg:error", () => {
   loading.value?.close();
 });
 
-listen<Progress>("progress:init_project", async (event) => {
+listen<EmitProgress>("progress:init_project", async (event) => {
   if (event.payload.percentage == 100) {
     loading.value?.close();
     msgSuccess(t("Project created successfully."));
