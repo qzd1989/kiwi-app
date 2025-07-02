@@ -3,29 +3,23 @@ import { msgError } from "@utils/msg";
 import { getVersion, getName } from "@tauri-apps/api/app";
 import { apiFetch } from "@utils/api";
 import { type, arch } from "@tauri-apps/plugin-os";
-import { Locale } from "@types";
+import { Locale, u32 } from "@types";
 
-interface PlatformInfo {
-  signature: string;
-  force_update: boolean;
-  url: string;
-}
-
-interface ReleaseInfo {
-  version: string;
-  notes: string[];
-  pub_date: string; // RFC 3339 格式的字符串
-  platforms: {
-    [platform: string]: PlatformInfo;
-  };
-}
-
+// 定义 Release 接口
 interface Release {
+  signature: string;
   version: string;
-  notes: string[];
+  pub_date: string; // RFC 3339 格式的字符串 "2025-07-02T15:43:00+08:00"
   force_update: boolean;
-  pub_date: string;
+  notes: string[];
   url: string;
+  size: u32;
+}
+
+type Platforms = Record<string, Release>;
+
+interface PlatformData {
+  platforms: Platforms;
 }
 
 interface ConfigApp {
@@ -84,6 +78,7 @@ class AppModel {
     return this.app.relativeImageDataPath;
   }
 
+  // 静态方法获取应用信息
   static async getApp(): Promise<App> {
     try {
       const name = await getName();
@@ -99,6 +94,7 @@ class AppModel {
     }
   }
 
+  // 保存应用配置
   async save(): Promise<void> {
     try {
       await invoke("save_app_config", { config: this.config });
@@ -108,22 +104,25 @@ class AppModel {
     }
   }
 
+  // 检查平台的 Release 更新
   async checkRelease(): Promise<Release | null> {
-    const release = (await apiFetch("/version.json")) as ReleaseInfo;
-    const osName = await type();
-    const archName = await arch();
-    if (this.version == release.version) return null;
-    const platformKey = osName + "-" + archName;
-    if (!(platformKey in release.platforms)) return null;
-    const platformInfo = release.platforms[platformKey];
-    if (platformInfo.url == "") return null;
-    return {
-      version: release.version,
-      notes: release.notes,
-      force_update: platformInfo.force_update,
-      pub_date: release.pub_date,
-      url: platformInfo.url,
-    };
+    try {
+      // 获取平台数据
+      const platformData = (await apiFetch("/version.json")) as PlatformData;
+      const platforms = platformData.platforms;
+      // 获取当前操作系统和架构
+      const osName = await type();
+      const archName = await arch();
+      const platformKey = osName + "-" + archName;
+
+      // 检查平台是否存在对应的 Release 信息
+      if (!(platformKey in platforms)) return null;
+
+      return platforms[platformKey];
+    } catch (e: unknown) {
+      msgError(e);
+      return null;
+    }
   }
 }
 
