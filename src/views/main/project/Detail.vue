@@ -127,7 +127,7 @@ const openMonitor = async () => {
 const openProjectLoadingBegin = () => {
   openProjectProgressLoading.value = ElLoading.service({
     lock: true,
-    text: t("The project is opening, Please wait."),
+    text: t("The project is opening, please wait."),
     background: "rgba(0, 0, 0, 0.7)",
   });
 };
@@ -156,7 +156,7 @@ const openProject = async (path: string) => {
         await ProjectModel.reinit(path);
         break;
       default:
-        throw new Error(t("This is not a valild kiwi project."));
+        throw new Error(t("This is not a valid Kiwi project. "));
     }
     const project = await ProjectModel.open(path); //如果出错最晚在这一步,不会污染 stateStore.project
     stateStore.project = project;
@@ -421,7 +421,7 @@ onUnmounted(async () => {
               <el-tooltip
                 class="box-item"
                 effect="dark"
-                :content="t('Hide while running')"
+                :content="t('Hide While Running')"
                 placement="right-start"
               >
                 <el-checkbox v-model="hiders.runProject" size="large"
@@ -446,7 +446,7 @@ onUnmounted(async () => {
               <el-tooltip
                 class="box-item"
                 effect="dark"
-                :content="t('Hide while running')"
+                :content="t('Hide While Running')"
                 placement="right-start"
               >
                 <el-checkbox v-model="hiders.recorder" size="large" />
@@ -476,7 +476,7 @@ onUnmounted(async () => {
               effect="dark"
               :content="
                 t(
-                  'If “Edit” doesn’t work, install VS Code or set “edit_command“ manually in config.toml.'
+                  'If “Edit” doesn’t work, install VS Code or set “edit_command” manually in config.toml.'
                 )
               "
               placement="bottom"
@@ -498,7 +498,7 @@ onUnmounted(async () => {
           <div class="actions">
             <el-tooltip
               effect="dark"
-              :content="t('Relative Path Of Current File')"
+              :content="t('Relative Path of Current File')"
               placement="bottom"
             >
               <el-input
@@ -512,7 +512,7 @@ onUnmounted(async () => {
               <el-tooltip
                 class="box-item"
                 effect="dark"
-                :content="t('Hide while running')"
+                :content="t('Hide While Running')"
                 placement="right-start"
               >
                 <el-checkbox v-model="hiders.runScript" size="large"

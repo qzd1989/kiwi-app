@@ -123,7 +123,7 @@ const pushColor = async (relativeColorPoint: RelativeColorPoint) => {
       })
       .includes(relativeColorPoint.key)
   ) {
-    msgError(t("The point is already exist."));
+    msgError(t("The point already exists."));
     return;
   }
   result.value = code.value = null;
@@ -306,7 +306,7 @@ const findRelativeColors = async (formEl: FormInstance | undefined) => {
 const drawItems = (peak: ColoredPoint) => {
   emits("drawItems", {
     callback: (ctx: CanvasRenderingContext2D) => {
-      const title = t("Peak Point: (x,y)", {
+      const title = t("Peak Point: (x, y)", {
         x: peak.point.x,
         y: peak.point.y,
       });
@@ -321,7 +321,7 @@ const copy = async () => {
   if (!code.value) return;
   try {
     await writeText(code.value);
-    msgSuccess(t("Copy successed."));
+    msgSuccess(t("Copy succeeded."));
   } catch (e: any) {
     msgError(t("Copy Failed.", { error: e.message }));
   }
@@ -483,7 +483,7 @@ onMounted(async () => {
                 @click="findRelativeColors(formRef)"
                 :disabled="loading"
               >
-                {{ t("FindOne") }}
+                {{ t("Find") }}
               </el-button>
             </div>
             <div style="margin-bottom: -10px">
@@ -500,7 +500,7 @@ onMounted(async () => {
                       :min="findArea.start.x.min"
                       :max="findArea.start.x.max"
                       ><template #prefix>
-                        <span>{{ t("start x") }}</span>
+                        <span>{{ t("Start X") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -517,7 +517,7 @@ onMounted(async () => {
                       :min="findArea.start.y.min"
                       :max="findArea.start.y.max"
                       ><template #prefix>
-                        <span>{{ t("start y") }}</span>
+                        <span>{{ t("Start Y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -536,7 +536,7 @@ onMounted(async () => {
                       :min="findArea.end.x.min"
                       :max="findArea.end.x.max"
                       ><template #prefix>
-                        <span>{{ t("end x") }}</span>
+                        <span>{{ t("End X") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -553,7 +553,7 @@ onMounted(async () => {
                       :min="findArea.end.y.min"
                       :max="findArea.end.y.max"
                       ><template #prefix>
-                        <span>{{ t("end y") }}</span>
+                        <span>{{ t("End Y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -571,7 +571,7 @@ onMounted(async () => {
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>{{ t("offset r") }}</span>
+                        <span>{{ t("Offset R") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -585,7 +585,7 @@ onMounted(async () => {
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>{{ t("offset g") }}</span>
+                        <span>{{ t("Offset G") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -599,7 +599,7 @@ onMounted(async () => {
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>{{ t("offset b") }}</span>
+                        <span>{{ t("Offset B") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>

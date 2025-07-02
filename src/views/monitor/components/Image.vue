@@ -387,7 +387,7 @@ const saveAndCopy = async (formEl: FormInstance | undefined) => {
     const model = new ProjectModel(stateStore.project);
     await model.saveImage(form.name as string, data);
     await writeText(code.value);
-    msgSuccess(t("Copy successed."));
+    msgSuccess(t("Copy succeeded."));
   } catch (e: unknown) {
     msgError(e);
   }
@@ -396,7 +396,7 @@ const saveAndCopy = async (formEl: FormInstance | undefined) => {
 const copyFullFilePath = async () => {
   try {
     await writeText(fullFilePath.value);
-    msgSuccess(t("Copy successed."));
+    msgSuccess(t("Copy succeeded."));
   } catch (e: any) {
     msgError(t("Copy failed.", { error: e.message }));
   }
@@ -569,14 +569,14 @@ onUnmounted(async () => {});
                   @click="findImage"
                   :disabled="loading"
                 >
-                  {{ t("FindOne") }}
+                  {{ t("Find One") }}
                 </el-button>
                 <el-button
                   type="primary"
                   @click="findImages"
                   :disabled="loading"
                 >
-                  {{ t("FindMultiple") }}
+                  {{ t("Find Multiple") }}
                 </el-button>
               </div>
             </div>
@@ -594,7 +594,7 @@ onUnmounted(async () => {});
                       :min="findArea.start.x.min"
                       :max="findArea.start.x.max"
                       ><template #prefix>
-                        <span>{{ t("start x") }}</span>
+                        <span>{{ t("Start X") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -611,7 +611,7 @@ onUnmounted(async () => {});
                       :min="findArea.start.y.min"
                       :max="findArea.start.y.max"
                       ><template #prefix>
-                        <span>{{ t("start y") }}</span>
+                        <span>{{ t("Start Y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -630,7 +630,7 @@ onUnmounted(async () => {});
                       :min="findArea.end.x.min"
                       :max="findArea.end.x.max"
                       ><template #prefix>
-                        <span>{{ t("end x") }}</span>
+                        <span>{{ t("End X") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -647,7 +647,7 @@ onUnmounted(async () => {});
                       :min="findArea.end.y.min"
                       :max="findArea.end.y.max"
                       ><template #prefix>
-                        <span>{{ t("end y") }}</span>
+                        <span>{{ t("End Y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -692,7 +692,7 @@ onUnmounted(async () => {});
             <div class="title">
               <span>Code</span>
               <el-button type="primary" @click="saveAndCopy(formRef)">
-                {{ t("Save And Copy") }}
+                {{ t("Save and Copy") }}
               </el-button>
             </div>
             <div>
@@ -708,7 +708,7 @@ onUnmounted(async () => {});
           </div>
           <div class="item">
             <div class="title">
-              <span>{{ t("Full Path Of Image") }}</span>
+              <span>{{ t("Full Path of Image") }}</span>
             </div>
             <div>
               <el-form-item style="margin-bottom: 0px">

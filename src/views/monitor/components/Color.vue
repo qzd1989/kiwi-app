@@ -92,7 +92,7 @@ const pushColor = async (coloredPoint: ColoredPoint) => {
       })
       .includes(coloredPoint.hex)
   ) {
-    msgError(t("The color is already exist!"));
+    msgError(t("The color is already exists."));
     return;
   }
   result.value = code.value = null;
@@ -198,7 +198,7 @@ const copy = async () => {
   if (!code.value) return;
   try {
     await writeText(code.value);
-    msgSuccess(t("Copy successed"));
+    msgSuccess(t("Copy succeeded. "));
   } catch (e: any) {
     msgError(t("Copy failed.", { error: e.message }));
   }
@@ -359,7 +359,7 @@ onUnmounted(async () => {});
                       :min="findArea.start.x.min"
                       :max="findArea.start.x.max"
                       ><template #prefix>
-                        <span>{{ t("start x") }}</span>
+                        <span>{{ t("Start X") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -376,7 +376,7 @@ onUnmounted(async () => {});
                       :min="findArea.start.y.min"
                       :max="findArea.start.y.max"
                       ><template #prefix>
-                        <span>{{ t("start y") }}</span>
+                        <span>{{ t("Start Y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -395,7 +395,7 @@ onUnmounted(async () => {});
                       :min="findArea.end.x.min"
                       :max="findArea.end.x.max"
                       ><template #prefix>
-                        <span>{{ t("end x") }}</span>
+                        <span>{{ t("End X") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -412,7 +412,7 @@ onUnmounted(async () => {});
                       :min="findArea.end.y.min"
                       :max="findArea.end.y.max"
                       ><template #prefix>
-                        <span>{{ t("end y") }}</span>
+                        <span>{{ t("End Y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -430,7 +430,7 @@ onUnmounted(async () => {});
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>{{ t("offset r") }}</span>
+                        <span>{{ t("Offset R") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -444,7 +444,7 @@ onUnmounted(async () => {});
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>t("offset g")</span>
+                        <span>t("Offset G")</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -458,7 +458,7 @@ onUnmounted(async () => {});
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>{{ t("offset b") }}</span>
+                        <span>{{ t("Offset B") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>

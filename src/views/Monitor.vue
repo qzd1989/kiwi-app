@@ -518,7 +518,7 @@ onUnmounted(async () => {
             @click="capture"
             :disabled="form.target == null"
           >
-            <el-text>{{ t("capture") }}</el-text>
+            <el-text>{{ t("Capture") }}</el-text>
           </el-button>
         </div>
         <el-button
@@ -528,7 +528,7 @@ onUnmounted(async () => {
           :disabled="form.target == null"
           style="margin-right: 5px"
         >
-          <el-text>{{ t("reset") }}</el-text>
+          <el-text>{{ t("Reset") }}</el-text>
         </el-button>
       </el-header>
       <el-main
@@ -549,26 +549,26 @@ onUnmounted(async () => {
             }"
           >
             <!-- find image -->
-            <el-icon :title="t('find image')" @click="findImage()">
+            <el-icon :title="t('Find Image')" @click="findImage()">
               <Picture />
             </el-icon>
             <!-- find locating colors -->
             <el-icon
-              :title="t('find relative colors')"
+              :title="t('Find Relative Colors')"
               @click="findRelativeColor()"
             >
               <Orange />
             </el-icon>
             <!-- find colors-->
-            <el-icon :title="t('find colors')" @click="findColor()">
+            <el-icon :title="t('Find Colors')" @click="findColor()">
               <Pointer />
             </el-icon>
             <!-- recognize text -->
-            <el-icon :title="t('recognize text')" @click="findText()">
+            <el-icon :title="t('Recognize Text')" @click="findText()">
               <View />
             </el-icon>
             <!-- close -->
-            <el-icon :title="t('close')" @click="cancelCapture">
+            <el-icon :title="t('Close')" @click="cancelCapture">
               <CircleClose />
             </el-icon>
           </div>
@@ -589,24 +589,24 @@ onUnmounted(async () => {
       </el-main>
       <el-footer>
         <span v-if="form.target?.base64Png">
-          {{ t("monitor size") }}: ({{ form.target?.size.width }},
+          {{ t("Monitor Size") }}: ({{ form.target?.size.width }},
           {{ form.target?.size.height }})
         </span>
         <span>
-          {{ t("position") }}: ({{ hoveredPixelPoint.x }},
+          {{ t("Position") }}: ({{ hoveredPixelPoint.x }},
           {{ hoveredPixelPoint.y }})
         </span>
         <span>hex: {{ hoveredPixelHexColor }}</span>
         <span>
-          {{ t("begin point") }}: ({{ form.findArea.start.x }},
+          {{ t("Begin Point") }}: ({{ form.findArea.start.x }},
           {{ form.findArea.start.y }})
         </span>
         <span>
-          {{ t("end point") }}: ({{ form.findArea.end.x }},
+          {{ t("End Point") }}: ({{ form.findArea.end.x }},
           {{ form.findArea.end.y }})
         </span>
         <span>
-          {{ t("captured Rect Size") }}: ({{ capturedSize.width }},
+          {{ t("Captured Rect Size") }}: ({{ capturedSize.width }},
           {{ capturedSize.height }})
         </span>
       </el-footer>

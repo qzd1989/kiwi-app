@@ -66,7 +66,7 @@ class LocalStore {
 
   async set<T = unknown>(key: LocalStoreKey, value: T) {
     if (!this.keys.includes(key)) {
-      throw new Error(t("LocalStore Key is not registered.", { key }));
+      throw new Error(t("LocalStore key is not registered.", { key }));
     }
     if (!this.instance) await this.init();
     await this.instance?.set(key, value);

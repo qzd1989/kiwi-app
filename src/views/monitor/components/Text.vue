@@ -111,7 +111,7 @@ const copy = async () => {
   if (!code.value) return;
   try {
     await writeText(code.value);
-    msgSuccess(t("Copy successed."));
+    msgSuccess(t("Copy succeeded."));
   } catch (e: any) {
     msgError(t("Copy failed.", { error: e.message }));
   }
@@ -176,7 +176,7 @@ onUnmounted(async () => {});
                       :style="{ width: '100%' }"
                       disabled
                       ><template #prefix>
-                        <span>{{ t("start x") }}</span>
+                        <span>{{ t("Start X") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -192,7 +192,7 @@ onUnmounted(async () => {});
                       :style="{ width: '100%' }"
                       disabled
                       ><template #prefix>
-                        <span>{{ t("start y") }}</span>
+                        <span>{{ t("Start Y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -210,7 +210,7 @@ onUnmounted(async () => {});
                       :style="{ width: '100%' }"
                       disabled
                       ><template #prefix>
-                        <span>{{ t("end x") }}</span>
+                        <span>{{ t("End X") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -226,7 +226,7 @@ onUnmounted(async () => {});
                       :style="{ width: '100%' }"
                       disabled
                       ><template #prefix>
-                        <span>{{ t("end y") }}</span>
+                        <span>{{ t("End Y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>

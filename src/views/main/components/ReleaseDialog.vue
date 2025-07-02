@@ -7,7 +7,7 @@ const { t } = useI18n();
 const props = defineProps(["release"]);
 const visible = ref(true);
 const title = computed(() => {
-  return t("Discovered new version", { version: props.release.version });
+  return t("Discovered new version.", { version: props.release.version });
 });
 
 const close = () => {

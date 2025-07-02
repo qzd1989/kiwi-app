@@ -26,7 +26,7 @@ const rules = reactive<FormRules<Form>>({
   websocketPort: [
     {
       required: true,
-      message: t("Websocket port is required."),
+      message: t("WebSocket port is required."),
       trigger: "blur",
     },
   ],
@@ -152,7 +152,7 @@ onUnmounted(async () => {});
     </el-header>
     <el-main>
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
-        <el-form-item :label="t('Websocket Port')" prop="websocketPort">
+        <el-form-item :label="t('WebSocket Port')" prop="websocketPort">
           <el-input-number
             :min="2"
             :max="65534"
@@ -163,7 +163,7 @@ onUnmounted(async () => {});
           ></el-input-number>
         </el-form-item>
         <el-form-item :label="t('Language')" prop="locale">
-          <el-select v-model="form.locale" :placeholder="t('Select Language')">
+          <el-select v-model="form.locale">
             <el-option
               v-for="appLocale in locales"
               :key="appLocale.key"
