@@ -156,7 +156,7 @@ const openProject = async (path: string) => {
         await ProjectModel.reinit(path);
         break;
       default:
-        throw new Error(t("This is not a valid Kiwi project. "));
+        throw new Error(t("This is not a valid Kiwi project."));
     }
     const project = await ProjectModel.open(path); //如果出错最晚在这一步,不会污染 stateStore.project
     stateStore.project = project;

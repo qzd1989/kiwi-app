@@ -14,7 +14,7 @@ interface Form {
   locale: Locale;
 }
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const stateStore = useStateStore();
 const shouldShowSaveSuccess = ref<boolean>(true);
 const form = reactive<Form>({
@@ -26,7 +26,7 @@ const rules = reactive<FormRules<Form>>({
   websocketPort: [
     {
       required: true,
-      message: t("WebSocket port is required.", {}, locale.value),
+      message: t("WebSocket port is required."),
       trigger: "blur",
     },
   ],

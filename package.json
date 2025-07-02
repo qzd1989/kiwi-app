@@ -8,7 +8,8 @@
     "build": "npm run sync-version && vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "sync-version": "node sync-version.js"
+    "sync-version": "node sync-version.js",
+    "i18n-extract": "vue-i18n-extract --add --vueFiles './src/views/**/*.?(vue)' --languageFiles './src/locales/*.?(json)'"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

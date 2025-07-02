@@ -323,7 +323,7 @@ const copy = async () => {
     await writeText(code.value);
     msgSuccess(t("Copy succeeded."));
   } catch (e: any) {
-    msgError(t("Copy Failed.", { error: e.message }));
+    msgError(t("Copy failed.", { error: e.message }));
   }
 };
 
