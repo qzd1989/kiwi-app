@@ -132,7 +132,6 @@ onMounted(async () => {
   form.websocketPort = form.originalWebsocketPort =
     stateStore.app.config!.app.websocket_port;
   form.locale = stateStore.app.config!.app.locale;
-  console.log(form);
 });
 
 onUnmounted(async () => {});
