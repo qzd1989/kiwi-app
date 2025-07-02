@@ -2,9 +2,6 @@ import { defineStore } from "pinia";
 import { load, Store } from "@tauri-apps/plugin-store";
 import { Size } from "@types";
 import { App, Project } from "@kiwi";
-import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
 
 type LocalStoreKey = "projectRootDirectory" | "isPythonAttributed";
 interface Enable {
@@ -66,7 +63,7 @@ class LocalStore {
 
   async set<T = unknown>(key: LocalStoreKey, value: T) {
     if (!this.keys.includes(key)) {
-      throw new Error(t("LocalStore key is not registered.", { key }));
+      throw new Error(`LocalStore key "${key}" is not registered.`);
     }
     if (!this.instance) await this.init();
     await this.instance?.set(key, value);

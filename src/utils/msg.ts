@@ -1,7 +1,4 @@
 import { ElMessage } from "element-plus";
-import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
 
 const msgInfo = (msg: string) => {
   ElMessage({
@@ -42,7 +39,7 @@ const msgError = (e: unknown, duration?: number) => {
       try {
         message = JSON.stringify(e, null, 2);
       } catch {
-        message = t("Can't parse error object.");
+        message = "Can't parse error object.";
       }
     }
   } else {

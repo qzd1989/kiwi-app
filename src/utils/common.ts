@@ -1,9 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { getAllWindows } from "@tauri-apps/api/window";
 import { Base64Png, Point, RgbColor, Size } from "@types";
-import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
 
 const delay = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -65,7 +62,7 @@ const cropBase64Png = (
       resolve(croppedBase64);
     };
     img.onerror = function () {
-      reject(new Error(t("Could not load image.")));
+      reject(new Error("Could not load image."));
     };
     img.src = data;
   });
