@@ -9,6 +9,9 @@
     "Settings saved successfully.":"Settings saved successfully.",
     "WebSocket port is required.":"WebSocket port is required.",
     "WebSocket failed to start, revert to original port.":"WebSocket failed to start on port: {port}, revert to original port {originalPort}.",
-    "WebSocket failed to start on both port and original port.":"WebSocket failed to start on both port: {port} and original port: {originalPort}."
+    "WebSocket failed to start on both port and original port.":"WebSocket failed to start on both port: {port} and original port: {originalPort}.",
+    "Create Project": "Create Project",
+    "Open Project": "Open Project",
+    "Version": "Version"
 
 }

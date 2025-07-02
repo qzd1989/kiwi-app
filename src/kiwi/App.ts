@@ -106,23 +106,13 @@ class AppModel {
 
   // 检查平台的 Release 更新
   async checkRelease(): Promise<Release | null> {
-    try {
-      // 获取平台数据
-      const platformData = (await apiFetch("/version.json")) as PlatformData;
-      const platforms = platformData.platforms;
-      // 获取当前操作系统和架构
-      const osName = await type();
-      const archName = await arch();
-      const platformKey = osName + "-" + archName;
-
-      // 检查平台是否存在对应的 Release 信息
-      if (!(platformKey in platforms)) return null;
-
-      return platforms[platformKey];
-    } catch (e: unknown) {
-      msgError(e);
-      return null;
-    }
+    const platformData = (await apiFetch("/version.json")) as PlatformData;
+    const platforms = platformData.platforms;
+    const osName = await type();
+    const archName = await arch();
+    const platformKey = osName + "-" + archName;
+    if (!(platformKey in platforms)) return null;
+    return platforms[platformKey];
   }
 }
 
