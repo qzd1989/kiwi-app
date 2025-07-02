@@ -9,6 +9,7 @@ import { FormInstance, ElLoading, FormRules } from "element-plus";
 import { listen } from "@tauri-apps/api/event";
 import { useRouter } from "vue-router";
 import { Project, ProjectModel } from "@kiwi";
+import { useI18n } from "vue-i18n";
 
 interface Form {
   name: string;
@@ -18,6 +19,7 @@ interface Form {
   rootDirectory: string;
 }
 
+const { t } = useI18n();
 const stateStore = useStateStore();
 const router = useRouter();
 const formRef = ref<FormInstance>();
@@ -32,20 +34,21 @@ const rules = reactive<FormRules<Form>>({
   name: [
     {
       required: true,
-      message: "Project name is required.",
+      message: t("Project name is required."),
       trigger: "blur",
     },
     {
       pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9]+$/,
-      message:
-        "Can only contain Chinese characters, English letters, digits, and underscores.",
+      message: t(
+        "Can only contain Chinese characters, English letters, digits, and underscores."
+      ),
       trigger: "blur",
     },
   ],
   path: [
     {
       required: true,
-      message: "Project path is required.",
+      message: t("Project path is required."),
       trigger: "blur",
     },
   ],
@@ -83,7 +86,7 @@ const save = async (formEl: FormInstance | undefined) => {
   try {
     loading.value = ElLoading.service({
       lock: true,
-      text: "Project is initializing, please wait.",
+      text: t("Project is initializing, please wait."),
       background: "rgba(0, 0, 0, 0.7)",
     });
     const path = await join(form.rootDirectory, form.path);
@@ -110,7 +113,7 @@ listen("msg:error", () => {
 listen<Progress>("progress:init_project", async (event) => {
   if (event.payload.percentage == 100) {
     loading.value?.close();
-    msgSuccess("Project created successfully.");
+    msgSuccess(t("Project created successfully."));
     router.push({
       path: "/main/project/detail",
       query: { path: form.fullPath },
@@ -133,13 +136,13 @@ onUnmounted(async () => {});
             <el-icon :size="20" color="#fff"><ArrowLeft /></el-icon>
           </router-link>
         </el-col>
-        <el-col :span="8" class="title">Create Project</el-col>
+        <el-col :span="8" class="title">{{ t("Create Project") }}</el-col>
         <el-col :span="8" class="right"></el-col>
       </el-row>
     </el-header>
     <el-main
       ><el-form ref="formRef" :model="form" :rules="rules" label-position="top">
-        <el-form-item label="Project Name" prop="name">
+        <el-form-item :label="t('Project Name')" prop="name">
           <el-input
             placeholder=""
             v-model="form.name"
@@ -148,7 +151,7 @@ onUnmounted(async () => {});
             spellcheck="false"
           ></el-input>
         </el-form-item>
-        <el-form-item label="Programming Language" prop="description">
+        <el-form-item :label="t('Programming Language')" prop="description">
           <el-select v-model="form.language">
             <el-option
               v-for="item in languages"
@@ -158,10 +161,10 @@ onUnmounted(async () => {});
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="Project Path" prop="path" :required="true">
+        <el-form-item :label="t('Project Path')" prop="path" :required="true">
           <el-input
             v-model="form.path"
-            placeholder="Project Folder Name"
+            :placeholder="t('Project Folder Name')"
             autocapitalize="off"
             autocorrect="off"
             spellcheck="false"
@@ -176,7 +179,7 @@ onUnmounted(async () => {});
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="save" @click="save(formRef)">
-            Create
+            {{ t("Create") }}
           </el-button>
         </el-form-item>
       </el-form>

@@ -9,6 +9,7 @@ import { Base64Png, HexColor, Point, Size, Stack } from "@types";
 import { cropBase64Png } from "@utils/common";
 import { useResizeObserver } from "@vueuse/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useI18n } from "vue-i18n";
 
 import FindImage from "@views/monitor/components/Image.vue";
 import FindRelativeColor from "@views/monitor/components/RelativeColor.vue";
@@ -45,11 +46,12 @@ interface Form {
   };
 }
 
+const { t } = useI18n();
 const stateStore = useStateStore();
 const loading = ref<ReturnType<typeof ElLoading.service> | null>(null);
 const targets = ref<Target[]>([
   {
-    name: "Primary Monitor",
+    name: t("Primary Monitor"),
     key: "primary_monitor",
     size: Size.from(0, 0),
     base64Png: null,
@@ -97,7 +99,7 @@ const capture = async () => {
       form.target.size = await captureModel.getMonitorSize();
       loading.value = ElLoading.service({
         lock: true,
-        text: "Capturing, please wait.",
+        text: t("Capturing, please wait."),
         background: "rgba(0, 0, 0, 0.7)",
       });
       await commonModel.protectWindows(["main", "monitor"]);
@@ -501,12 +503,7 @@ onUnmounted(async () => {
       }"
     >
       <el-header ref="headerRef">
-        <el-select
-          v-model="form.target"
-          placeholder="Select"
-          class="monitors"
-          disabled
-        >
+        <el-select v-model="form.target" class="monitors" disabled>
           <el-option
             v-for="target in targets"
             :key="target.key"
@@ -521,7 +518,7 @@ onUnmounted(async () => {
             @click="capture"
             :disabled="form.target == null"
           >
-            <el-text>capture</el-text>
+            <el-text>{{ t("capture") }}</el-text>
           </el-button>
         </div>
         <el-button
@@ -531,7 +528,7 @@ onUnmounted(async () => {
           :disabled="form.target == null"
           style="margin-right: 5px"
         >
-          <el-text>reset</el-text>
+          <el-text>{{ t("reset") }}</el-text>
         </el-button>
       </el-header>
       <el-main
@@ -552,23 +549,26 @@ onUnmounted(async () => {
             }"
           >
             <!-- find image -->
-            <el-icon title="find image" @click="findImage()">
+            <el-icon :title="t('find image')" @click="findImage()">
               <Picture />
             </el-icon>
             <!-- find locating colors -->
-            <el-icon title="find relative colors" @click="findRelativeColor()">
+            <el-icon
+              :title="t('find relative colors')"
+              @click="findRelativeColor()"
+            >
               <Orange />
             </el-icon>
             <!-- find colors-->
-            <el-icon title="find colors" @click="findColor()">
+            <el-icon :title="t('find colors')" @click="findColor()">
               <Pointer />
             </el-icon>
             <!-- recognize text -->
-            <el-icon title="recognize text" @click="findText()">
+            <el-icon :title="t('recognize text')" @click="findText()">
               <View />
             </el-icon>
             <!-- close -->
-            <el-icon title="close" @click="cancelCapture">
+            <el-icon :title="t('close')" @click="cancelCapture">
               <CircleClose />
             </el-icon>
           </div>
@@ -589,21 +589,24 @@ onUnmounted(async () => {
       </el-main>
       <el-footer>
         <span v-if="form.target?.base64Png">
-          monitor size: ({{ form.target?.size.width }},
+          {{ t("monitor size") }}: ({{ form.target?.size.width }},
           {{ form.target?.size.height }})
         </span>
         <span>
-          position: ({{ hoveredPixelPoint.x }}, {{ hoveredPixelPoint.y }})
+          {{ t("position") }}: ({{ hoveredPixelPoint.x }},
+          {{ hoveredPixelPoint.y }})
         </span>
         <span>hex: {{ hoveredPixelHexColor }}</span>
         <span>
-          beginAt: ({{ form.findArea.start.x }}, {{ form.findArea.start.y }})
+          {{ t("begin point") }}: ({{ form.findArea.start.x }},
+          {{ form.findArea.start.y }})
         </span>
         <span>
-          endAt: ({{ form.findArea.end.x }}, {{ form.findArea.end.y }})
+          {{ t("end point") }}: ({{ form.findArea.end.x }},
+          {{ form.findArea.end.y }})
         </span>
         <span>
-          captured Rect Size: ({{ capturedSize.width }},
+          {{ t("captured Rect Size") }}: ({{ capturedSize.width }},
           {{ capturedSize.height }})
         </span>
       </el-footer>

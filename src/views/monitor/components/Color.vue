@@ -7,6 +7,7 @@ import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useStateStore } from "@utils/store";
 import { FormInstance, FormRules } from "element-plus";
 import { codeModel, frameModel } from "@kiwi";
+import { useI18n } from "vue-i18n";
 
 interface Form {
   coloredPoints: ColoredPoint[];
@@ -18,6 +19,7 @@ interface Form {
   };
 }
 
+const { t } = useI18n();
 const props = defineProps(["params", "target"]);
 const emits = defineEmits(["close", "drawItems", "clearAllItems"]);
 const stateStore = useStateStore();
@@ -90,7 +92,7 @@ const pushColor = async (coloredPoint: ColoredPoint) => {
       })
       .includes(coloredPoint.hex)
   ) {
-    msgError("The color is already exist!");
+    msgError(t("The color is already exist!"));
     return;
   }
   result.value = code.value = null;
@@ -139,7 +141,7 @@ const findColor = async (formEl: FormInstance | undefined) => {
   result.value = code.value = null;
   if (form.coloredPoints.length == 0) {
     clearAllItems();
-    msgError("The colors must not be empty.");
+    msgError(t("The colors must not be empty."));
     return;
   }
   const origin = props.target.originalBase64Png;
@@ -196,9 +198,9 @@ const copy = async () => {
   if (!code.value) return;
   try {
     await writeText(code.value);
-    msgSuccess("copy successed");
+    msgSuccess(t("Copy successed"));
   } catch (e: any) {
-    msgError(`copy failed: ${e.message}`);
+    msgError(t("Copy failed.", { error: e.message }));
   }
 };
 
@@ -260,7 +262,7 @@ onUnmounted(async () => {});
 </script>
 <template>
   <el-container>
-    <el-header>Find Colors</el-header>
+    <el-header>{{ t("Find Colors") }}</el-header>
     <el-main>
       <el-form ref="formRef" :model="form" :rules="rules" status-icon>
         <div class="work-area">
@@ -308,7 +310,7 @@ onUnmounted(async () => {});
             </el-button>
           </div>
           <div class="item">
-            <div class="title">Colors</div>
+            <div class="title">{{ t("Colors") }}</div>
             <el-form-item
               prop="points"
               style="margin-bottom: 0px"
@@ -334,13 +336,13 @@ onUnmounted(async () => {});
           </div>
           <div class="item">
             <div class="title">
-              <span>Find Area</span>
+              <span>{{ t("Find Area") }}</span>
               <el-button
                 type="primary"
                 @click="findColor(formRef)"
                 :disabled="loading"
               >
-                find
+                {{ t("Find") }}
               </el-button>
             </div>
             <div style="margin-bottom: -10px">
@@ -357,7 +359,7 @@ onUnmounted(async () => {});
                       :min="findArea.start.x.min"
                       :max="findArea.start.x.max"
                       ><template #prefix>
-                        <span>start x</span>
+                        <span>{{ t("start x") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -374,7 +376,7 @@ onUnmounted(async () => {});
                       :min="findArea.start.y.min"
                       :max="findArea.start.y.max"
                       ><template #prefix>
-                        <span>start y</span>
+                        <span>{{ t("start y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -393,7 +395,7 @@ onUnmounted(async () => {});
                       :min="findArea.end.x.min"
                       :max="findArea.end.x.max"
                       ><template #prefix>
-                        <span>end x</span>
+                        <span>{{ t("end x") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -410,7 +412,7 @@ onUnmounted(async () => {});
                       :min="findArea.end.y.min"
                       :max="findArea.end.y.max"
                       ><template #prefix>
-                        <span>end y</span>
+                        <span>{{ t("end y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -428,7 +430,7 @@ onUnmounted(async () => {});
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>offset r</span>
+                        <span>{{ t("offset r") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -442,7 +444,7 @@ onUnmounted(async () => {});
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>offset g</span>
+                        <span>t("offset g")</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -456,7 +458,7 @@ onUnmounted(async () => {});
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>offset b</span>
+                        <span>{{ t("offset b") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -477,8 +479,10 @@ onUnmounted(async () => {});
           </div>
           <div class="item">
             <div class="title">
-              <span>Code</span>
-              <el-button type="primary" @click="copy"> copy </el-button>
+              <span>{{ t("Code") }}</span>
+              <el-button type="primary" @click="copy">
+                {{ t("Copy") }}
+              </el-button>
             </div>
             <div>
               <el-input
@@ -495,7 +499,7 @@ onUnmounted(async () => {});
       </el-form>
     </el-main>
     <el-footer>
-      <el-button @click="close">Close</el-button>
+      <el-button @click="close">{{ t("Close") }}</el-button>
     </el-footer>
   </el-container>
 </template>

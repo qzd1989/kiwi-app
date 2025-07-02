@@ -9,7 +9,7 @@ import Monitor from "@views/Monitor.vue";
 import "./css/default.css";
 const app = createApp(Main);
 
-// element plust
+// element plus
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
@@ -17,6 +17,22 @@ app.use(ElementPlus);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component);
 }
+
+// i18n
+import { createI18n } from "vue-i18n";
+import zhCN from "./locales/zh-CN.json";
+import enUS from "./locales/en-US.json";
+const messages = {
+  "zh-CN": zhCN,
+  "en-US": enUS,
+};
+const i18n = createI18n({
+  legacy: false,
+  locale: "zh-CN", // set locale
+  fallbackLocale: "en-US", // set fallback locale
+  messages,
+});
+app.use(i18n);
 
 // router
 import { createRouter, createWebHistory } from "vue-router";

@@ -13,6 +13,7 @@ import { Base64Png, f64, Point, WeightPoint, Size } from "@types";
 import { sep } from "@tauri-apps/api/path";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { codeModel, frameModel, ProjectModel } from "@kiwi";
+import { useI18n } from "vue-i18n";
 
 interface Form {
   name: string | null;
@@ -42,6 +43,7 @@ namespace Item {
   };
 }
 
+const { t } = useI18n();
 const props = defineProps(["params", "target", "imageDataPath"]);
 const emits = defineEmits(["close", "drawItems", "clearAllItems"]);
 const stateStore = useStateStore();
@@ -74,7 +76,7 @@ const rules = reactive<FormRules<Form>>({
     },
     {
       pattern: /^[^\u3000\s\\]+$/,
-      message: "Spaces and backslashes are not allowed.",
+      message: t("Spaces and backslashes are not allowed."),
       trigger: "blur",
     },
   ],
@@ -373,7 +375,7 @@ const saveAndCopy = async (formEl: FormInstance | undefined) => {
     return;
   }
   if (!code.value?.trim()) {
-    msgWarn("Result is null.");
+    msgWarn(t("Result is null."));
     return;
   }
   const data = await cropBase64Png(
@@ -385,7 +387,7 @@ const saveAndCopy = async (formEl: FormInstance | undefined) => {
     const model = new ProjectModel(stateStore.project);
     await model.saveImage(form.name as string, data);
     await writeText(code.value);
-    msgSuccess("Copy successed.");
+    msgSuccess(t("Copy successed."));
   } catch (e: unknown) {
     msgError(e);
   }
@@ -394,9 +396,9 @@ const saveAndCopy = async (formEl: FormInstance | undefined) => {
 const copyFullFilePath = async () => {
   try {
     await writeText(fullFilePath.value);
-    msgSuccess("Copy successed.");
+    msgSuccess(t("Copy successed."));
   } catch (e: any) {
-    msgError(`Copy failed: ${e.message}`);
+    msgError(t("Copy failed.", { error: e.message }));
   }
 };
 
@@ -457,7 +459,7 @@ onUnmounted(async () => {});
 </script>
 <template>
   <el-container>
-    <el-header>Find Image</el-header>
+    <el-header>{{ t("Find Image") }}</el-header>
     <el-main>
       <el-form ref="formRef" :model="form" :rules="rules" status-icon>
         <div class="work-area">
@@ -553,28 +555,28 @@ onUnmounted(async () => {});
                 autocorrect="off"
                 spellcheck="false"
               >
-                <template #prepend>image name</template>
+                <template #prepend>{{ t("Image Name") }}</template>
                 <template #append>.png</template>
               </el-input>
             </el-form-item>
           </div>
           <div class="item">
             <div class="title">
-              <span>Find Area</span>
+              <span>{{ t("Find Area") }}</span>
               <div>
                 <el-button
                   type="primary"
                   @click="findImage"
                   :disabled="loading"
                 >
-                  findOne
+                  {{ t("FindOne") }}
                 </el-button>
                 <el-button
                   type="primary"
                   @click="findImages"
                   :disabled="loading"
                 >
-                  findMultiple
+                  {{ t("FindMultiple") }}
                 </el-button>
               </div>
             </div>
@@ -592,7 +594,7 @@ onUnmounted(async () => {});
                       :min="findArea.start.x.min"
                       :max="findArea.start.x.max"
                       ><template #prefix>
-                        <span>start x</span>
+                        <span>{{ t("start x") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -609,7 +611,7 @@ onUnmounted(async () => {});
                       :min="findArea.start.y.min"
                       :max="findArea.start.y.max"
                       ><template #prefix>
-                        <span>start y</span>
+                        <span>{{ t("start y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -628,7 +630,7 @@ onUnmounted(async () => {});
                       :min="findArea.end.x.min"
                       :max="findArea.end.x.max"
                       ><template #prefix>
-                        <span>end x</span>
+                        <span>{{ t("end x") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -645,7 +647,7 @@ onUnmounted(async () => {});
                       :min="findArea.end.y.min"
                       :max="findArea.end.y.max"
                       ><template #prefix>
-                        <span>end y</span>
+                        <span>{{ t("end y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -668,7 +670,7 @@ onUnmounted(async () => {});
                     :style="{ width: '100%' }"
                   >
                     <template #prefix>
-                      <span>threshold</span>
+                      <span>{{ t("Threshold") }}</span>
                     </template>
                   </el-input-number>
                 </el-tooltip>
@@ -690,7 +692,7 @@ onUnmounted(async () => {});
             <div class="title">
               <span>Code</span>
               <el-button type="primary" @click="saveAndCopy(formRef)">
-                save and copy
+                {{ t("Save And Copy") }}
               </el-button>
             </div>
             <div>
@@ -706,7 +708,7 @@ onUnmounted(async () => {});
           </div>
           <div class="item">
             <div class="title">
-              <span>Full path of Image</span>
+              <span>{{ t("Full Path Of Image") }}</span>
             </div>
             <div>
               <el-form-item style="margin-bottom: 0px">
@@ -724,7 +726,7 @@ onUnmounted(async () => {});
                       @click="copyFullFilePath"
                       :disabled="!form.name?.trim()"
                     >
-                      copy
+                      {{ t("Copy") }}
                     </el-button>
                   </template>
                 </el-input>
@@ -735,7 +737,7 @@ onUnmounted(async () => {});
       </el-form>
     </el-main>
     <el-footer>
-      <el-button @click="close">Close</el-button>
+      <el-button @click="close">{{ t("Close") }}</el-button>
     </el-footer>
   </el-container>
 </template>

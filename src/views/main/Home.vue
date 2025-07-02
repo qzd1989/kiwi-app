@@ -6,7 +6,9 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { msgError } from "@utils/msg";
 import { AppModel, Release } from "@kiwi/App";
 import ReleaseDialog from "@views/main/components/ReleaseDialog.vue";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const stateStore = useStateStore();
 const release = ref<Release | null>(null);
 const isDev = import.meta.env.DEV;
@@ -73,7 +75,9 @@ onUnmounted(async () => {});
             <el-icon :size="100" color="#1230BA"><Star /></el-icon>
           </div>
           <div class="title">{{ stateStore.app.name }}</div>
-          <div class="sologan">Hands-free, everything on autopilot.</div>
+          <div class="sologan">
+            {{ t("Hands-free, everything on autopilot.") }}
+          </div>
         </el-col>
       </el-row>
       <el-row :gutter="0">
@@ -82,7 +86,7 @@ onUnmounted(async () => {});
             type="primary"
             @click="goToCreateProject"
             :disabled="!isEnabled"
-            >Create Project</el-button
+            >{{ t("Create Project") }}</el-button
           >
         </el-col>
       </el-row>
@@ -92,20 +96,22 @@ onUnmounted(async () => {});
             type="primary"
             @click="selectProject"
             :disabled="!isEnabled"
-            >Open Project</el-button
+            >{{ t("Open Project") }}</el-button
           >
         </el-col>
       </el-row>
       <el-row :gutter="0">
         <el-col :span="24">
-          <el-button type="primary" @click="goToSetting">Setting</el-button>
+          <el-button type="primary" @click="goToSetting">{{
+            t("Setting")
+          }}</el-button>
         </el-col>
       </el-row>
       <el-row :gutter="0">
         <el-col :span="24">
-          <el-button type="primary" @click="clearLocalStore" v-if="isDev"
-            >ClearLocalStore</el-button
-          >
+          <el-button type="primary" @click="clearLocalStore" v-if="isDev">
+            ClearLocalStore
+          </el-button>
         </el-col>
       </el-row>
       <el-row :gutter="0" style="display: none">
@@ -115,7 +121,7 @@ onUnmounted(async () => {});
       </el-row>
       <el-row :gutter="0">
         <el-col :span="24" class="version">
-          version: {{ stateStore.app.version }}</el-col
+          {{ t("Version") }}: {{ stateStore.app.version }}</el-col
         >
       </el-row>
     </el-main>

@@ -17,6 +17,7 @@ import {
 import { join } from "@tauri-apps/api/path";
 import { listen } from "@tauri-apps/api/event";
 import { Project, ProjectModel } from "@kiwi";
+import { useI18n } from "vue-i18n";
 
 type LogType = "info" | "success" | "error";
 interface HotKeys {
@@ -70,6 +71,7 @@ namespace Log {
   });
 }
 
+const { t } = useI18n();
 const model = ref<ProjectModel | null>(null);
 const stateStore = useStateStore();
 const route = useRoute();
@@ -98,7 +100,7 @@ const logs = ref<Stack<Log>>(new Stack(100));
 const openMonitor = async () => {
   const monitor = new WebviewWindow("monitor", {
     url: "/monitor",
-    title: "Monitor",
+    title: t("Monitor"),
     width: 800,
     height: 600,
     minWidth: 800,
@@ -117,7 +119,7 @@ const openMonitor = async () => {
       }
     }
     if (!monitorExists) {
-      msgError("Open monitor failed.");
+      msgError(t("Open monitor failed."));
     }
   });
 };
@@ -125,7 +127,7 @@ const openMonitor = async () => {
 const openProjectLoadingBegin = () => {
   openProjectProgressLoading.value = ElLoading.service({
     lock: true,
-    text: "The project is opening, Please wait.",
+    text: t("The project is opening, Please wait."),
     background: "rgba(0, 0, 0, 0.7)",
   });
 };
@@ -146,13 +148,15 @@ const openProject = async (path: string) => {
         stopOpenProjectProgressLoading();
         reinitProgressLoading.value = ElLoading.service({
           lock: true,
-          text: "The project has been moved, and is now being reinitialized. Please wait.",
+          text: t(
+            "The project has been moved, and is now being reinitialized. Please wait."
+          ),
           background: "rgba(0, 0, 0, 0.7)",
         });
         await ProjectModel.reinit(path);
         break;
       default:
-        throw new Error("This is not a valild kiwi project.");
+        throw new Error(t("This is not a valild kiwi project."));
     }
     const project = await ProjectModel.open(path); //如果出错最晚在这一步,不会污染 stateStore.project
     stateStore.project = project;
@@ -329,7 +333,7 @@ listen("msg:error", () => {
 listen<Progress>("progress:reinit_project", async (event) => {
   if (event.payload.percentage == 100) {
     reinitProgressLoading.value?.close();
-    msgSuccess("The project has been reinitialized successfully.");
+    msgSuccess(t("The project has been reinitialized successfully."));
   }
 });
 
@@ -417,13 +421,13 @@ onUnmounted(async () => {
               <el-tooltip
                 class="box-item"
                 effect="dark"
-                content="Hide while running"
+                :content="t('Hide while running')"
                 placement="right-start"
               >
                 <el-checkbox v-model="hiders.runProject" size="large"
               /></el-tooltip>
               <el-button type="success" size="large" @click="runProject">
-                Run Project ({{ hotKeys.runProject }})
+                {{ t("Run Project") }} ({{ hotKeys.runProject }})
               </el-button>
             </div>
           </el-col>
@@ -431,7 +435,7 @@ onUnmounted(async () => {
         <el-row :gutter="0">
           <el-col :span="24">
             <el-button type="danger" size="large" @click="stopAll">
-              Stop All ({{ hotKeys.stopAll }})
+              {{ t("Stop All") }} ({{ hotKeys.stopAll }})
             </el-button>
           </el-col>
         </el-row>
@@ -442,18 +446,18 @@ onUnmounted(async () => {
               <el-tooltip
                 class="box-item"
                 effect="dark"
-                content="Hide while running"
+                :content="t('Hide while running')"
                 placement="right-start"
               >
-                <el-checkbox v-model="hiders.recorder" size="large"
-              /></el-tooltip>
+                <el-checkbox v-model="hiders.recorder" size="large" />
+              </el-tooltip>
               <el-button
                 type="primary"
                 size="large"
                 :plain="true"
                 @click="record"
               >
-                Record ({{ hotKeys.recorder }})
+                {{ t("Record") }} ({{ hotKeys.recorder }})
               </el-button>
             </div>
           </el-col>
@@ -462,7 +466,7 @@ onUnmounted(async () => {
         <el-row :gutter="0">
           <el-col :span="24">
             <el-button type="info" size="large" @click="reveal" :plain="true">
-              Open
+              {{ t("Open") }}
             </el-button>
           </el-col>
         </el-row>
@@ -470,7 +474,11 @@ onUnmounted(async () => {
           <el-col :span="24">
             <el-tooltip
               effect="dark"
-              content="If “Edit” doesn’t work, install VS Code or set “edit_command“ manually in config.toml."
+              :content="
+                t(
+                  'If “Edit” doesn’t work, install VS Code or set “edit_command“ manually in config.toml.'
+                )
+              "
               placement="bottom"
             >
               <el-button
@@ -479,7 +487,7 @@ onUnmounted(async () => {
                 @click="openInEditor"
                 :plain="true"
               >
-                Edit
+                {{ t("Edit") }}
               </el-button>
             </el-tooltip>
           </el-col>
@@ -490,7 +498,7 @@ onUnmounted(async () => {
           <div class="actions">
             <el-tooltip
               effect="dark"
-              content="Relative Path Of Current File"
+              :content="t('Relative Path Of Current File')"
               placement="bottom"
             >
               <el-input
@@ -504,7 +512,7 @@ onUnmounted(async () => {
               <el-tooltip
                 class="box-item"
                 effect="dark"
-                content="Hide while running"
+                :content="t('Hide while running')"
                 placement="right-start"
               >
                 <el-checkbox v-model="hiders.runScript" size="large"
@@ -514,7 +522,7 @@ onUnmounted(async () => {
                 size="default"
                 @click="runScript"
                 :plain="true"
-                >Run File ({{ hotKeys.runScript }})</el-button
+                >{{ t("Run File") }} ({{ hotKeys.runScript }})</el-button
               >
             </div>
           </div>
@@ -525,7 +533,7 @@ onUnmounted(async () => {
                 size="small"
                 @click="clearLog"
                 :plain="true"
-                >Clear Log</el-button
+                >{{ t("Clear Log") }}</el-button
               >
             </div>
             <el-tabs type="border-card">

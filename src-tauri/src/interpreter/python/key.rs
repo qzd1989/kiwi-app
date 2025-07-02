@@ -115,7 +115,12 @@ impl TryFrom<PythonKey> for Key {
             "ScrollLock" => Key::ScrollLock,
             "Pause" => Key::Pause,
             "NumLock" => Key::NumLock,
-            unknown_key => return Err(anyhow!(t!("The key is not supported.", key = unknown_key))),
+            unknown_key => {
+                return Err(anyhow!(t!(
+                    "The Python key is not supported.",
+                    key = unknown_key
+                )));
+            }
         };
         Ok(key)
     }

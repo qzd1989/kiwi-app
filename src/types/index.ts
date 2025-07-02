@@ -14,6 +14,7 @@ import { u32 } from "./u32";
 import { u8 } from "./u8";
 import { WeightPoint } from "./weight-point";
 import { WindowLabel } from "./window-label";
+import { Locale, AppLocale, locales } from "./locale";
 
 export {
   u8,
@@ -23,12 +24,12 @@ export {
   Base64Png,
   Point,
   HexColor,
-  // RgbaBuffer,
   ColoredPoint,
   RgbColor,
   Size,
   Stack,
   WeightPoint,
+  locales,
 };
 
-export type { EmitData, Language, Progress, WindowLabel };
+export type { EmitData, Language, Progress, WindowLabel, Locale, AppLocale };

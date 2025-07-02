@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate rust_i18n;
 
-i18n!("locales", fallback = "en");
+i18n!("locales", fallback = "en-US");
 
 use std::sync::Arc;
 use tauri::Manager;

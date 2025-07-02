@@ -5,24 +5,34 @@ import { useStateStore } from "@utils/store";
 import { delay } from "@utils/common";
 import { msgError, msgInfo, msgSuccess } from "@utils/msg";
 import { AppModel, commonModel } from "@kiwi";
+import { Locale, locales } from "@types";
+import { useI18n } from "vue-i18n";
 
 interface Form {
   originalWebsocketPort: number;
   websocketPort: number;
+  locale: Locale;
 }
 
+const { t } = useI18n();
 const stateStore = useStateStore();
-const model = ref<AppModel | null>(null);
 const shouldShowSaveSuccess = ref<boolean>(true);
 const form = reactive<Form>({
   originalWebsocketPort: 0,
   websocketPort: 0,
+  locale: "en-US",
 });
 const rules = reactive<FormRules<Form>>({
   websocketPort: [
     {
       required: true,
-      message: "Websocket port is required.",
+      message: t("Websocket port is required."),
+      trigger: "blur",
+    },
+  ],
+  locale: [
+    {
+      required: true,
       trigger: "blur",
     },
   ],
@@ -36,14 +46,26 @@ const save = async () => {
     return;
   }
   try {
-    await model.value?.save();
+    const model: AppModel = new AppModel(stateStore.app);
+    if (!model.config) {
+      throw new Error(t("App configuration not found."));
+    }
+    model.config.app.websocket_port = form.websocketPort;
+    model.config.app.locale = form.locale;
+    await model.save();
     if (shouldShowSaveSuccess.value) {
-      msgSuccess("Settings saved successfully.");
+      msgSuccess(t("Settings saved successfully."));
     }
   } catch (e) {
     msgError(e);
   }
   stateStore.app.config!.app.websocket_port = form.websocketPort;
+  stateStore.app.config!.app.locale = form.locale;
+  await changeLocale();
+};
+
+const changeLocale = async () => {
+  // todo
 };
 
 const runWebsocket = async () => {
@@ -58,7 +80,7 @@ const runWebsocket = async () => {
     await delay(200);
     await commonModel.openWebsocket(form.websocketPort);
     msgSuccess(
-      `WebSocket started successfully on port: ${form.websocketPort}.`
+      t("WebSocket started successfully.", { port: form.websocketPort })
     );
     form.originalWebsocketPort = form.websocketPort;
     stateStore.enable.isWebsocketAlive = true;
@@ -70,20 +92,38 @@ const runWebsocket = async () => {
         await delay(200);
         commonModel.openWebsocket(form.originalWebsocketPort);
         stateStore.enable.isWebsocketAlive = true;
-        const infoMsg = `WebSocket failed to start on port: ${form.websocketPort}. Reverted to the original port: ${form.originalWebsocketPort}, which started successfully.`;
+        const infoMsg = t(
+          "WebSocket failed to start, revert to original port.",
+          {
+            port: form.websocketPort,
+            originalPort: form.originalWebsocketPort,
+          }
+        );
         msgInfo(infoMsg);
         form.websocketPort = form.originalWebsocketPort;
         stateStore.enable.isWebsocketAlive = true;
         shouldShowSaveSuccess.value = false;
       } catch (rollbackError) {
         stateStore.enable.isWebsocketAlive = false;
-        const errMsg = `WebSocket failed to start. Both the original port: ${form.originalWebsocketPort} and the new port: ${form.websocketPort} are unavailable.`;
+        const errMsg = t(
+          "WebSocket failed to start on both port and original port.",
+          {
+            port: form.websocketPort,
+            originalPort: form.originalWebsocketPort,
+          }
+        );
         msgError(errMsg);
         throw new Error(errMsg);
       }
     } else {
       stateStore.enable.isWebsocketAlive = false;
-      const errMsg = `WebSocket failed to start on port: ${form.websocketPort}, and original port: ${form.originalWebsocketPort} is also unavailable.`;
+      const errMsg = t(
+        "WebSocket failed to start on both port and original port.",
+        {
+          port: form.websocketPort,
+          originalPort: form.originalWebsocketPort,
+        }
+      );
       msgError(errMsg);
       throw new Error(errMsg);
     }
@@ -91,9 +131,9 @@ const runWebsocket = async () => {
 };
 
 onMounted(async () => {
-  model.value = new AppModel(stateStore.app);
   form.websocketPort = form.originalWebsocketPort =
-    model.value.config!.app.websocket_port;
+    stateStore.app.config!.app.websocket_port;
+  form.locale = stateStore.app.config!.app.locale;
 });
 onUnmounted(async () => {});
 </script>
@@ -106,27 +146,38 @@ onUnmounted(async () => {});
             <el-icon :size="20" color="#fff"><ArrowLeft /></el-icon>
           </router-link>
         </el-col>
-        <el-col :span="8" class="title">Setting</el-col>
+        <el-col :span="8" class="title">{{ t("Setting") }}</el-col>
         <el-col :span="8" class="right"></el-col>
       </el-row>
     </el-header>
     <el-main>
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
-        <el-form-item label="Websocket Port" prop="websocketPort">
+        <el-form-item :label="t('Websocket Port')" prop="websocketPort">
           <el-input-number
             :min="2"
             :max="65534"
             v-model="form.websocketPort"
             :step="1"
             :controls="false"
+            style="width: 100%"
           ></el-input-number>
+        </el-form-item>
+        <el-form-item :label="t('Language')" prop="locale">
+          <el-select v-model="form.locale" :placeholder="t('Select Language')">
+            <el-option
+              v-for="appLocale in locales"
+              :key="appLocale.key"
+              :label="appLocale.name"
+              :value="appLocale.key"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="" prop="">
           <el-button type="primary" class="save" @click="save">
-            Save
+            {{ t("Save") }}
           </el-button>
-        </el-form-item></el-form
-      >
+        </el-form-item>
+      </el-form>
     </el-main>
   </el-container>
 </template>

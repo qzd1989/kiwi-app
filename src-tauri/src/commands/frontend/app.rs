@@ -20,6 +20,7 @@ pub fn save_app_config(config: AppConfig) -> CommandResult<()> {
 
     App::with_config_mut(|app_config| {
         app_config.app.websocket_port = config.app.websocket_port;
+        app_config.app.locale = config.app.locale;
         app_config.save()
     })?;
 

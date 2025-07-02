@@ -7,6 +7,7 @@ import { base64PngToRgbPixels, drawArc, drawText } from "@utils/common";
 import { Base64Png, ColoredPoint, RgbColor, HexColor, Point } from "@types";
 import { FormInstance, FormRules } from "element-plus";
 import { codeModel, frameModel } from "@kiwi";
+import { useI18n } from "vue-i18n";
 
 interface RelativeColorPoint {
   key: string;
@@ -49,6 +50,7 @@ interface Form {
   };
 }
 
+const { t } = useI18n();
 const props = defineProps(["params", "target"]);
 const emits = defineEmits(["close", "drawItems", "clearAllItems"]);
 const stateStore = useStateStore();
@@ -121,7 +123,7 @@ const pushColor = async (relativeColorPoint: RelativeColorPoint) => {
       })
       .includes(relativeColorPoint.key)
   ) {
-    msgError("The point is already exist!");
+    msgError(t("The point is already exist."));
     return;
   }
   result.value = code.value = null;
@@ -266,7 +268,7 @@ const findRelativeColors = async (formEl: FormInstance | undefined) => {
   result.value = code.value = null;
   if (form.points.length == 0) {
     clearAllItems();
-    msgWarn("The colors must not be empty.");
+    msgWarn(t("The colors must not be empty."));
     return;
   }
   const vertexHex = getVertexHex();
@@ -304,7 +306,10 @@ const findRelativeColors = async (formEl: FormInstance | undefined) => {
 const drawItems = (peak: ColoredPoint) => {
   emits("drawItems", {
     callback: (ctx: CanvasRenderingContext2D) => {
-      const title = `peak point(${peak.point.x}, ${peak.point.y})`;
+      const title = t("Peak Point: (x,y)", {
+        x: peak.point.x,
+        y: peak.point.y,
+      });
       const titlePoint = Point.from(peak.point.x - 5, peak.point.y - 10);
       drawArc(ctx, peak.point, 5);
       drawText(ctx, title, titlePoint);
@@ -316,9 +321,9 @@ const copy = async () => {
   if (!code.value) return;
   try {
     await writeText(code.value);
-    msgSuccess("copy successed");
+    msgSuccess(t("Copy successed."));
   } catch (e: any) {
-    msgError(`copy failed: ${e.message}`);
+    msgError(t("Copy Failed.", { error: e.message }));
   }
 };
 
@@ -383,7 +388,7 @@ onMounted(async () => {
 </script>
 <template>
   <el-container>
-    <el-header>Find Relative Colors</el-header>
+    <el-header>{{ t("Find Relative Colors") }}</el-header>
     <el-main>
       <el-form ref="formRef" :model="form" :rules="rules" status-icon>
         <div class="work-area">
@@ -432,7 +437,7 @@ onMounted(async () => {
             </el-button>
           </div>
           <div class="item">
-            <div class="title">Colors</div>
+            <div class="title">{{ t("Colors") }}</div>
             <el-form-item
               prop="points"
               style="margin-bottom: 0px"
@@ -472,13 +477,13 @@ onMounted(async () => {
           </div>
           <div class="item">
             <div class="title">
-              <span>Find Area</span>
+              <span>{{ t("Find Area") }}</span>
               <el-button
                 type="primary"
                 @click="findRelativeColors(formRef)"
                 :disabled="loading"
               >
-                findOne
+                {{ t("FindOne") }}
               </el-button>
             </div>
             <div style="margin-bottom: -10px">
@@ -495,7 +500,7 @@ onMounted(async () => {
                       :min="findArea.start.x.min"
                       :max="findArea.start.x.max"
                       ><template #prefix>
-                        <span>start x</span>
+                        <span>{{ t("start x") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -512,7 +517,7 @@ onMounted(async () => {
                       :min="findArea.start.y.min"
                       :max="findArea.start.y.max"
                       ><template #prefix>
-                        <span>start y</span>
+                        <span>{{ t("start y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -531,7 +536,7 @@ onMounted(async () => {
                       :min="findArea.end.x.min"
                       :max="findArea.end.x.max"
                       ><template #prefix>
-                        <span>end x</span>
+                        <span>{{ t("end x") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -548,7 +553,7 @@ onMounted(async () => {
                       :min="findArea.end.y.min"
                       :max="findArea.end.y.max"
                       ><template #prefix>
-                        <span>end y</span>
+                        <span>{{ t("end y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -566,7 +571,7 @@ onMounted(async () => {
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>offset r</span>
+                        <span>{{ t("offset r") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -580,7 +585,7 @@ onMounted(async () => {
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>offset g</span>
+                        <span>{{ t("offset g") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -594,7 +599,7 @@ onMounted(async () => {
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>offset b</span>
+                        <span>{{ t("offset b") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -616,7 +621,9 @@ onMounted(async () => {
           <div class="item">
             <div class="title">
               <span>Code</span>
-              <el-button type="primary" @click="copy"> copy </el-button>
+              <el-button type="primary" @click="copy">
+                {{ t("Copy") }}
+              </el-button>
             </div>
             <div>
               <el-input
@@ -633,7 +640,7 @@ onMounted(async () => {
       </el-form>
     </el-main>
     <el-footer>
-      <el-button @click="close">Close</el-button>
+      <el-button @click="close">{{ t("Close") }}</el-button>
     </el-footer>
   </el-container>
 </template>

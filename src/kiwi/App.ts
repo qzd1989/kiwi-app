@@ -3,6 +3,7 @@ import { msgError } from "@utils/msg";
 import { getVersion, getName } from "@tauri-apps/api/app";
 import { apiFetch } from "@utils/api";
 import { type, arch } from "@tauri-apps/plugin-os";
+import { Locale } from "@types";
 
 interface PlatformInfo {
   signature: string;
@@ -29,7 +30,7 @@ interface Release {
 
 interface ConfigApp {
   websocket_port: number;
-  locale: string;
+  locale: Locale;
 }
 
 interface Config {

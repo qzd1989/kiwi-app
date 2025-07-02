@@ -6,6 +6,7 @@ import { msgError, msgSuccess } from "@utils/msg";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { FormInstance, FormRules } from "element-plus";
 import { codeModel, frameModel } from "@kiwi";
+import { useI18n } from "vue-i18n";
 
 interface Form {
   base64Png: Base64Png | null;
@@ -15,6 +16,7 @@ interface Form {
   };
 }
 
+const { t } = useI18n();
 const props = defineProps(["params", "target"]);
 const emits = defineEmits(["close", "drawItems", "clearAllItems"]);
 const result = ref<string | null>(null);
@@ -109,9 +111,9 @@ const copy = async () => {
   if (!code.value) return;
   try {
     await writeText(code.value);
-    msgSuccess("copy successed");
+    msgSuccess(t("Copy successed."));
   } catch (e: any) {
-    msgError(`copy failed: ${e.message}`);
+    msgError(t("Copy failed.", { error: e.message }));
   }
 };
 
@@ -137,7 +139,7 @@ onUnmounted(async () => {});
 </script>
 <template>
   <el-container>
-    <el-header>Recognize Text</el-header>
+    <el-header>{{ t("Recognize Text") }}</el-header>
     <el-main>
       <el-form ref="formRef" :model="form" :rules="rules" status-icon>
         <div class="work-area">
@@ -152,13 +154,13 @@ onUnmounted(async () => {});
           </div>
           <div class="item">
             <div class="title">
-              <span>Find Area</span>
+              <span>{{ t("Find Area") }}</span>
               <el-button
                 type="primary"
                 @click="recognize(formRef)"
                 :disabled="loading"
               >
-                Recognize
+                {{ t("Recognize") }}
               </el-button>
             </div>
             <div style="margin-bottom: -10px">
@@ -174,7 +176,7 @@ onUnmounted(async () => {});
                       :style="{ width: '100%' }"
                       disabled
                       ><template #prefix>
-                        <span>start x</span>
+                        <span>{{ t("start x") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -190,7 +192,7 @@ onUnmounted(async () => {});
                       :style="{ width: '100%' }"
                       disabled
                       ><template #prefix>
-                        <span>start y</span>
+                        <span>{{ t("start y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -208,7 +210,7 @@ onUnmounted(async () => {});
                       :style="{ width: '100%' }"
                       disabled
                       ><template #prefix>
-                        <span>end x</span>
+                        <span>{{ t("end x") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -224,7 +226,7 @@ onUnmounted(async () => {});
                       :style="{ width: '100%' }"
                       disabled
                       ><template #prefix>
-                        <span>end y</span>
+                        <span>{{ t("end y") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -246,7 +248,9 @@ onUnmounted(async () => {});
           <div class="item">
             <div class="title">
               <span>Code</span>
-              <el-button type="primary" @click="copy"> copy </el-button>
+              <el-button type="primary" @click="copy">
+                {{ t("Copy") }}
+              </el-button>
             </div>
             <div>
               <el-input
@@ -263,7 +267,7 @@ onUnmounted(async () => {});
       </el-form>
     </el-main>
     <el-footer>
-      <el-button @click="close">Close</el-button>
+      <el-button @click="close">{{ t("Close") }}</el-button>
     </el-footer>
   </el-container>
 </template>
