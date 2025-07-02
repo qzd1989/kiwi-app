@@ -15,6 +15,7 @@ import { u8 } from "./u8";
 import { WeightPoint } from "./weight-point";
 import { WindowLabel } from "./window-label";
 import { Locale, AppLocale, locales } from "./locale";
+import { EmitEvent } from "./emit-event";
 
 export {
   u8,
@@ -32,4 +33,12 @@ export {
   locales,
 };
 
-export type { EmitData, Language, Progress, WindowLabel, Locale, AppLocale };
+export type {
+  EmitData,
+  Language,
+  Progress,
+  WindowLabel,
+  Locale,
+  AppLocale,
+  EmitEvent,
+};

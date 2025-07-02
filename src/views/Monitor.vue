@@ -10,6 +10,7 @@ import { cropBase64Png } from "@utils/common";
 import { useResizeObserver } from "@vueuse/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useI18n } from "vue-i18n";
+import { EmitEvent, Locale } from "@types";
 
 import FindImage from "@views/monitor/components/Image.vue";
 import FindRelativeColor from "@views/monitor/components/RelativeColor.vue";
@@ -46,7 +47,7 @@ interface Form {
   };
 }
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const stateStore = useStateStore();
 const loading = ref<ReturnType<typeof ElLoading.service> | null>(null);
 const targets = ref<Target[]>([
@@ -426,6 +427,11 @@ const clearAllItems = () => {
   draw();
 };
 
+const setLocale = (newLocale: Locale) => {
+  if (!stateStore.app.config) return;
+  locale.value = stateStore.app.config.app.locale = newLocale;
+};
+
 useResizeObserver(containerRef, (entries) => {
   if (!rightRef.value) return;
   const entry = entries[0];
@@ -455,6 +461,10 @@ listen<Base64Png>("backend:update:frame", async (event) => {
   draw();
   loading.value?.close();
   commonModel.unprotectWindows(["main", "monitor"]);
+});
+
+listen("backend:update:locale", (event: EmitEvent) => {
+  setLocale(event.payload as Locale);
 });
 
 // test todo

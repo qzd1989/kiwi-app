@@ -26,7 +26,7 @@ const rules = reactive<FormRules<Form>>({
   websocketPort: [
     {
       required: true,
-      message: t("WebSocket port is required."),
+      message: t("WebSocket port is required.", {}, locale.value),
       trigger: "blur",
     },
   ],
@@ -40,34 +40,30 @@ const rules = reactive<FormRules<Form>>({
 
 const save = async () => {
   shouldShowSaveSuccess.value = true;
+  await saveLocaleConfig();
+  await saveWebsocketConfig();
+  if (shouldShowSaveSuccess.value) {
+    msgSuccess(t("Settings saved successfully."));
+  }
+};
+
+const saveLocaleConfig = async () => {
+  if (!stateStore.app.config) return;
+  stateStore.app.config.app.locale = form.locale;
+  const model: AppModel = new AppModel(stateStore.app);
+  await model.save();
+};
+
+const saveWebsocketConfig = async () => {
+  if (!stateStore.app.config) return;
   try {
     await runWebsocket();
   } catch (e) {
     return;
   }
-  try {
-    const model: AppModel = new AppModel(stateStore.app);
-    if (!model.config) {
-      throw new Error(t("App configuration not found."));
-    }
-    model.config.app.websocket_port = form.websocketPort;
-    model.config.app.locale = form.locale;
-    await model.save();
-    if (shouldShowSaveSuccess.value) {
-      msgSuccess(t("Settings saved successfully."));
-    }
-  } catch (e) {
-    msgError(e);
-  }
-  stateStore.app.config!.app.websocket_port = form.websocketPort;
-  stateStore.app.config!.app.locale = form.locale;
-  await changeLocale();
-};
-
-const changeLocale = async () => {
-  if (!stateStore.app.config) return;
-  locale.value = form.locale;
-  stateStore.app.config.app.locale = form.locale;
+  stateStore.app.config.app.websocket_port = form.websocketPort;
+  const model: AppModel = new AppModel(stateStore.app);
+  await model.save();
 };
 
 const runWebsocket = async () => {
@@ -136,7 +132,9 @@ onMounted(async () => {
   form.websocketPort = form.originalWebsocketPort =
     stateStore.app.config!.app.websocket_port;
   form.locale = stateStore.app.config!.app.locale;
+  console.log(form);
 });
+
 onUnmounted(async () => {});
 </script>
 <template>

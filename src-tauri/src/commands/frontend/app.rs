@@ -1,5 +1,10 @@
+use tauri::AppHandle;
+
 use super::{CommandResult, utils::get_relative_image_data_path_buf};
-use crate::app::{App, Config as AppConfig};
+use crate::{
+    app::{App, Config as AppConfig},
+    commands::frontend::utils::emit,
+};
 
 #[tauri::command]
 pub fn get_app_name() -> CommandResult<String> {
@@ -13,20 +18,22 @@ pub fn get_app_config() -> CommandResult<AppConfig> {
 }
 
 #[tauri::command]
-pub fn save_app_config(config: AppConfig) -> CommandResult<()> {
+pub fn save_app_config(app_handle: AppHandle, config: AppConfig) -> CommandResult<()> {
     if config.app.websocket_port == 0 {
         return Err("WebSocket port must be greater than 0.".into());
     }
 
     App::with_config_mut(|app_config| {
         app_config.app.websocket_port = config.app.websocket_port;
-        app_config.app.locale = config.app.locale;
+        app_config.app.locale = config.app.locale.clone();
         app_config.save()
     })?;
 
-    // 1. The WebSocket is already set up on the frontend.
-    // 2. Set Locale
+    // set backend locale
     App::set_locale();
+
+    // set frontend locale
+    emit(&app_handle, "backend:update:locale", config.app.locale);
 
     Ok(())
 }

@@ -6,5 +6,8 @@
     "WebSocket Port":"WebSocket 端口",
     "Save":"保存",
     "Setting": "设置",
-    "Settings saved successfully.":"设置已成功保存。"
+    "Settings saved successfully.":"设置已成功保存。",
+    "WebSocket port is required.":"WebSocket 端口是必填项.",
+    "WebSocket failed to start, revert to original port.":"WebSocket在端口{port}启动失败，已恢复到原始端口{originalPort}.",
+    "WebSocket failed to start on both port and original port.":"WebSocket在端口{port}和原始端口{originalPort}上均启动失败."
 }

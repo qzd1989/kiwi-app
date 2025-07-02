@@ -9,21 +9,30 @@ import { listen } from "@tauri-apps/api/event";
 import { onUnmounted } from "vue";
 import { AppModel, commonModel } from "@kiwi";
 import { useI18n } from "vue-i18n";
+import { EmitEvent, Locale } from "@types";
 
 const { locale } = useI18n();
 const stateStore = useStateStore();
 const init = async () => {
-  setLocale();
+  const app = await AppModel.getApp();
+  if (!app.config) return;
+
   await focus();
-  stateStore.app = await AppModel.getApp();
+
+  stateStore.app = app;
+
+  setLocale(app.config.app.locale);
+
   await localStoreInit();
+
   if (!(await websocketInit())) {
     return;
   }
 };
-const setLocale = () => {
+
+const setLocale = (newLocale: Locale) => {
   if (!stateStore.app.config) return;
-  locale.value = stateStore.app.config.app.locale;
+  locale.value = stateStore.app.config.app.locale = newLocale;
 };
 
 const focus = async () => {
@@ -89,6 +98,10 @@ watchEffect(async () => {
 
 listen("msg:error", (event: any) => {
   msgError(event.payload.data);
+});
+
+listen("backend:update:locale", (event: EmitEvent) => {
+  setLocale(event.payload as Locale);
 });
 
 onMounted(async () => {
