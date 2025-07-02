@@ -1,5 +1,10 @@
 {
     "Hands-free, everything on autopilot.":"Hands-free, everything on autopilot.",
     "Project name is required.":"Project name is required.",
-    "WebSocket started successfully.":"WebSocket started successfully on port: {port}."
+    "WebSocket started successfully.":"WebSocket started successfully on port: {port}.",
+    "Language":"Language",
+    "WebSocket Port":"WebSocket Port",
+    "Save":"Save",
+    "Setting": "Setting",
+    "Settings saved successfully.":"Settings saved successfully."
 }

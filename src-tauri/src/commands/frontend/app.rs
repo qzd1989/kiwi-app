@@ -24,6 +24,8 @@ pub fn save_app_config(config: AppConfig) -> CommandResult<()> {
         app_config.save()
     })?;
 
+    // 1. The WebSocket is already set up on the frontend.
+    // 2. Set Locale
     App::set_locale();
 
     Ok(())

@@ -1,5 +1,10 @@
 {
     "Hands-free, everything on autopilot.":"解放双手，一切交给Kiwi。",
     "Project name is required.":"项目名称是必填项。",
-    "WebSocket started successfully.":"WebSocket成功从端口{port}启动."
+    "WebSocket started successfully.":"WebSocket成功从端口{port}启动.",
+    "Language":"语言",
+    "WebSocket Port":"WebSocket 端口",
+    "Save":"保存",
+    "Setting": "设置",
+    "Settings saved successfully.":"设置已成功保存。"
 }

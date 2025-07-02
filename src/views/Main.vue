@@ -8,15 +8,22 @@ import { msgError } from "@utils/msg";
 import { listen } from "@tauri-apps/api/event";
 import { onUnmounted } from "vue";
 import { AppModel, commonModel } from "@kiwi";
+import { useI18n } from "vue-i18n";
 
+const { locale } = useI18n();
 const stateStore = useStateStore();
 const init = async () => {
+  setLocale();
   await focus();
   stateStore.app = await AppModel.getApp();
   await localStoreInit();
   if (!(await websocketInit())) {
     return;
   }
+};
+const setLocale = () => {
+  if (!stateStore.app.config) return;
+  locale.value = stateStore.app.config.app.locale;
 };
 
 const focus = async () => {

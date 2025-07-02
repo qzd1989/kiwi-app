@@ -14,7 +14,7 @@ interface Form {
   locale: Locale;
 }
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const stateStore = useStateStore();
 const shouldShowSaveSuccess = ref<boolean>(true);
 const form = reactive<Form>({
@@ -65,7 +65,9 @@ const save = async () => {
 };
 
 const changeLocale = async () => {
-  // todo
+  if (!stateStore.app.config) return;
+  locale.value = form.locale;
+  stateStore.app.config.app.locale = form.locale;
 };
 
 const runWebsocket = async () => {
