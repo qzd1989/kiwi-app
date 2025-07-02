@@ -12,6 +12,32 @@
     "WebSocket failed to start on both port and original port.":"WebSocket failed to start on both port: {port} and original port: {originalPort}.",
     "Create Project": "Create Project",
     "Open Project": "Open Project",
-    "Version": "Version"
+    "Version": "Version",
+    "Primary Monitor":"Primary Monitor",
+    "Capturing, please wait.":"Capturing, please wait.",
+    "Capture":"Capture",
+    "Reset":"Reset",
+    "Find Image":"Find Image",
+    "Find Relative Colors":"Find Relative Colors",
+    "Find Colors":"Find Colors",
+    "Recognize Text":"Recognize Text",
+    "Close":"Close",
+    "Monitor Size":"Monitor Size",
+    "Position":"Position",
+    "Begin Point":"Begin Point",
+    "End Point":"End Point",
+    "Captured Rect Size":"Captured Rect Size",
+    "Discovered new version.":"Discovered new version: {version}.",
+    "Download Now":"Download Now",
+    "Can only contain Chinese characters, English letters, digits, and underscores.":"Can only contain Chinese characters, English letters, digits, and underscores.",
+    "Project path is required.":"Project path is required.",
+    "Project is initializing, please wait.":"Project is initializing, please wait.",
+    "Project created successfully.":"Project created successfully.",
+    "Project Name":"Project Name",
+    "Programming Language":"Programming Language",
+    "Project Path":"Project Path",
+    "Project Folder Name":"Project Folder Name",
+    "Create":"Create"
+
 
 }
