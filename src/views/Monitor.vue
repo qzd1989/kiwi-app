@@ -435,7 +435,7 @@ const setLocale = (newLocale: Locale) => {
 const loadTargets = async () => {
   targets.value = [
     {
-      name: t("Primary Monitor"),
+      name: "Primary Monitor",
       key: "primary_monitor",
       size: Size.from(0, 0),
       base64Png: null,
@@ -475,7 +475,7 @@ listen<Base64Png>("backend:update:frame", async (event) => {
   commonModel.unprotectWindows(["main", "monitor"]);
 });
 
-listen<Locale>("backend:update:locale", (event) => {
+listen<Locale>("backend:update:locale", async (event) => {
   setLocale(event.payload as Locale);
 });
 
@@ -498,9 +498,8 @@ onMounted(async () => {
   document.addEventListener("mouseup", upListener);
   //zoom
   window.addEventListener("keyup", shortcutZoom);
-  // init
-  await loadTargets();
 
+  await loadTargets();
   if ((await getCurrentWindow().label) == "monitor") {
     form.target = targets.value[0];
     await capture();
