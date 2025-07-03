@@ -537,7 +537,7 @@ onUnmounted(async () => {
               >
             </div>
             <el-tabs type="border-card">
-              <el-tab-pane label="Log">
+              <el-tab-pane :label="t('Log')">
                 <el-scrollbar class="logs" ref="logScrollbarRef">
                   <ul>
                     <li class="log" :class="log.type" v-for="log in logs.stack">

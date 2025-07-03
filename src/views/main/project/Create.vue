@@ -151,7 +151,7 @@ onUnmounted(async () => {});
             spellcheck="false"
           ></el-input>
         </el-form-item>
-        <el-form-item :label="t('Programming Language')" prop="description">
+        <el-form-item :label="t('Script Language')" prop="description">
           <el-select v-model="form.language">
             <el-option
               v-for="item in languages"
