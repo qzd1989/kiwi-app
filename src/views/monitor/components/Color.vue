@@ -444,7 +444,7 @@ onUnmounted(async () => {});
                       :max="50"
                       :min="0"
                       ><template #prefix>
-                        <span>t("Offset G")</span>
+                        <span>{{ t("Offset G") }}</span>
                       </template>
                     </el-input-number>
                   </el-form-item>
@@ -471,7 +471,7 @@ onUnmounted(async () => {});
                 style="width: 100%"
                 :rows="2"
                 type="textarea"
-                placeholder="result"
+                :placeholder="t('Result...')"
                 readonly
                 :autosize="true"
               />
@@ -490,7 +490,7 @@ onUnmounted(async () => {});
                 style="width: 100%"
                 :rows="9"
                 type="textarea"
-                placeholder="code"
+                :placeholder="t!('Code...')"
                 readonly
               />
             </div>

@@ -612,7 +612,7 @@ onMounted(async () => {
                 style="width: 100%"
                 :rows="2"
                 type="textarea"
-                placeholder="result"
+                :placeholder="t('Result...')"
                 readonly
                 :autosize="true"
               />
@@ -620,7 +620,7 @@ onMounted(async () => {
           </div>
           <div class="item">
             <div class="title">
-              <span>Code</span>
+              <span>{{ t("Code") }}</span>
               <el-button type="primary" @click="copy">
                 {{ t("Copy") }}
               </el-button>
@@ -631,7 +631,7 @@ onMounted(async () => {
                 style="width: 100%"
                 :rows="9"
                 type="textarea"
-                placeholder="code"
+                :placeholder="t!('Code...')"
                 readonly
               />
             </div>

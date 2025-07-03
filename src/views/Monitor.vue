@@ -58,15 +58,7 @@ interface Form {
 const { t, locale } = useI18n();
 const stateStore = useStateStore();
 const loading = ref<ReturnType<typeof ElLoading.service> | null>(null);
-const targets = ref<Target[]>([
-  {
-    name: t("Primary Monitor"),
-    key: "primary_monitor",
-    size: Size.from(0, 0),
-    base64Png: null,
-    originalBase64Png: null,
-  },
-]);
+const targets = ref<Target[]>([]);
 const containerRef = ref<InstanceType<typeof ElContainer> | null>(null);
 const bgLight = "/src/assets/canvas-bg-light.png";
 const bgUrl = ref(bgLight);
@@ -440,6 +432,18 @@ const setLocale = (newLocale: Locale) => {
   locale.value = stateStore.app.config.app.locale = newLocale;
 };
 
+const loadTargets = async () => {
+  targets.value = [
+    {
+      name: t("Primary Monitor"),
+      key: "primary_monitor",
+      size: Size.from(0, 0),
+      base64Png: null,
+      originalBase64Png: null,
+    },
+  ];
+};
+
 useResizeObserver(containerRef, (entries) => {
   if (!rightRef.value) return;
   const entry = entries[0];
@@ -495,6 +499,8 @@ onMounted(async () => {
   //zoom
   window.addEventListener("keyup", shortcutZoom);
   // init
+  await loadTargets();
+
   if ((await getCurrentWindow().label) == "monitor") {
     form.target = targets.value[0];
     await capture();
@@ -614,7 +620,7 @@ onUnmounted(async () => {
           {{ t("Position") }}: ({{ hoveredPixelPoint.x }},
           {{ hoveredPixelPoint.y }})
         </span>
-        <span>hex: {{ hoveredPixelHexColor }}</span>
+        <span>{{ t("Hex Color") }}: {{ hoveredPixelHexColor }}</span>
         <span>
           {{ t("Begin Point") }}: ({{ form.findArea.start.x }},
           {{ form.findArea.start.y }})

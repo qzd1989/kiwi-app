@@ -682,7 +682,7 @@ onUnmounted(async () => {});
                 style="width: 100%"
                 :rows="2"
                 type="textarea"
-                placeholder="result"
+                :placeholder="t('Result...')"
                 readonly
                 :autosize="true"
               />
@@ -690,7 +690,7 @@ onUnmounted(async () => {});
           </div>
           <div class="item">
             <div class="title">
-              <span>Code</span>
+              <span>{{ t("Code") }}</span>
               <el-button type="primary" @click="saveAndCopy(formRef)">
                 {{ t("Save and Copy") }}
               </el-button>
@@ -703,6 +703,7 @@ onUnmounted(async () => {});
                 type="textarea"
                 readonly
                 :disabled="!form.name?.trim()"
+                :placeholder="t('Code...')"
               />
             </div>
           </div>

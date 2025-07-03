@@ -71,6 +71,8 @@
   "Offset B": "Offset B",
   "Code": "Code",
   "Copy": "Copy",
+  "Result...": "Result...",
+  "Code...": "Code...",
   "Spaces and backslashes are not allowed.": "Spaces and backslashes are not allowed.",
   "Result is null.": "Result is null.",
   "Image Name": "Image Name",
@@ -81,5 +83,6 @@
   "Full Path of Image": "Full Path of Image",
   "The point already exists.": "The point already exists.",
   "Peak Point: (x, y)": "Peak Point: ({x}, {y})",
-  "Recognize": "Recognize"
+  "Recognize": "Recognize",
+  "Hex Color": "Hex Color"
 }

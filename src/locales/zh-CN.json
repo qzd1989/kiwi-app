@@ -66,11 +66,13 @@
   "Start Y": "起始Y",
   "End X": "结束X",
   "End Y": "结束Y",
-  "Offset R": "R偏移",
-  "Offset G": "G偏移",
-  "Offset B": "B偏移",
+  "Offset R": "R偏移值",
+  "Offset G": "G偏移值",
+  "Offset B": "B偏移值",
   "Code": "代码",
   "Copy": "复制",
+  "Result...": "结果...",
+  "Code...": "代码...",
   "Spaces and backslashes are not allowed.": "不允许有空格和反斜杠。",
   "Result is null.": "结果为空。",
   "Image Name": "图片名称",
@@ -81,5 +83,6 @@
   "Full Path of Image": "图片完整路径",
   "The point already exists.": "该点已存在。",
   "Peak Point: (x, y)": "顶点：({x}, {y})",
-  "Recognize": "识别"
+  "Recognize": "识别",
+  "Hex Color": "十六进制颜色"
 }
