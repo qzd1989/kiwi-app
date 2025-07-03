@@ -445,7 +445,9 @@ const loadTargets = async () => {
 };
 
 const init = async () => {
+  // set locale
   setLocale(stateStore.app.config!.app.locale);
+
   await loadTargets();
   if ((await getCurrentWindow().label) == "monitor") {
     form.target = targets.value[0];

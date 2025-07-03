@@ -14,14 +14,19 @@ import { EmitMsg, Locale } from "@types";
 const { locale } = useI18n();
 const stateStore = useStateStore();
 const init = async () => {
+  // init app
   const app = await AppModel.getApp();
   if (!app.config) return;
   await focus();
   stateStore.app = app;
+
+  // set locale
   setLocale(app.config.app.locale);
 
+  // init local store
   await localStoreInit();
 
+  // init websocket
   if (!(await websocketInit())) {
     return;
   }
