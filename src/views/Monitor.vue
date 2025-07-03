@@ -25,6 +25,7 @@ import FindRelativeColor from "@views/monitor/components/RelativeColor.vue";
 import FindColor from "@views/monitor/components/Color.vue";
 import FindText from "@views/monitor/components/Text.vue";
 import { captureModel, commonModel } from "@kiwi";
+import { load } from "@tauri-apps/plugin-store";
 
 interface Target {
   name: string;
@@ -435,7 +436,7 @@ const setLocale = (newLocale: Locale) => {
 const loadTargets = async () => {
   targets.value = [
     {
-      name: "Primary Monitor",
+      name: t("Primary Monitor"),
       key: "primary_monitor",
       size: Size.from(0, 0),
       base64Png: null,
@@ -477,6 +478,7 @@ listen<Base64Png>("backend:update:frame", async (event) => {
 
 listen<Locale>("backend:update:locale", async (event) => {
   setLocale(event.payload as Locale);
+  await loadTargets();
 });
 
 // test todo
