@@ -27,7 +27,7 @@
   "Begin Point": "Begin Point",
   "End Point": "End Point",
   "Captured Rect Size": "Captured Rect Size",
-  "Discovered new version.": "Discovered new version: {version}.",
+  "Discovered new version.": "Discovered new version: {version}",
   "Download Now": "Download Now",
   "Can only contain Chinese characters, English letters, digits, and underscores.": "Can only contain Chinese characters, English letters, digits, and underscores.",
   "Project path is required.": "Project path is required.",

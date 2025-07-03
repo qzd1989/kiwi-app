@@ -27,7 +27,7 @@
   "Begin Point": "起点",
   "End Point": "终点",
   "Captured Rect Size": "捕获区域尺寸",
-  "Discovered new version.": "发现新版本: {version}.",
+  "Discovered new version.": "发现新版本: {version}",
   "Download Now": "立即下载",
   "Can only contain Chinese characters, English letters, digits, and underscores.": "只能包含中文、英文字母、数字和下划线。",
   "Project path is required.": "项目路径是必填项。",

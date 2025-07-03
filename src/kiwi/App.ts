@@ -112,7 +112,11 @@ class AppModel {
     const archName = await arch();
     const platformKey = osName + "-" + archName;
     if (!(platformKey in platforms)) return null;
-    return platforms[platformKey];
+    let release = platforms[platformKey];
+    if (release.version === this.version) {
+      return null; // 没有更新
+    }
+    return release;
   }
 }
 
