@@ -16,11 +16,8 @@ const stateStore = useStateStore();
 const init = async () => {
   const app = await AppModel.getApp();
   if (!app.config) return;
-
   await focus();
-
   stateStore.app = app;
-
   setLocale(app.config.app.locale);
 
   await localStoreInit();

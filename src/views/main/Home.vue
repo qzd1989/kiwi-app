@@ -114,11 +114,6 @@ onUnmounted(async () => {});
           </el-button>
         </el-col>
       </el-row>
-      <el-row :gutter="0" style="display: none">
-        <el-col :span="24">
-          <el-button type="primary" @click="">Online Market</el-button>
-        </el-col>
-      </el-row>
       <el-row :gutter="0">
         <el-col :span="24" class="version">
           {{ t("Version") }}: {{ stateStore.app.version }}</el-col

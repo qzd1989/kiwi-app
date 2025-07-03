@@ -19,13 +19,12 @@ import { useResizeObserver } from "@vueuse/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useI18n } from "vue-i18n";
 import { Locale } from "@types";
+import { captureModel, commonModel } from "@kiwi";
 
 import FindImage from "@views/monitor/components/Image.vue";
 import FindRelativeColor from "@views/monitor/components/RelativeColor.vue";
 import FindColor from "@views/monitor/components/Color.vue";
 import FindText from "@views/monitor/components/Text.vue";
-import { captureModel, commonModel } from "@kiwi";
-import { load } from "@tauri-apps/plugin-store";
 
 interface Target {
   name: string;
@@ -445,6 +444,15 @@ const loadTargets = async () => {
   ];
 };
 
+const init = async () => {
+  setLocale(stateStore.app.config!.app.locale);
+  await loadTargets();
+  if ((await getCurrentWindow().label) == "monitor") {
+    form.target = targets.value[0];
+    await capture();
+  }
+};
+
 useResizeObserver(containerRef, (entries) => {
   if (!rightRef.value) return;
   const entry = entries[0];
@@ -496,16 +504,10 @@ watch(
 );
 
 onMounted(async () => {
+  await init();
   document.addEventListener("mousemove", moveListener);
   document.addEventListener("mouseup", upListener);
-  //zoom
   window.addEventListener("keyup", shortcutZoom);
-
-  await loadTargets();
-  if ((await getCurrentWindow().label) == "monitor") {
-    form.target = targets.value[0];
-    await capture();
-  }
 });
 
 onUnmounted(async () => {
