@@ -146,8 +146,8 @@ pub fn save_image(name: String, data: Base64Png) -> CommandResult<()> {
     let parent_path = path.parent().unwrap();
     if let Err(error) = dir::create_all(parent_path, false) {
         let msg = t!(
-            "Create folder failed.",
-            parent = parent_path.to_string_lossy(),
+            "Failed to create folder.",
+            path = parent_path.to_string_lossy(),
             error = error.to_string()
         );
         return Err(msg.into());
@@ -164,7 +164,7 @@ pub fn get_image(name: String, data_path: String) -> CommandResult<Response> {
     let project_path = App::try_with_project(|project| project.path.clone())?;
     let path = Path::new(&project_path).join(data_path).join(&name);
     let Ok(image) = image::open(&path) else {
-        let msg = t!("Can't open image.", path = path.to_string_lossy());
+        let msg = t!("Unable to open image.", path = path.to_string_lossy());
         return Err(msg.into());
     };
     Ok(Response::new(image.to_rgba8().to_vec()))
@@ -176,7 +176,7 @@ pub fn get_image_size(name: String, data_path: String) -> CommandResult<Size> {
     let project_path = App::try_with_project(|project| project.path.clone())?;
     let path = Path::new(&project_path).join(data_path).join(&name);
     let Ok(image) = image::open(&path) else {
-        let msg = t!("Can't open image.", path = path.to_string_lossy());
+        let msg = t!("Unable to open image.", path = path.to_string_lossy());
         return Err(msg.into());
     };
     Ok(Size::new(image.width(), image.height()))
@@ -192,12 +192,12 @@ pub fn run_script(app_handle: AppHandle, path: String) {
     }
 
     if App::with_capturer(|capturer| capturer.is_running()) {
-        Log::error(t!("Screen capture is still running. Please wait a moment.")).send_to_app_log();
+        Log::error(t!("Screen capture is still running. Please wait.")).send_to_app_log();
         return;
     }
 
     if App::with_recorder(|recorder| recorder.is_running()) {
-        Log::error(t!("The recorder is running. Please stop it first.")).send_to_app_log();
+        Log::error(t!("Recorder is running. Please stop it first.")).send_to_app_log();
         return;
     }
 
@@ -229,11 +229,7 @@ pub fn run_script(app_handle: AppHandle, path: String) {
         });
     };
     let on_exit = move |pid, exit_status| {
-        let msg = t!(
-            "The script has finished running.",
-            pid = pid,
-            status = exit_status
-        );
+        let msg = t!("The script has completed.", pid = pid, status = exit_status);
         Log::success(msg.to_string()).send_to_app_log();
         emit(&app_handle_wait, "run:status", "stopped");
     };
@@ -280,7 +276,7 @@ pub fn stop_all(app: AppHandle) {
     if App::with_recorder(|recorder| recorder.is_running()) {
         App::with_recorder(|recorder| {
             recorder.stop();
-            Log::success(t!("The recorder has stopped.")).send_to_app_log();
+            Log::success(t!("Recorder has stopped.")).send_to_app_log();
             emit(&app_handle, "run:status", "stopped");
         });
         return;
@@ -296,7 +292,7 @@ pub fn stop_all(app: AppHandle) {
         if project.interpreter.get_pid() != 0 {
             project.interpreter.stop();
         } else {
-            Log::error(t!("No script is currently running.")).send_to_app_log();
+            Log::error(t!("No script is running.")).send_to_app_log();
         }
     });
 
@@ -313,16 +309,16 @@ pub fn run_recorder(app: AppHandle) {
     }
 
     if App::with_capturer(|capturer| capturer.is_running()) {
-        Log::error(t!("Screen capture is still running, please wait a moment.")).send_to_app_log();
+        Log::error(t!("Screen capture is still running. Please wait a moment.")).send_to_app_log();
         return;
     }
 
     if App::with_recorder(|recorder| recorder.is_running()) {
-        Log::error(t!("The recorder is running, please stop it first.")).send_to_app_log();
+        Log::error(t!("Recorder is running. Please stop it first.")).send_to_app_log();
         return;
     }
 
-    Log::success(t!("The recorder is now running.")).send_to_app_log();
+    Log::success(t!("Recorder is now running.")).send_to_app_log();
 
     let last_call_time = Arc::new(Mutex::new(Instant::now()));
     let file = match App::try_with_project(|project| project.generate_record_file()) {
@@ -372,7 +368,7 @@ pub fn run_recorder(app: AppHandle) {
     //write token line
     {
         let error_handler = |e: Error| {
-            let msg = t!("recorder error.", error = e.to_string());
+            let msg = t!("Recorder error occurred.", error = e.to_string());
             Log::error(msg.to_string()).send_to_app_log();
         };
         let token_handler = match App::try_with_project(|project| {
@@ -380,7 +376,7 @@ pub fn run_recorder(app: AppHandle) {
         }) {
             Ok(f) => f,
             Err(e) => {
-                let msg = t!("recorder error.", error = e.to_string());
+                let msg = t!("Recorder error occurred.", error = e.to_string());
                 Log::error(msg.to_string()).send_to_app_log();
                 return;
             }

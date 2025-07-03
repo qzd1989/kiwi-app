@@ -42,13 +42,17 @@
   "Invalid pattern: no directory specified.": "Invalid pattern: no directory specified.",
   "Invalid pattern: no filename specified.": "Invalid pattern: no filename specified.",
 
-  "No script is currently running.": "No script is currently running.",
-  "Screen capture is still running, please wait a moment.": "Screen capture is still running, please wait a moment.",
-  "The recorder is now running.": "The recorder is now running.",
-  "Invalid file name.": "Invalid file name.",
   "Failed to create project directory.": "Failed to create project directory. (path:%{path})(error:%{error})",
-  "Create folder failed.": "Create folder failed. (path:%{path})(error:%{error})",
-  "Can't open image.": "Can't open image. (path:%{path})",
+  "Failed to create folder.": "Failed to create folder. (path:%{path})(error:%{error})",
+  "Unable to open image.": "Unable to open image. (path:%{path})",
+  "Screen capture is still running. Please wait.": "Screen capture is still running. Please wait.",
+  "Recorder is running. Please stop it first.": "Recorder is running. Please stop it first.",
+  "The script is now running.": "The script is now running.",
+  "The script has completed.": "The script has completed.",
+  "Recorder has stopped.": "Recorder has stopped.",
+  "No script is running.": "No script is running.",
   "Screen capture is still running. Please wait a moment.": "Screen capture is still running. Please wait a moment.",
-  "The recorder is running. Please stop it first.": "The recorder is running. Please stop it first."
+  "Recorder is now running.": "Recorder is now running.",
+  "Invalid file name.": "Invalid file name.",
+  "Recorder error occurred.": "Recorder error occurred. (error:%{error})"
 }

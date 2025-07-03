@@ -40,5 +40,18 @@
   "WebSocket argument is missing.": "缺少 WebSocket 参数。(参数:%{argument})",
   "Width must be greater than zero.": "宽度必须大于零。",
   "Invalid pattern: no directory specified.": "无效的模式：未指定目录。",
-  "Invalid pattern: no filename specified.": "无效的模式：未指定文件名。"
+  "Invalid pattern: no filename specified.": "无效的模式：未指定文件名。",
+  "Failed to create project directory.": "创建项目目录失败。(路径:%{path})(错误:%{error})",
+  "Failed to create folder.": "创建文件夹失败。(路径:%{path})(错误:%{error})",
+  "Unable to open image.": "无法打开图片。(路径:%{path})",
+  "Screen capture is still running. Please wait.": "屏幕捕获正在进行中，请稍候。",
+  "Recorder is running. Please stop it first.": "录制器正在运行，请先停止它。",
+  "The script is now running.": "脚本正在运行。",
+  "The script has completed.": "脚本已完成。",
+  "Recorder has stopped.": "录制器已停止。",
+  "No script is running.": "当前没有脚本在运行。",
+  "Screen capture is still running. Please wait a moment.": "屏幕捕获正在进行中，请稍等片刻。",
+  "Recorder is now running.": "录制器正在运行。",
+  "Invalid file name.": "无效的文件名。",
+  "Recorder error occurred.": "录制器发生错误。(错误:%{error})"
 }
