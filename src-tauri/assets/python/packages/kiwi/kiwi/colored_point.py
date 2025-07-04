@@ -6,7 +6,7 @@ from typing import Optional
 
 
 @dataclass(kw_only=True)
-class RelativePoint:
+class ColoredPoint:
     point: Point
     hex: str
 
@@ -17,13 +17,13 @@ class RelativePoint:
         }
 
     @staticmethod
-    def from_namespace(ns: SimpleNamespace | None) -> Optional[RelativePoint]:
+    def from_namespace(ns: SimpleNamespace | None) -> Optional[ColoredPoint]:
         if ns is None:
             return None
-        return RelativePoint(point=Point.from_namespace(ns.point), hex=ns.hex)
+        return ColoredPoint(point=Point.from_namespace(ns.point), hex=ns.hex)
 
     @staticmethod
-    def from_namespace(ns_array: list[SimpleNamespace] | None) -> list[RelativePoint]:
+    def from_namespace(ns_array: list[SimpleNamespace] | None) -> list[ColoredPoint]:
         if ns_array is None:
             return []
-        return [RelativePoint.from_namespace(ns) for ns in ns_array if ns is not None]
+        return [ColoredPoint.from_namespace(ns) for ns in ns_array if ns is not None]

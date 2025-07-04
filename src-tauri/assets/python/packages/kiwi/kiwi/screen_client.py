@@ -7,7 +7,7 @@ import atexit
 import json
 import sys
 from .point import Point
-from .relative_point import RelativePoint
+from .colored_point import ColoredPoint
 from .response import Response
 from .rgb_offset import RgbOffset
 from .key import Key
@@ -111,32 +111,38 @@ class ScreenClient:
         self,
         *,
         vertex_hex: str,
-        relative_points: list[RelativePoint],
+        colored_points: list[ColoredPoint],
         start_point: Point,
         end_point: Point,
         rgb_offset: RgbOffset,
     ) -> Optional[Response]:
         args = {
             "vertex_hex": vertex_hex,
-            "relative_points": [rp.to_dict() for rp in relative_points],
+            "colored_points": [rp.to_dict() for rp in colored_points],
             "start_point": start_point.to_dict(),
             "end_point": end_point.to_dict(),
             "rgb_offset": rgb_offset.to_dict(),
         }
         response = self._send_and_receive("find_relative_colors", args)
-        response.data = RelativePoint.from_namespace(response.data)
+        response.data = ColoredPoint.from_namespace(response.data)
         return response
 
     def find_colors(
-        self, *, hex_colors: list[str], start_point: Point, end_point: Point
+        self,
+        *,
+        hex_colors: list[str],
+        start_point: Point,
+        end_point: Point,
+        rgb_offset: RgbOffset,
     ) -> Optional[Response]:
         args = {
             "hex_colors": hex_colors,
             "start_point": start_point.to_dict(),
             "end_point": end_point.to_dict(),
+            "rgb_offset": rgb_offset.to_dict(),
         }
         response = self._send_and_receive("find_colors", args)
-        response.data = RelativePoint.from_namespace_array(response.data)
+        response.data = ColoredPoint.from_namespace_array(response.data)
         return response
 
     def recognize_text(
@@ -148,9 +154,7 @@ class ScreenClient:
         }
         return self._send_and_receive("recognize_text", args)
 
-    def save_frame(
-        self, *, path: str
-    ) -> Optional[Response]:
+    def save_frame(self, *, path: str) -> Optional[Response]:
         args = {
             "path": path,
         }

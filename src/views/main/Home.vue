@@ -72,7 +72,7 @@ onUnmounted(async () => {});
       <el-row :gutter="0">
         <el-col :span="24">
           <div class="logo">
-            <el-icon :size="100" color="#1230BA"><Star /></el-icon>
+            <img src="../../assets/logo.png" alt="Logo" :width="100" />
           </div>
           <div class="title">{{ stateStore.app.name }}</div>
           <div class="sologan">
