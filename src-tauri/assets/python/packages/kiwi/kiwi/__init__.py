@@ -5,13 +5,15 @@ from .response import Response
 from .rgb_offset import RgbOffset
 from .system import System
 from .key import Key
+from .weight_point import WeightPoint
 
 __all__ = [
     "ScreenClient",
+    "System",
     "Point",
     "ColoredPoint",
     "Response",
     "RgbOffset",
-    "System",
     "Key",
+    "WeightPoint",
 ]
