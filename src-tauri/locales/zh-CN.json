@@ -12,7 +12,7 @@
   "Failed to initialize Python virtual environment.": "初始化 Python 虚拟环境失败。(错误:%{error})",
   "Failed to initialize app handle.": "初始化应用句柄失败。",
   "Failed to initialize resource directory.": "初始化资源目录失败。",
-  "Failed to install the Kiwi module.": "安装 Kiwi 模块失败。(错误:%{error})",
+  "Failed to install the Python module.": "安装 Python 模块失败。(错误:%{error})",
   "Failed to remove quarantine attribute from Python.": "移除 Python 的隔离属性失败。(错误:%{error})",
   "Failed to retrieve webview with the specified label.": "获取指定标签的 webview 失败。(标签:%{label})",
   "Failed to set window display affinity.": "设置窗口捕获属性失败。(错误:%{error})",
@@ -53,5 +53,6 @@
   "Screen capture is still running. Please wait a moment.": "屏幕捕获正在进行中，请稍等片刻。",
   "Recorder is now running.": "录制器正在运行。",
   "Invalid file name.": "无效的文件名。",
-  "Recorder error occurred.": "录制器发生错误。(错误:%{error})"
+  "Recorder error occurred.": "录制器发生错误。(错误:%{error})",
+  "Unable to delete the project’s Python virtual environment.": "无法删除项目的 Python 虚拟环境。(错误:%{error})"
 }

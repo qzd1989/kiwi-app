@@ -94,6 +94,14 @@ impl Project {
         Ok(())
     }
 
+    pub fn get_kind(interpreter: &Interpreter) -> String {
+        match interpreter {
+            Interpreter::Python(_) => {
+                return "desktop".to_string();
+            }
+        }
+    }
+
     pub fn get_edit_command(interpreter: &Interpreter) -> String {
         match interpreter {
             Interpreter::Python(_) => {

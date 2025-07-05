@@ -38,6 +38,7 @@ pub fn save_project(name: String, language: String, path: String) -> CommandResu
     let config = Config::new(
         &name,
         &language,
+        &Project::get_kind(&interpreter),
         &Project::get_edit_command(&interpreter),
         &Project::get_kiwi_version(&interpreter),
     );
@@ -67,7 +68,6 @@ pub fn init_project(app_handle: AppHandle, path: String) -> CommandResult<()> {
 
 #[tauri::command]
 pub fn reinit_project(app_handle: AppHandle, path: String) -> CommandResult<()> {
-    use fs_extra::remove_items;
     let project_path = PathBuf::from(path);
     let config = Config::new_from_toml(&project_path)?;
     let interpreter =
@@ -75,20 +75,7 @@ pub fn reinit_project(app_handle: AppHandle, path: String) -> CommandResult<()> 
     thread::spawn(move || {
         emit_progress(&app_handle, "reinit_project", Progress::start());
 
-        //delete
-        {
-            let mut need_to_removed = Vec::new();
-            let venv_path = project_path.join(".venv");
-            need_to_removed.push(&venv_path);
-
-            if let Err(error) = remove_items(&need_to_removed) {
-                Log::error(error.to_string()).send_to_app_log();
-                return;
-            }
-        }
-
-        //init
-        if let Err(error) = interpreter.init() {
+        if let Err(error) = interpreter.reinit() {
             Log::error(error.to_string()).send_to_app_log();
             return;
         }

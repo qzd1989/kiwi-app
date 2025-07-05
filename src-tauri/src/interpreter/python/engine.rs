@@ -1,10 +1,14 @@
 // done
 use super::{PyProject, PythonCode};
-use crate::{app::App, project::VerifyStatus};
+use crate::{
+    app::App,
+    project::{Config, VerifyStatus},
+};
 use anyhow::{Result, anyhow};
 use fs_extra;
 use std::{
-    fs,
+    fs::{self, File},
+    io::{BufRead, BufReader, Write},
     path::{Path, PathBuf},
     process::{ChildStderr, ChildStdout, Command, ExitStatus, Stdio},
     sync::{
@@ -147,6 +151,137 @@ impl Engine {
         VerifyStatus::Valid
     }
 
+    pub fn reinit(&self) -> Result<()> {
+        let config = Config::new_from_toml(&self.project_path)?;
+        //delete
+        {
+            let mut need_to_removed = Vec::new();
+            let venv_path = self.project_path.join(".venv");
+            need_to_removed.push(&venv_path);
+
+            if let Err(e) = fs_extra::remove_items(&need_to_removed) {
+                return Err(anyhow!(t!(
+                    "Unable to delete the project’s Python virtual environment.",
+                    error = e.to_string()
+                )));
+            }
+        }
+
+        // init
+        {
+            if let Err(error) = self.init() {
+                return Err(error);
+            }
+        }
+
+        // only desktop project needs to install requirements.txt.
+        // mobile project only can use what kiwi app provides.
+        {
+            if &config.project.kind != "desktop" {
+                return Ok(());
+            }
+        }
+
+        // init
+        {
+            self.init()?;
+        }
+
+        // check requirements.txt if exists
+        let requirements_path = self.project_path.join("requirements.txt");
+        {
+            if !requirements_path.exists() {
+                return Ok(());
+            }
+        }
+
+        // ignore kiwi module then install requirements.txt, because Kiwi may be installed in a different location.
+        {
+            let requirements_temp_path = self.project_path.join(".requirements.txt");
+            let file = File::open(&requirements_path)?;
+            let mut temp_file = File::create(&requirements_temp_path)?;
+            let reader = BufReader::new(file);
+            let mut modules = Vec::new();
+
+            for (_, line) in reader.lines().enumerate() {
+                let line = line?;
+                if line.starts_with("kiwi") {
+                    continue;
+                }
+                modules.push(line);
+            }
+
+            for module in modules {
+                writeln!(temp_file, "{}", module)?;
+            }
+
+            // install .requirements.txt
+            {
+                let output = {
+                    #[cfg(target_os = "macos")]
+                    {
+                        Command::new(&self.project_interpreter)
+                            .args(&["-u", "-m", "pip", "install", "-r"])
+                            .arg(&requirements_temp_path)
+                            .output()
+                    }
+                    #[cfg(target_os = "windows")]
+                    {
+                        Command::new(&self.project_interpreter)
+                            .args(&["-u", "-m", "pip", "install", "-r"])
+                            .arg(&requirements_temp_path)
+                            .creation_flags(CREATE_NO_WINDOW.0)
+                            .output()
+                    }
+                }?;
+
+                if !output.status.success() {
+                    let stderr = String::from_utf8_lossy(&output.stderr);
+                    return Err(anyhow!(t!(
+                        "Failed to install the Python module.",
+                        error = stderr.to_string()
+                    )));
+                }
+            }
+
+            // update requirements.txt
+            {
+                let output = {
+                    #[cfg(target_os = "macos")]
+                    {
+                        Command::new(&self.project_interpreter)
+                            .args(&["-u", "-m", "pip", "freeze"])
+                            .arg(&requirements_path)
+                            .output()
+                    }
+                    #[cfg(target_os = "windows")]
+                    {
+                        Command::new(&self.project_interpreter)
+                            .args(&["-u", "-m", "pip", "freeze"])
+                            .arg(&requirements_path)
+                            .creation_flags(CREATE_NO_WINDOW.0)
+                            .output()
+                    }
+                }?;
+
+                if !output.status.success() {
+                    let stderr = String::from_utf8_lossy(&output.stderr);
+                    return Err(anyhow!(t!(
+                        "Failed to install the Python module.",
+                        error = stderr.to_string()
+                    )));
+                }
+
+                fs::write(&requirements_path, &output.stdout)?;
+            }
+
+            // remove the temporary requirements file
+            let _ = fs::remove_file(&requirements_temp_path);
+        }
+
+        Ok(())
+    }
+
     pub fn init(&self) -> Result<()> {
         let default_interpreter = self.default_interpreter.clone();
         //copy template to project
@@ -233,7 +368,7 @@ impl Engine {
                 if !output.status.success() {
                     let stderr = String::from_utf8_lossy(&output.stderr);
                     return Err(anyhow!(t!(
-                        "Failed to install the Kiwi module.",
+                        "Failed to install the Python module.",
                         error = stderr.to_string()
                     )));
                 }

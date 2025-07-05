@@ -60,6 +60,12 @@ impl Interpreter {
         }
     }
 
+    pub fn reinit(&self) -> Result<()> {
+        match self {
+            Interpreter::Python(engine) => engine.reinit(),
+        }
+    }
+
     pub fn run<
         OnSpawned: Fn(u32) + Send + 'static,
         OnStdout: Fn(ChildStdout) + Send + 'static,

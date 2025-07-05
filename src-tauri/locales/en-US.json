@@ -12,7 +12,7 @@
   "Failed to initialize Python virtual environment.": "Failed to initialize Python virtual environment. (error:%{error})",
   "Failed to initialize app handle.": "Failed to initialize app handle.",
   "Failed to initialize resource directory.": "Failed to initialize resource directory.",
-  "Failed to install the Kiwi module.": "Failed to install the Kiwi module. (error:%{error})",
+  "Failed to install the Python module.": "Failed to install the Python module. (error:%{error})",
   "Failed to remove quarantine attribute from Python.": "Failed to remove quarantine attribute from Python. (error:%{error})",
   "Failed to retrieve webview with the specified label.": "Failed to retrieve webview with the specified label. (label:%{label})",
   "Failed to set window display affinity.": "Failed to set window display affinity. (error:%{error})",
@@ -54,5 +54,6 @@
   "Screen capture is still running. Please wait a moment.": "Screen capture is still running. Please wait a moment.",
   "Recorder is now running.": "Recorder is now running.",
   "Invalid file name.": "Invalid file name.",
-  "Recorder error occurred.": "Recorder error occurred. (error:%{error})"
+  "Recorder error occurred.": "Recorder error occurred. (error:%{error})",
+  "Unable to delete the project’s Python virtual environment.": "Unable to delete the project’s Python virtual environment. (error:%{error})"
 }

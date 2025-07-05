@@ -20,12 +20,14 @@ impl Config {
     pub fn new(
         name: impl AsRef<str>,
         language: impl AsRef<str>,
+        kind: impl AsRef<str>,
         edit_command: impl AsRef<str>,
         kiwi_version: impl AsRef<str>,
     ) -> Self {
         let mut config = Self::default();
         config.project.name = name.as_ref().to_string();
         config.project.language = language.as_ref().to_string();
+        config.project.kind = kind.as_ref().to_string();
         config.project.edit_command = edit_command.as_ref().to_string();
         config.project.kiwi_version = kiwi_version.as_ref().to_string();
         config
@@ -53,6 +55,7 @@ impl Config {
 pub struct ConfigProject {
     pub name: String,
     pub language: String,
+    pub kind: String,
     pub edit_command: String,
     pub kiwi_version: String,
 }
@@ -62,6 +65,7 @@ impl Default for ConfigProject {
         Self {
             name: "".to_string(),
             language: "".to_string(),
+            kind: "".to_string(),
             edit_command: "".to_string(),
             kiwi_version: "".to_string(),
         }
