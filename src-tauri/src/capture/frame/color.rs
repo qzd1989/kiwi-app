@@ -3,18 +3,23 @@ use crate::{
     extensions::ImageBufferRgbaExt as _,
     types::{ColoredPoint, HexColor, HexColorExt as _, Point, RgbColor, RgbOffset, Size},
 };
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use image::{ImageBuffer, Rgba};
 
 impl Frame {
     pub fn find_colors(
         &self,
         hex_colors: &[HexColor],
-        point: Point,
+        start_point: Point,
         size: Size,
         rgb_offset: RgbOffset,
     ) -> Result<Vec<ColoredPoint>> {
-        let buffer = self.to_buffer()?.crop(point, size);
+        if size.width > self.width || self.height > self.height {
+            return Err(anyhow!(t!(
+                "The find area size must not be larger than the frame size."
+            )));
+        }
+        let buffer = self.to_buffer()?.crop(start_point, size);
         let (width, height) = buffer.dimensions();
         let mut rgb_colors: Vec<RgbColor> = hex_colors
             .iter()
@@ -29,7 +34,10 @@ impl Frame {
                 rgb_colors.retain(|rgb_color| {
                     if let Some(_) = rgb_color.range_compare(rgb_offset, &rgb) {
                         locating_colors.push(ColoredPoint::new(
-                            Point::new(cropped_x as i32 + point.x, cropped_y as i32 + point.y),
+                            Point::new(
+                                cropped_x as i32 + start_point.x,
+                                cropped_y as i32 + start_point.y,
+                            ),
                             rgb_color.to_hex(),
                         ));
                         return false;
@@ -60,14 +68,19 @@ impl Frame {
         &self,
         vertex_hex: HexColor,               //peak point is {x:0, y:0}
         relative_points: Vec<ColoredPoint>, //not include peak point
-        point: Point,                       //scan start point
+        start_point: Point,                 //scan start point
         size: Size,                         //scan range
         rgb_offset: RgbOffset,
     ) -> Result<Option<ColoredPoint>> //return peak point
     {
+        if size.width > self.width || self.height > self.height {
+            return Err(anyhow!(t!(
+                "The find area size must not be larger than the frame size."
+            )));
+        }
         if relative_points.len() == 0 {
             let colors = vec![vertex_hex];
-            return match self.find_colors(&colors, point, size, rgb_offset) {
+            return match self.find_colors(&colors, start_point, size, rgb_offset) {
                 Ok(mut locating_colors) => Ok(locating_colors.pop()),
                 Err(_) => Ok(None),
             };
@@ -75,7 +88,7 @@ impl Frame {
         let locationg_colors_rect_height =
             relative_points.iter().map(|lc| lc.point.y).max().unwrap() as u32;
         let peak_rgb = vertex_hex.to_rgb();
-        let buffer = self.to_buffer().unwrap().crop(point, size);
+        let buffer = self.to_buffer().unwrap().crop(start_point, size);
         let (width, height) = buffer.dimensions();
         for cropped_y in 0..height {
             for cropped_x in 0..width {
@@ -91,7 +104,10 @@ impl Frame {
                     // 4. compare others pixel point.
                     if match_relatives(&buffer, &origin_abs_point, &relative_points, &offsets) {
                         let peak_abs = ColoredPoint::new(
-                            Point::new(cropped_x as i32 + point.x, cropped_y as i32 + point.y),
+                            Point::new(
+                                cropped_x as i32 + start_point.x,
+                                cropped_y as i32 + start_point.y,
+                            ),
                             rgb.to_hex(),
                         );
                         return Ok(Some(peak_abs));

@@ -15,14 +15,23 @@ impl Size {
         }
     }
     pub fn new_from_start_end_points(start_point: Point, end_point: Point) -> Result<Self> {
+        if start_point.x < 0 || start_point.y < 0 {
+            return Err(anyhow!(t!(
+                "The starting point coordinates must be greater than (0, 0)."
+            )));
+        }
+
         let width = end_point.x - start_point.x;
         let height = end_point.y - start_point.y;
+
         if width <= 0 {
             return Err(anyhow!(t!("Width must be greater than zero.")));
         }
+
         if height <= 0 {
             return Err(anyhow!(t!("Height must be greater than zero.")));
         }
+
         let (width, height) = (width as u32, height as u32);
         Ok(Self { width, height })
     }

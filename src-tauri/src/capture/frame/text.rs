@@ -8,8 +8,13 @@ use anyhow::{Result, anyhow};
 use paddle_ocr_rs::ocr_lite::OcrLite;
 use std::sync::{Mutex, OnceLock};
 impl Frame {
-    pub fn recognize_text(&self, point: Point, size: Size) -> Result<Option<String>> {
-        let rgb_image = self.to_buffer()?.crop(point, size).to_rgb()?;
+    pub fn recognize_text(&self, start_point: Point, size: Size) -> Result<Option<String>> {
+        if size.width > self.width || self.height > self.height {
+            return Err(anyhow!(t!(
+                "The find area size must not be larger than the frame size."
+            )));
+        }
+        let rgb_image = self.to_buffer()?.crop(start_point, size).to_rgb()?;
         OCR.get_or_init(move || -> Mutex<OcrLite> {
             let ocr = Mutex::new(OcrLite::new());
             match (

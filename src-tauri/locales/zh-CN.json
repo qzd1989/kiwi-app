@@ -54,5 +54,7 @@
   "Recorder is now running.": "录制器正在运行。",
   "Invalid file name.": "无效的文件名。",
   "Recorder error occurred.": "录制器发生错误。(错误:%{error})",
-  "Unable to delete the project’s Python virtual environment.": "无法删除项目的 Python 虚拟环境。(错误:%{error})"
+  "Unable to delete the project’s Python virtual environment.": "无法删除项目的 Python 虚拟环境。(错误:%{error})",
+  "The starting point coordinates must be greater than (0, 0).": "起始点坐标必须大于 (0, 0)。",
+  "The find area size must not be larger than the frame size.": "查找区域的大小不能大于画面大小。"
 }

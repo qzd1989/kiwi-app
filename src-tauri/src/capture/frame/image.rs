@@ -21,10 +21,15 @@ impl Frame {
     pub fn find_image(
         &self,
         template: &ImageBuffer<image::Rgba<u8>, Vec<u8>>,
-        point: Point,
+        start_point: Point,
         size: Size,
         threshold: impl Into<f64>, //建议0.99以上
     ) -> Result<Option<WeightPoint>> {
+        if size.width > self.width || self.height > self.height {
+            return Err(anyhow!(t!(
+                "The find area size must not be larger than the frame size."
+            )));
+        }
         let (template_width, template_height) = {
             let (w, h) = template.dimensions();
             (w as usize, h as usize)
@@ -34,7 +39,7 @@ impl Frame {
                 "The template size exceeds the cropped frame size."
             )));
         }
-        let image = self.to_buffer()?.crop(point, size).to_mat()?;
+        let image = self.to_buffer()?.crop(start_point, size).to_mat()?;
         let mask = template.mask()?;
         let template = template.to_mat()?;
         let mut matched = Mat::default();
@@ -50,18 +55,23 @@ impl Frame {
             println!("threshold is too big, the max is {:?}", one.weight);
             return Ok(None);
         }
-        one.point.x += point.x;
-        one.point.y += point.y;
+        one.point.x += start_point.x;
+        one.point.y += start_point.y;
         Ok(Some(one))
     }
 
     pub fn find_images(
         &self,
         template: &ImageBuffer<image::Rgba<u8>, Vec<u8>>,
-        point: Point,
+        start_point: Point,
         size: Size,
         threshold: impl Into<f64>, //建议0.99以上
     ) -> Result<Vec<WeightPoint>> {
+        if size.width > self.width || self.height > self.height {
+            return Err(anyhow!(t!(
+                "The find area size must not be larger than the frame size."
+            )));
+        }
         let (template_width, template_height) = {
             let (w, h) = template.dimensions();
             (w as usize, h as usize)
@@ -71,7 +81,7 @@ impl Frame {
                 "The template size exceeds the cropped frame size."
             )));
         }
-        let image = self.to_buffer()?.crop(point, size).to_mat()?;
+        let image = self.to_buffer()?.crop(start_point, size).to_mat()?;
         let mask = template.mask()?;
         let template = template.to_mat()?;
         let mut matched = Mat::default();
@@ -85,8 +95,8 @@ impl Frame {
         let mut weight_points = FindResult::new(template, matched).multiple(threshold.into())?;
         weight_points.sort_by(|a, b| b.weight.partial_cmp(&a.weight).unwrap());
         for weight_point in weight_points.iter_mut() {
-            weight_point.point.x += point.x;
-            weight_point.point.y += point.y;
+            weight_point.point.x += start_point.x;
+            weight_point.point.y += start_point.y;
         }
         Ok(weight_points)
     }

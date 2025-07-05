@@ -55,5 +55,7 @@
   "Recorder is now running.": "Recorder is now running.",
   "Invalid file name.": "Invalid file name.",
   "Recorder error occurred.": "Recorder error occurred. (error:%{error})",
-  "Unable to delete the project’s Python virtual environment.": "Unable to delete the project’s Python virtual environment. (error:%{error})"
+  "Unable to delete the project’s Python virtual environment.": "Unable to delete the project’s Python virtual environment. (error:%{error})",
+  "The starting point coordinates must be greater than (0, 0).": "The starting point coordinates must be greater than (0, 0).",
+  "The find area size must not be larger than the frame size.": "The find area size must not be larger than the frame size."
 }
