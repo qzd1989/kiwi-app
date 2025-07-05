@@ -1,13 +1,13 @@
 import time
 from kiwi import (
-    ScreenClient,
-    Point,
-    RelativePoint,
-    RgbOffset,
-    System,
-    Key,
     ColoredPoint,
+    Key,
+    Point,
     Response,
+    RgbOffset,
+    ScreenClient,
+    System,
+    WeightPoint,
 )
 
 client = ScreenClient()
