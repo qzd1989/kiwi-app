@@ -78,8 +78,8 @@ client = ScreenClient()
             .join("\n");
         format!(
             r#"client.find_relative_colors(
-    vertex_color="{vertex_hex}",
-    relative_points=[
+    vertex_hex="{vertex_hex}",
+    colored_points=[
 {rows_str}
     ],
     start_point=Point(x={sx},y={sy}),
