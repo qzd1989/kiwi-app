@@ -76,7 +76,7 @@ onUnmounted(async () => {});
           </div>
           <div class="title">{{ stateStore.app.name }}</div>
           <div class="sologan">
-            {{ t("Hands-free, everything on autopilot.") }}
+            {{ t("Simplifying your tasks, one click at a time.") }}
           </div>
         </el-col>
       </el-row>
