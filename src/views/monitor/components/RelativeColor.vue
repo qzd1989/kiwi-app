@@ -58,7 +58,7 @@ const result = ref<string | null>(null);
 const code = ref<string | null>(null);
 const points = ref<RelativeColorPoint[]>([]);
 const loading = ref(false);
-const pixelValue = 10;
+const pixelValue = 5;
 const formRef = ref<FormInstance>();
 const form = reactive<Form>({
   points: [],
