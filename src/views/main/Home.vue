@@ -148,6 +148,7 @@ onUnmounted(async () => {});
       }
       .sologan {
         font-size: 14px;
+        opacity: 0.5;
       }
       .el-button {
         width: 100%;
