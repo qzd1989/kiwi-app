@@ -401,7 +401,7 @@ impl Engine {
             .stderr(Stdio::piped());
         #[cfg(target_os = "windows")]
         {
-            command.creation_flags(CREATE_NO_WINDOW.0)
+            command.creation_flags(CREATE_NO_WINDOW.0);
         }
         let mut child = command.spawn()?;
         let pid = child.id();
