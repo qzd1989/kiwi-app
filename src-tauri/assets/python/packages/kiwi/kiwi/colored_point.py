@@ -23,7 +23,9 @@ class ColoredPoint:
         return ColoredPoint(point=Point.from_namespace(ns.point), hex=ns.hex)
 
     @staticmethod
-    def from_namespace(ns_array: list[SimpleNamespace] | None) -> list[ColoredPoint]:
+    def from_namespace_array(
+        ns_array: list[SimpleNamespace] | None,
+    ) -> list[ColoredPoint]:
         if ns_array is None:
             return []
         return [ColoredPoint.from_namespace(ns) for ns in ns_array if ns is not None]
