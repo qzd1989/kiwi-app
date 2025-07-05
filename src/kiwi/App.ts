@@ -106,7 +106,12 @@ class AppModel {
 
   // 检查平台的 Release 更新
   async checkRelease(): Promise<Release | null> {
-    const platformData = (await apiFetch("/version.json")) as PlatformData;
+    const locale = this.app.config?.app.locale as string;
+    const platformData = (await apiFetch("/version.json", {
+      params: {
+        locale,
+      },
+    })) as PlatformData;
     const platforms = platformData.platforms;
     const osName = await type();
     const archName = await arch();
