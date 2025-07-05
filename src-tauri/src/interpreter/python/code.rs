@@ -72,7 +72,7 @@ client = ScreenClient()
             .map(|p| {
                 let Point { x, y } = p.point;
                 let hex = p.clone().hex;
-                format!("        ColoredPoint(point=Point(x={x}, y={y})), hex=\"{hex}\"")
+                format!("        ColoredPoint(point=Point(x={x}, y={y}), hex=\"{hex}\"),")
             })
             .collect::<Vec<_>>()
             .join("\n");
