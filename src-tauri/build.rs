@@ -5,8 +5,6 @@ use std::{env, fs, path::PathBuf, process::Command, sync::OnceLock};
 
 fn main() {
     init();
-    // init_7z();
-    // init_vscode();
     init_dirs();
     init_python_interpreter();
 
@@ -156,13 +154,6 @@ fn init_whl() {
 }
 
 fn init_python_interpreter() {
-    let dst_file = assets_dir().join("zip").join("interpreter.zip");
-
-    if dst_file.exists() {
-        return;
-    }
-
-    println!("cargo:warning=compress python interpreter");
     let interpreter_name = {
         if is_macos() {
             "python_interpreter_macos"
@@ -171,16 +162,24 @@ fn init_python_interpreter() {
         }
     };
     let src_dir = assets_dir().join("resources").join(interpreter_name);
-    dbg!(&src_dir, &dst_file);
-    compress(&src_dir, &dst_file).expect("Compress python interpreter failed.");
-    {
-        println!("cargo:warning=extract python interpreter to target");
-        let src_path = dst_file;
+    let copy_to_target = |src_path: &PathBuf| {
         let dst_dir = target_dir().join("python").join("interpreter");
         dir::create_all(&dst_dir, true).expect("Failed to create target/python/interpreter dir.");
         extract(fs::File::open(src_path).unwrap(), &dst_dir, true)
             .expect("Failed to extract python interpreter.");
+    };
+    let zip_file = assets_dir().join("zip").join("interpreter.zip");
+
+    if zip_file.exists() {
+        copy_to_target(&zip_file);
+        return;
     }
+
+    println!("cargo:warning=compress python interpreter");
+    compress(&src_dir, &zip_file).expect("Compress python interpreter failed.");
+
+    println!("cargo:warning=extract python interpreter to target");
+    copy_to_target(&zip_file);
 }
 
 #[allow(dead_code)]
