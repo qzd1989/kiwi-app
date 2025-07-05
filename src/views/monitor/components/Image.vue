@@ -119,6 +119,7 @@ const fullFilePath = computed(() => {
   if (!form.name?.trim()) {
     return "";
   }
+
   return (
     stateStore.project.path +
     sep() +
@@ -444,6 +445,27 @@ watch(
       if (form.findArea.end.y <= form.findArea.start.y) {
         form.findArea.end.y = form.findArea.start.y + 1;
       }
+    }
+  }
+);
+
+watch(
+  () => {
+    return form.name;
+  },
+  async (newVal) => {
+    if (newVal) {
+      if (!form.name?.trim()) return;
+
+      const startPoint = form.findArea.start;
+      const endPoint = form.findArea.end;
+      const threshold = form.threshold;
+      code.value = await codeModel.generateFindImageCode(
+        formatImageName(form.name),
+        startPoint,
+        endPoint,
+        threshold
+      );
     }
   }
 );
