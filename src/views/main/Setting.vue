@@ -141,9 +141,13 @@ onUnmounted(async () => {});
     <el-header class="page-header">
       <el-row :gutter="0">
         <el-col :span="8" class="left">
-          <router-link to="/">
-            <el-icon :size="20" color="#fff"><ArrowLeft /></el-icon>
-          </router-link>
+          <el-icon
+            :size="20"
+            color="#fff"
+            style="cursor: pointer"
+            @click="$router.push('/main/home')"
+            ><ArrowLeft
+          /></el-icon>
         </el-col>
         <el-col :span="8" class="title">{{ t("Setting") }}</el-col>
         <el-col :span="8" class="right"></el-col>
