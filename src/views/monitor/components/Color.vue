@@ -180,7 +180,7 @@ const drawItems = (items: ColoredPoint[]) => {
   emits("drawItems", {
     callback: (ctx: CanvasRenderingContext2D) => {
       for (const item of items) {
-        const title = `color:${item.hex}`;
+        const title = `Color:${item.hex}`;
         const titlePoint = Point.from(item.point.x - 5, item.point.y - 10);
         const arcPoint = Point.from(item.point.x, item.point.y);
         drawArc(ctx, arcPoint, 5);
