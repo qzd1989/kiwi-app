@@ -89,8 +89,8 @@ const rules = reactive<FormRules<Form>>({
 });
 const originalBase64Png = ref("");
 const dataExtSideLength = 100; //额外扩展的画布长度,让图像居中方便擦除
-const bgLight = "/src/assets/canvas-bg-light.png";
-const bgDark = "/src/assets/canvas-bg-dark.png";
+const bgLight = "/canvas-bg-light.png";
+const bgDark = "/canvas-bg-dark.png";
 const bgUrl = ref(bgLight);
 const showmagnifyingGlass = ref(false);
 const point = reactive({ x: 0, y: 0 });
