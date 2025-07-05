@@ -116,19 +116,19 @@ jobs:
             ~/.cargo/git
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Cache target/release
-        uses: actions/cache@v4
-        with:
-          path: src-tauri/target/release
-          key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
+      # - name: Cache target/release
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: src-tauri/target/release
+      #     key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      # - name: Cache node_modules
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: node_modules
+      #     key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-node-
 
       - name: Install dependencies
         run: npm ci
