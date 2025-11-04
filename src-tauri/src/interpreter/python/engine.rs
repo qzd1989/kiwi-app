@@ -8,6 +8,7 @@ use crate::{
 };
 use anyhow::{Result, anyhow};
 use fs_extra;
+use regex::Regex;
 use std::{
     fs,
     path::PathBuf,
@@ -293,39 +294,49 @@ impl Engine {
         Ok(())
     }
 
-    pub fn should_reinit(&self, path: &PathBuf) -> Result<bool> {
-        // default interpreter is moved?
+    pub fn should_reinit(&self, project_path: &PathBuf) -> Result<bool> {
+        // system interpreter is moved?
         {
-            let cfg_path = path.join(".venv").join("pyvenv.cfg");
+            let cfg_path = project_path.join(".venv").join("pyvenv.cfg");
             let content = fs::read_to_string(&cfg_path)?;
-            let bin_path_str = self
+            let system_interpreter_dir = self
                 .path
                 .parent()
                 .ok_or_else(|| anyhow!("Python bin folder not found."))?
                 .to_str()
                 .ok_or_else(|| anyhow!("Convert Path to String failed."))?;
-            if let None = content.find(bin_path_str) {
+            if let None = content.find(system_interpreter_dir) {
                 return Ok(true);
             }
         }
-
         // kiwi whl is outdated?
         {
-            let path = path.join("pyproject.toml");
-            let pyproject = PyProject::new_from_file(&path)?;
-            let sources = pyproject.tool.uv.sources;
-            let kiwi_source = sources
-                .get("kiwi")
-                .ok_or_else(|| anyhow!("Kiwi lib not found"))?;
-            let project_kiwi = kiwi_source.path.clone();
-            let wheels_path = app::get()
-                .resource_dir()
-                .join("python")
-                .join("project_template")
-                .join("wheels");
-            let pattern = r"^kiwi-\d+(\.\d+)*-py3-none-any\.whl$";
-            let app_kiwi = find_file_in_dir(&wheels_path, pattern)
-                .ok_or_else(|| anyhow!("Kiwi lib not found."))?;
+            let project_kiwi = {
+                let pattern = r"kiwi-\d+(\.\d+)*-py3-none-any\.whl$";
+                let path = project_path.join("pyproject.toml");
+                let pyproject = PyProject::new_from_file(&path)?;
+                let sources = pyproject.tool.uv.sources;
+                let kiwi_source = sources
+                    .get("kiwi")
+                    .ok_or_else(|| anyhow!("Kiwi lib not found"))?;
+                let re = Regex::new(pattern)?;
+                let path = re
+                    .find(&kiwi_source.path)
+                    .ok_or_else(|| anyhow!("Matched pyproject.toml kiwi.path failed."))?
+                    .as_str();
+                path.to_string()
+            };
+            let app_kiwi = {
+                let pattern = r"^kiwi-\d+(\.\d+)*-py3-none-any\.whl$";
+                let wheels_path = app::get()
+                    .resource_dir()
+                    .join("python")
+                    .join("project_template")
+                    .join("wheels");
+                find_file_in_dir(&wheels_path, pattern)
+                    .ok_or_else(|| anyhow!("Kiwi lib not found."))?
+            };
+
             if project_kiwi != app_kiwi {
                 return Ok(true);
             }

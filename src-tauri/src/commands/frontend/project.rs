@@ -125,16 +125,6 @@ pub fn run_script(file: String) -> CommandResult<()> {
         app.try_with_project(|_| {})?;
     }
 
-    // check if script is running
-    // {
-    //     let pid = app.try_with_project(|project| project.interpreter.pid())?;
-    //     if pid != 0 {
-    //         let msg = t!("The script is running, plese stop it first.", pid = pid);
-    //         project_warn!("{}", &msg);
-    //         return Err(msg.into());
-    //     }
-    // }
-
     // run capturer if local server
     {
         if app.remote_server_address() == ServerEngine::local_address()
