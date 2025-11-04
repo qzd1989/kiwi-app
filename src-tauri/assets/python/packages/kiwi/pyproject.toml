@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kiwi"
+version = "0.1.0"
+description = "kiwi lib"
+authors = [{ name = "kiwi", email = "kiwi@kiwi.kiwi" }]
+readme = "README.md"
+requires-python = ">=3.13"
+
+# websocket-client 是 kiwi 库连接后端时使用
+# uv 用于创建标准python 项目时使用
+dependencies = ["websocket-client","uv"] 
+
+[tool.setuptools]
+packages = ["kiwi"]
