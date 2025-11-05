@@ -92,16 +92,12 @@ fn init_python() {
 }
 
 fn install_uv() {
+    println!("cargo:warning=install_uv");
     let wheels_path = target_dir()
         .join("python")
         .join("project_template")
         .join("wheels");
     let pattern = r"^uv-.*\.whl$";
-    println!(
-        "cargo:warning=uv: {}, {}",
-        &wheels_path.to_string_lossy(),
-        pattern
-    );
     let uv_path = match find_one_file_in_dir(&wheels_path, pattern) {
         Some(p) => p,
         None => panic!("Uv wheel not found."),
