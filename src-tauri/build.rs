@@ -183,7 +183,8 @@ fn build_whl() {
         .join("python")
         .join("project_template")
         .join("wheels");
-    let kiwi_whl_path = wheels_dir.join(&format!("kiwi-{}-py3-none-any.whl", kiwi_whl_version()));
+    let kiwi_whl_file = format!("kiwi-{}-py3-none-any.whl", kiwi_whl_version());
+    let kiwi_whl_path = wheels_dir.join(&kiwi_whl_file);
 
     if kiwi_whl_path.exists() {
         return;
@@ -243,6 +244,22 @@ fn build_whl() {
     if !output.status.success() {
         panic!("Build_whl download dependencies of kiwi whl failed.");
     }
+
+    println!("cargo:warning=delete project_template/wheels/*.tar and *.tar.gz");
+    find_all_files_in_dir(&wheels_dir, r".*\.tar(\.gz)?$")
+        .iter()
+        .for_each(|file| {
+            fs::remove_file(file).expect("Failed to delete .tar or .tar.gz file.");
+        });
+
+    println!("cargo:warning=delete old kiwi whl");
+    find_all_files_in_dir(&wheels_dir, r"^kiwi.*\.whl$")
+        .iter()
+        .for_each(|file| {
+            if file != &kiwi_whl_path {
+                fs::remove_file(file).expect("Failed to delete old kiwi whl file.");
+            }
+        });
 }
 
 fn python_command() -> Command {
@@ -372,4 +389,31 @@ pub fn find_one_file_in_dir(dir: &Path, pattern: &str) -> Option<PathBuf> {
         }
     }
     None
+}
+
+/// 遍历目录，返回所有匹配正则 pattern 的文件路径
+pub fn find_all_files_in_dir(dir: &Path, pattern: &str) -> Vec<PathBuf> {
+    let mut matched_files = Vec::new();
+    let re = match Regex::new(pattern) {
+        Ok(r) => r,
+        Err(_) => return matched_files, // 正则无效返回空列表
+    };
+
+    let entries = match std::fs::read_dir(dir) {
+        Ok(e) => e,
+        Err(_) => return matched_files, // 目录不存在返回空列表
+    };
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_file() {
+            if let Some(file_name) = path.file_name().and_then(|s| s.to_str()) {
+                if re.is_match(file_name) {
+                    matched_files.push(path);
+                }
+            }
+        }
+    }
+
+    matched_files
 }
