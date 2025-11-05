@@ -10,6 +10,7 @@ use anyhow::{Result, anyhow};
 use fs_extra;
 use regex::Regex;
 use std::{
+    any::Any,
     fs,
     path::PathBuf,
     process::Command,
@@ -30,6 +31,10 @@ pub struct Engine {
 }
 
 impl Interpreter for Engine {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
     fn code(&self) -> Box<dyn Code> {
         Box::new(PythonCode::default())
     }

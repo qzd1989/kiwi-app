@@ -1,4 +1,5 @@
 import { useAppStore } from "@store";
+import WebSocket from "@tauri-apps/plugin-websocket";
 
 type Method =
   | "save_template"
@@ -28,7 +29,7 @@ type Method =
 
 type RequestPayload = {
   method: string;
-  args: Record<string, any> | null;
+  args?: Record<string, any>;
 };
 
 type Response<T = any> = {
@@ -38,109 +39,37 @@ type Response<T = any> = {
 };
 
 class Api {
-  private static instance: Api | null = null;
-  private ws: WebSocket;
-  private pending: Array<(res: Response) => void> = [];
-  private connected = false;
-  private readyPromise: Promise<void>;
-  private readyResolve!: () => void;
-
-  private constructor(url: string) {
-    this.ws = new WebSocket(url);
-
-    this.readyPromise = new Promise((resolve) => {
-      this.readyResolve = resolve;
-    });
-
-    this.ws.addEventListener("open", () => {
-      this.connected = true;
-      this.readyResolve();
-    });
-
-    this.ws.addEventListener("message", (event) => {
-      try {
-        const msg = JSON.parse(event.data);
-        if (this.pending.length > 0) {
-          const resolver = this.pending.shift()!;
-          resolver(msg);
-        }
-      } catch (err) {
-        console.error("[Api] Invalid message:", event.data);
-      }
-    });
-
-    this.ws.addEventListener("close", () => {
-      this.connected = false;
-      console.warn("[Api] WebSocket disconnected");
-    });
-
-    this.ws.addEventListener("error", (err) => {
-      console.error("[Api] WebSocket error:", err);
-    });
-  }
-
-  private async ready() {
-    if (this.connected) {
-      return;
-    }
-    await this.readyPromise;
-  }
-
-  static getInstance(): Api {
-    if (!Api.instance) {
-      const appStore = useAppStore();
-      Api.instance = new Api(`ws://${appStore.remoteServerAddress}`);
-    }
-    return Api.instance;
-  }
-
   static async request<T = any>(
     method: Method,
     args: Record<string, any> | null = null,
-  ): Promise<Response<T>> {
-    const api = Api.getInstance();
-    return api._request<T>(method, args);
-  }
+  ): Promise<T | null> {
+    const appStore = useAppStore();
+    const ws = await WebSocket.connect(`ws://${appStore.remoteServerAddress}`);
 
-  async _request<T = any>(
-    method: Method,
-    args: Record<string, any> | null = null,
-  ): Promise<Response<T>> {
-    await this.ready();
+    const payload: RequestPayload = { method };
+    if (args) payload.args = args;
 
-    const payload = { method, args } satisfies RequestPayload;
-
-    return new Promise((resolve, reject) => {
-      this.pending.push(resolve);
-
-      try {
-        this.ws.send(JSON.stringify(payload));
-      } catch (err) {
-        this.pending.pop();
-        reject(err);
-        return;
-      }
-
-      const timeout = setTimeout(() => {
-        const index = this.pending.indexOf(resolve);
-        if (index !== -1) {
-          this.pending.splice(index, 1);
+    return new Promise<T | null>((resolve, reject) => {
+      const listener = (msg: any) => {
+        try {
+          // msg.data 是 JSON 字符串，需要解析
+          const data =
+            typeof msg.data === "string" ? JSON.parse(msg.data) : msg.data;
+          resolve(data as T);
+        } catch (err) {
+          reject(err);
+        } finally {
+          ws.disconnect().catch(() => {});
         }
-        reject(new Error("Request timed out after 5 seconds"));
-      }, 5000);
-
-      const wrappedResolve = (res: Response) => {
-        clearTimeout(timeout);
-        resolve(res);
       };
 
-      // Replace the original resolve with wrappedResolve to clear timeout on response
-      this.pending[this.pending.length - 1] = wrappedResolve;
-    });
-  }
+      ws.addListener(listener);
 
-  close() {
-    this.ws.close();
+      ws.send(JSON.stringify(payload)).catch((err) => {
+        ws.disconnect().catch(() => {});
+        reject(err);
+      });
+    });
   }
 }
 

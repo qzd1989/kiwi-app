@@ -1,11 +1,14 @@
 use crate::interpreter::code::Code;
 use anyhow::Result;
+use std::any::Any;
 use std::path::Path;
 use std::process::{ChildStderr, ChildStdout, ExitStatus};
 use std::sync::Arc;
 use std::sync::atomic::AtomicU32;
 
 pub trait Interpreter {
+    fn as_any(&self) -> &dyn Any;
+
     fn code(&self) -> Box<dyn Code>;
 
     fn run(

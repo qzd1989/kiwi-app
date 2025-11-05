@@ -1,7 +1,6 @@
 use crate::{
-    app,
-    commands::frontend::relative_template_dir,
-    commands::server::Engine as ServerEngine,
+    app::{self, Role},
+    commands::{frontend::relative_template_dir, server::Engine as ServerEngine},
     types::{Base64Png, Base64PngExt as _, HexColor, Point, RelativeColoredPoint, RgbOffset, Size},
 };
 use anyhow::{Result, anyhow};
@@ -186,12 +185,14 @@ pub fn load_template_from_cache(subpath: &str) -> Result<RgbaImage> {
 pub fn get_image_args(args: &Value) -> Result<(RgbaImage, Point, Size, f64, u32)> {
     let subpath = get_required_string(args, "subpath")?;
     let app = app::get();
-    let template_buffer = if app.remote_server_address() == ServerEngine::local_address() {
+
+    let template_buffer = if app.role() == Role::Listener {
+        load_template_from_cache(&subpath)?
+    } else {
         let project_dir = get_project_dir()?;
         load_template_from_project(&project_dir, &subpath)?
-    } else {
-        load_template_from_cache(&subpath)?
     };
+
     let start_point = get_required_point(args, "start_point")?;
     let end_point = get_required_point(args, "end_point")?;
     let threshold = get_required_f64(args, "threshold")?;

@@ -67,5 +67,12 @@ pub fn get_lan_server_address() -> CommandResult<String> {
 #[tauri::command]
 pub fn set_remote_server_address(address: String) -> CommandResult<String> {
     app::get().set_remote_server_address(address);
+
+    //如果project存在，修改project的配置文件
+    let _ = app::get().try_with_project(|project| {
+        // 1. python project: 修改.vscode/launch.json里的 --endpoint参数
+        project.update_endpoint(&app::get().remote_server_address())
+    });
+
     Ok(app::get().remote_server_address())
 }

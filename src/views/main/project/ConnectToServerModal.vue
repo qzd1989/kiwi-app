@@ -10,7 +10,7 @@ type Form = {
 };
 
 const appStore = useAppStore();
-const props = defineProps(["close"]);
+const props = defineProps(["close", "capture"]);
 const formRef = ref<FormInstance>();
 const form = reactive<Form>({
   address: "",
@@ -35,6 +35,7 @@ const connect = async (formEl: FormInstance | undefined) => {
       await Server.setRemoteAddress(form.address);
       appStore.remoteServerAddress = form.address;
       msgSuccess(`Server ${form.address} is alive.`);
+      await props.capture();
       await props.close();
     } else {
       msgError("Remote Server is not alive.");

@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "name": "Run Kiwi Project Script",
+      "type": "debugpy",
+      "program": "${file}",
+      "request": "launch",
+      "args": ["--endpoint", "127.0.0.1:9927"]
+    }
+  ]
+}

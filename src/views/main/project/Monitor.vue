@@ -65,11 +65,6 @@ const loadPngFromFile = async (pngTarget: Png) => {
 };
 
 const exportPng = async () => {
-  // 打开系统文件框，文件名为{Ymdhis}.png
-  // 点击保存后将 png.value 写入图片文件。
-  // 成功 msgSuccess
-  // 失败 msgError
-  console.log("yte");
   if (!png.value) {
     msgError("No image to export.");
     return;
@@ -100,8 +95,7 @@ const exportPng = async () => {
     await writeFile(path, bytes);
 
     msgSuccess("Image exported successfully!");
-  } catch (e: any) {
-    console.error(e);
+  } catch (e) {
     msgError(e?.toString() || "Failed to export image.");
   }
 };
