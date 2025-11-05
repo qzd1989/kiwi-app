@@ -66,6 +66,45 @@ Function DoInstall
   ${If} ${Errors}
     Abort "Rename $INSTDIR\.python\interpreter to $INSTDIR\python\interpreter failed!"
   ${EndIf}
+
+  ; install uv
+  Call InstallUv
+FunctionEnd
+
+Function InstallUv
+  ; install uv whl, for example: uv-0.9.7-py3-none-win_arm64.whl
+  ; filepath: $INSTDIR\python\project_template\wheels\uv-*.whl
+  ; linkspath: $INSTDIR\python\project_template\wheels\
+  ; if filepath exists, run $INSTDIR\python\interpreter\python.exe -m pip install --no-index --find-links=<linkspath> <filepath>
+
+  DetailPrint "Checking for uv wheel file..."
+  FindFirst $0 $1 "$INSTDIR\python\project_template\wheels\uv-*.whl"
+  StrCmp $1 "" NoUvWheelFound
+
+  ; Found uv wheel file
+  StrCpy $R0 "$INSTDIR\python\project_template\wheels\$1"
+  StrCpy $R1 "$INSTDIR\python\project_template\wheels"
+  StrCpy $R2 "$INSTDIR\python\interpreter\python.exe"
+
+  DetailPrint "Found uv wheel: $R0"
+  DetailPrint "Installing uv via pip..."
+  nsExec::ExecToLog 'powershell -NoProfile -ExecutionPolicy Bypass -Command "& \"$R2\" -m pip install --no-index --find-links=\"$R1\" \"$R0\""'
+  Pop $R3
+
+  ${If} $R3 != "0"
+    Abort "Failed to install uv from $R0"
+  ${Else}
+    DetailPrint "uv installed successfully."
+  ${EndIf}
+
+  FindClose $0
+  Goto UvInstallDone
+
+  NoUvWheelFound:
+    DetailPrint "No uv wheel file found, skipping installation."
+    FindClose $0
+
+  UvInstallDone:
 FunctionEnd
 
 Function Cleanup
