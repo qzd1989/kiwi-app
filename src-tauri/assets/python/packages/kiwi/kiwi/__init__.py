@@ -1,4 +1,4 @@
-from .screen_client import ScreenClient
+from .client import Client
 from .point import Point
 from .colored_point import ColoredPoint
 from .response import Response
@@ -10,7 +10,7 @@ from .size import Size
 from .relative_colored_point import RelativeColoredPoint
 
 __all__ = [
-    "ScreenClient",
+    "Client",
     "System",
     "Point",
     "ColoredPoint",

@@ -91,6 +91,7 @@ pub fn run() {
             commands::frontend::code::generate_find_relative_colors_code,
             commands::frontend::code::generate_find_colors_code,
             commands::frontend::code::generate_recognize_text_code,
+            commands::frontend::code::generate_move_absolute_code
         ]);
 
     if cfg!(target_os = "macos") {

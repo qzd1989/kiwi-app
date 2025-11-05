@@ -88,3 +88,10 @@ pub fn generate_recognize_text_code(start_point: Point, end_point: Point) -> Com
     })?;
     Ok(code)
 }
+
+#[tauri::command]
+pub fn generate_move_absolute_code(point: Point) -> CommandResult<String> {
+    let code =
+        app::get().try_with_project(|project| project.interpreter.code().absolute_code(&point))?;
+    Ok(code)
+}

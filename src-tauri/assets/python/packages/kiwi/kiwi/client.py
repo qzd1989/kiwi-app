@@ -25,7 +25,7 @@ from .system import System
 from .weight_point import WeightPoint
 
 
-class ScreenClient:
+class Client:
     def __init__(self):
         self.ws = None
         self._connect()
@@ -210,11 +210,13 @@ class ScreenClient:
         args = {}
         self._send_and_receive("release_right", args)
 
-    def move_absolute(self, absolute_point: Point):
+    def move_absolute(self, x: int, y: int):
+        absolute_point = Point(x, y)
         args = {"absolute_point": absolute_point._to_dict()}
         self._send_and_receive("move_absolute", args)
 
-    def move_relative(self, offset: Point):
+    def move_relative(self, x: int, y: int):
+        offset = Point(x, y)
         args = {"offset": offset._to_dict()}
         self._send_and_receive("move_relative", args)
 
@@ -241,7 +243,7 @@ class ScreenClient:
         args = {"key": key_val}
         self._send_and_receive("click_key", args)
 
-    def input_copy(self):
+    def copy(self):
         system = System()
         if sys.platform == "darwin":
             self.press_key(key=Key.Meta)
@@ -256,7 +258,7 @@ class ScreenClient:
             system.sleep(milliseconds=20)
             self.release_key(key=Key.Control)
 
-    def input_paste(self):
+    def paste(self):
         system = System()
         if sys.platform == "darwin":
             self.press_key(key=Key.Meta)
@@ -271,7 +273,7 @@ class ScreenClient:
             system.sleep(milliseconds=20)
             self.release_key(key=Key.Control)
 
-    def input_cut(self):
+    def cut(self):
         system = System()
         if sys.platform == "darwin":
             self.press_key(key=Key.Meta)
@@ -286,7 +288,7 @@ class ScreenClient:
             system.sleep(milliseconds=20)
             self.release_key(key=Key.Control)
 
-    def input_select_all(self):
+    def select_all(self):
         system = System()
         if sys.platform == "darwin":
             self.press_key(key=Key.Meta)
@@ -301,6 +303,6 @@ class ScreenClient:
             system.sleep(milliseconds=20)
             self.release_key(key=Key.Control)
 
-    def input_text(self, text: str):
+    def text(self, text: str):
         args = {"text": text}
         self._send_and_receive("input_text", args)

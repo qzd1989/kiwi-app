@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, reactive, computed } from "vue";
 import { useAppStore } from "@store";
-import { Api, Common } from "@api";
+import { Api, Code, Common } from "@api";
 import bgUrl from "@assets/canvas-bg-light.png";
 import { Png, Point, Size } from "@types";
 import { copyText, msgError } from "@utils";
@@ -13,6 +13,7 @@ import { listen } from "@tauri-apps/api/event";
 import { delay, msgSuccess } from "@utils";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
+import { useI18n } from "vue-i18n";
 
 type Selection = {
   start: Point;
@@ -25,6 +26,7 @@ type Params = {
   selection: Selection;
 };
 
+const { t } = useI18n();
 const appStore = useAppStore();
 const findImageRef = ref<InstanceType<typeof FindImage> | null>(null);
 const findRelativeColorRef = ref<InstanceType<typeof FindRelativeColor> | null>(
@@ -186,6 +188,16 @@ const onCanvasMouseDown = (event: MouseEvent) => {
   shouldShowSelectionToolbar.value = false;
 };
 
+const copyMoveToAbsolutePositionCode = async () => {
+  try {
+    const result = await Code.generateMoveToAbsolutePositionCode(mousePoint);
+    copyText(result);
+    msgSuccess(t("Copy succeeded."));
+  } catch (e) {
+    msgError(e);
+  }
+};
+
 const onCanvasMouseUp = async (event: MouseEvent) => {
   if (event.button !== 0) return;
   if (!png.value) return;
@@ -195,6 +207,7 @@ const onCanvasMouseUp = async (event: MouseEvent) => {
     Math.abs(selection.start.x - selection.end.x) < minimumSelectionLength ||
     Math.abs(selection.start.y - selection.end.y) < minimumSelectionLength
   ) {
+    await copyMoveToAbsolutePositionCode();
     await hideSelectionRect();
     await hideSelectionToolbar();
     return;

@@ -5,14 +5,14 @@ from kiwi import (
     Point,
     Response,
     RgbOffset,
-    ScreenClient,
+    Client,
     System,
     WeightPoint,
     Size,
     RelativeColoredPoint,
 )
 
-client = ScreenClient()
+client = Client()
 
 while True:
     data = client.get_mouse_location().data

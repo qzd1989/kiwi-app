@@ -129,4 +129,9 @@ client = ScreenClient()
 )"#
         )
     }
+
+    fn absolute_code(&self, point: &Point) -> String {
+        let Point { x, y } = point;
+        format!(r#"client.move_absolute({x}, {y})"#)
+    }
 }

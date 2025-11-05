@@ -102,6 +102,17 @@ class Code {
       throw e;
     }
   }
+  static async generateMoveToAbsolutePositionCode(
+    point: Point,
+  ): Promise<string> {
+    try {
+      return await invoke("generate_move_absolute_code", {
+        point,
+      });
+    } catch (e) {
+      throw e;
+    }
+  }
 }
 
 export { Code };

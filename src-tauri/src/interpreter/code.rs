@@ -37,4 +37,5 @@ pub trait Code {
     ) -> String;
 
     fn recognize_text(&self, start_point: &Point, end_point: &Point) -> String;
+    fn absolute_code(&self, point: &Point) -> String;
 }
