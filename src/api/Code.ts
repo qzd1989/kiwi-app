@@ -1,6 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
 import {
-  ColoredPoint,
   f64,
   hexColor,
   Point,
