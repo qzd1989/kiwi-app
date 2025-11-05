@@ -114,25 +114,7 @@ Function Cleanup
   ${EndIf}
   DetailPrint "Installation completed successfully!"
   
-  ; Remove .tar files in wheels directory
-  DetailPrint "Checking for .tar files to remove..."
-  FindFirst $0 $1 "$INSTDIR\python\project_template\wheels\*.tar"
-  StrCmp $1 "" NoTarFilesFound
-
-  loop_remove_tar:
-    StrCpy $R0 "$INSTDIR\python\project_template\wheels\$1"
-    DetailPrint "Removing tar file: $R0"
-    nsExec::ExecToLog 'powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Remove-Item -Path \"$R0\" -Force } catch { Write-Host $_.Exception.Message; exit 1 }"'
-    Pop $R2
-    ${If} $R2 != "0"
-      DetailPrint "Warning: Failed to remove $R0"
-    ${EndIf}
-    FindNext $0 $1
-    StrCmp $1 "" NoTarFilesFound loop_remove_tar
-
-  NoTarFilesFound:
-    FindClose $0
-    DetailPrint ".tar cleanup finished."
+  ; Remove .tar files in wheels directory todo
 
 FunctionEnd
 

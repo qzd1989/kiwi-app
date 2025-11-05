@@ -2,7 +2,6 @@ use super::{Config, Info, Log};
 use crate::extensions::CommandExt;
 use crate::interpreter::{Interpreter, PythonConfig, PythonInterpreter};
 use anyhow::Result;
-use regex::Regex;
 use serde_json::Value;
 use std::path::PathBuf;
 use std::process::Command;

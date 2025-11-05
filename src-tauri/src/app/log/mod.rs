@@ -7,4 +7,3 @@ use level::Level;
 use message::Message;
 
 pub use log::Log;
-pub use log_macros::*;

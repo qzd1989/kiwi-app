@@ -8,11 +8,9 @@ use crate::{
     project_error, project_info, project_warn,
     types::{Base64Png, Base64PngExt as _},
 };
-use anyhow::anyhow;
 use encoding_rs::GBK; //command output need to support english(utf8) and chinese(gbk)
 use fs_extra::dir;
 use std::sync::Arc;
-use std::sync::atomic::Ordering;
 use std::{
     io::{BufRead as _, BufReader, Read},
     path::{Path, PathBuf},

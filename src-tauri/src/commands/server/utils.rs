@@ -1,6 +1,6 @@
 use crate::{
     app::{self, Role},
-    commands::{frontend::relative_template_dir, server::Engine as ServerEngine},
+    commands::frontend::relative_template_dir,
     types::{Base64Png, Base64PngExt as _, HexColor, Point, RelativeColoredPoint, RgbOffset, Size},
 };
 use anyhow::{Result, anyhow};
