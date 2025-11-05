@@ -173,7 +173,7 @@ onUnmounted(async () => {});
 <template>
   <el-container class="flex h-full flex-col">
     <el-header class="flex shrink-0 items-center">
-      {{ $t("Find Color") }}
+      {{ $t("Find Colors") }}
     </el-header>
     <el-main class="flex-1">
       <el-form>
