@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import {  Project } from "@api";
+import { Project } from "@api";
 
 export const useAppStore = defineStore("app", {
   state: () => ({
@@ -12,6 +12,7 @@ export const useAppStore = defineStore("app", {
     remoteServerAddress: null as string | null,
   }),
   actions: {
+    // 页面不刷新的情况下，比如router.push切换页面时，手动调用此方法进行初始化，很sb
     initProject() {
       if (!this.project) return;
       this.project = new Project(

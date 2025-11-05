@@ -98,7 +98,9 @@ onUnmounted(async () => {});
         <el-button type="primary" @click="setToLocal()">
           Use Local Server
         </el-button>
-        <el-button type="primary" @click="setToLan()">Use Lan Server</el-button>
+        <el-button type="primary" @click="setToLan()" v-show="false">
+          Use Lan Server
+        </el-button>
         <el-button type="primary" @click="connect(formRef)">Connect</el-button>
       </div>
     </template>

@@ -278,21 +278,6 @@ impl Engine {
             fs_extra::dir::copy(&template_path, &path, &options)?;
         }
 
-        // correct vscode setting
-        {
-            let setting_path = path.join(".vscode");
-            let from = {
-                if cfg!(target_os = "windows") {
-                    setting_path.join("settings.json.windows")
-                } else {
-                    setting_path.join("settings.json.mac")
-                }
-            };
-            let to = setting_path.join("settings.json");
-
-            fs::rename(&from, &to)?;
-        }
-
         self.uv_init(&name, &path)?;
         self.uv_venv(&path)?;
         self.uv_add_kiwi(&path)?;

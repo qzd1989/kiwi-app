@@ -7,6 +7,7 @@ import { msgError } from "@utils";
 import { Project } from "@api";
 import { useRouter } from "vue-router";
 import { useAppStore } from "@store";
+import { documentDir } from "@tauri-apps/api/path";
 
 const appStore = useAppStore();
 const router = useRouter();
@@ -14,6 +15,7 @@ const router = useRouter();
 type Form = {
   name: string;
   folder: string;
+  rootDir: string;
   rootPath: string;
 };
 
@@ -22,7 +24,8 @@ const formRef = ref<FormInstance>();
 const form = reactive<Form>({
   name: "",
   folder: "",
-  rootPath: "",
+  rootDir: "", //没有/结尾
+  rootPath: "", //有/结尾
 });
 const rules = reactive<FormRules<Form>>({
   name: [
@@ -64,9 +67,10 @@ const openSelector = async () => {
     const path = await open({
       directory: true,
       multiple: false,
-      defaultPath: undefined,
+      defaultPath: form.rootDir,
     });
     if (path) {
+      form.rootDir = path;
       form.rootPath = path + (await sep());
       fullPath.value = await join(form.rootPath, form.folder);
     }
@@ -94,7 +98,10 @@ const save = async (formEl: FormInstance | undefined) => {
   props.close();
 };
 
-onMounted(async () => {});
+onMounted(async () => {
+  form.rootDir = await documentDir();
+  form.rootPath = form.rootDir + (await sep());
+});
 onUnmounted(async () => {});
 </script>
 <template>
