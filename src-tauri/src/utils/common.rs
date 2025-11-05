@@ -56,3 +56,30 @@ pub fn find_matching_file(pattern: &str) -> Result<Option<PathBuf>> {
 
     Ok(None)
 }
+
+/// 遍历目录，返回所有匹配正则 pattern 的文件路径
+pub fn find_all_files_in_dir(dir: &Path, pattern: &str) -> Vec<PathBuf> {
+    let mut matched_files = Vec::new();
+    let re = match Regex::new(pattern) {
+        Ok(r) => r,
+        Err(_) => return matched_files, // 正则无效返回空列表
+    };
+
+    let entries = match std::fs::read_dir(dir) {
+        Ok(e) => e,
+        Err(_) => return matched_files, // 目录不存在返回空列表
+    };
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_file() {
+            if let Some(file_name) = path.file_name().and_then(|s| s.to_str()) {
+                if re.is_match(file_name) {
+                    matched_files.push(path);
+                }
+            }
+        }
+    }
+
+    matched_files
+}

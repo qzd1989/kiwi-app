@@ -216,6 +216,34 @@ impl Engine {
         Ok(())
     }
 
+    fn find_latest_kiwi_whl_filename(&self, dir: &Path) -> Option<String> {
+        // 匹配 kiwi-x.y.z-py3-none-any.whl
+        let re = Regex::new(r"^kiwi-(\d+)\.(\d+)\.(\d+)-py3-none-any\.whl$").unwrap();
+
+        let mut latest: Option<(u32, u32, u32, String)> = None;
+
+        for entry in fs::read_dir(dir).ok()? {
+            let entry = entry.ok()?;
+            let file_name = entry.file_name();
+            let file_name = file_name.to_string_lossy().to_string();
+
+            if let Some(caps) = re.captures(&file_name) {
+                let major: u32 = caps[1].parse().ok()?;
+                let minor: u32 = caps[2].parse().ok()?;
+                let patch: u32 = caps[3].parse().ok()?;
+
+                if latest.is_none()
+                    || (major, minor, patch)
+                        > (latest.as_ref()?.0, latest.as_ref()?.1, latest.as_ref()?.2)
+                {
+                    latest = Some((major, minor, patch, file_name.clone()));
+                }
+            }
+        }
+
+        latest.map(|(_, _, _, name)| name)
+    }
+
     fn uv_add_kiwi(&self, path: &PathBuf) -> Result<()> {
         // copy app wheels to the project to avoid using an outdated Kiwi wheel.
         {
@@ -229,28 +257,28 @@ impl Engine {
             fs_extra::copy_items(&[from], &to, &options)?;
         }
 
-        let wheels_path = path.join("wheels");
-        let pattern = r"^kiwi-\d+(\.\d+)*-py3-none-any\.whl$";
-        let kiwi = find_file_in_dir(&wheels_path, pattern)
-            .ok_or_else(|| anyhow!(t!("Kiwi wheel not found.")))?;
-        let kiwi_path = wheels_path.join(&kiwi);
-        let find_links = format!("--find-links={}", &wheels_path.to_string_lossy());
-        let output = self
-            .uv()
-            .arg("add")
-            .arg("--no-index")
-            .arg(&find_links)
-            .arg("--directory")
-            .arg(&path)
-            .arg(&kiwi_path)
-            .output()?;
+        // install kiwi
+        {
+            let wheels_dir = path.join("wheels");
+            let latest_kiwi_filename = self
+                .find_latest_kiwi_whl_filename(&wheels_dir)
+                .ok_or_else(|| anyhow!("Kiwi whl not found."))?;
+            let latest_kiwi_path = wheels_dir.join(&latest_kiwi_filename);
+            let find_links = format!("--find-links={}", &wheels_dir.to_string_lossy());
+            let output = self
+                .uv()
+                .arg("add")
+                .arg("--no-index")
+                .arg(&find_links)
+                .arg("--directory")
+                .arg(&path)
+                .arg(&latest_kiwi_path)
+                .output()?;
 
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(anyhow!(t!(
-                "Failed to install kiwi lib.",
-                error = stderr.to_string()
-            )));
+            if !output.status.success() {
+                let stderr = String::from_utf8_lossy(&output.stderr);
+                return Err(anyhow!("Failed to install kiwi lib. ({:?})", stderr));
+            }
         }
 
         Ok(())
