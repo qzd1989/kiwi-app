@@ -34,7 +34,7 @@ const toggleFullScreen = () => {
 };
 const monitorRef = ref<InstanceType<typeof Monitor> | null>(null);
 const logRef = ref<InstanceType<typeof Log> | null>(null);
-const activeTab = ref<"log" | "monitor">("monitor");
+const activeTab = ref<"log" | "monitor">("log");
 const remoteAliveTimer = ref<number | undefined>(undefined);
 const capturerStatusTimer = ref<number | undefined>(undefined);
 const isRemoteServerAlive = ref<boolean>(false);

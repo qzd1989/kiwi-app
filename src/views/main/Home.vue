@@ -52,37 +52,37 @@ const openLocalServer = async () => {
 };
 
 // test code
-const openAnyServer = async () => {
-  try {
-    await Server.shutdown();
-    await delay(200);
-    await Server.startAny();
-    await Server.setRemoteAddress(await Server.getLanAddress());
-    appStore.remoteServerAddress = await Server.getRemoteAddress();
-  } catch (e) {
-    appStore.remoteServerAddress = null;
-    msgError(e);
-  }
-};
+// const openAnyServer = async () => {
+//   try {
+//     await Server.shutdown();
+//     await delay(200);
+//     await Server.startAny();
+//     await Server.setRemoteAddress(await Server.getLanAddress());
+//     appStore.remoteServerAddress = await Server.getRemoteAddress();
+//   } catch (e) {
+//     appStore.remoteServerAddress = null;
+//     msgError(e);
+//   }
+// };
 // test code end
 
 onMounted(async () => {
   await openLocalServer();
   // test code
-  await openAnyServer();
-  await App.toListener(); //模拟listener用户，这样websocket::find_image/find_images就会去resource_dir/.cache/data/templates目录里找模板
-  setTimeout(async () => {
-    try {
-      const project = await Project.open("/Users/kiwi/Desktop/god");
-      appStore.project = project;
-      router.push({
-        path: "/project",
-        query: { path: "/Users/kiwi/Desktop/god" },
-      });
-    } catch (e) {
-      msgError(e);
-    }
-  }, 100);
+  // await openAnyServer();
+  // await App.toListener(); //模拟listener用户，这样websocket::find_image/find_images就会去resource_dir/.cache/data/templates目录里找模板
+  // setTimeout(async () => {
+  //   try {
+  //     const project = await Project.open("/Users/kiwi/Desktop/god");
+  //     appStore.project = project;
+  //     router.push({
+  //       path: "/project",
+  //       query: { path: "/Users/kiwi/Desktop/god" },
+  //     });
+  //   } catch (e) {
+  //     msgError(e);
+  //   }
+  // }, 100);
   // test code end
 });
 onUnmounted(async () => {});

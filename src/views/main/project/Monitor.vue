@@ -344,16 +344,16 @@ onMounted(async () => {
   await capture();
 
   // test code
-  setTimeout(async () => {
-    if (!png.value) return;
-    selection.start = new Point(68, 108);
-    selection.end = new Point(133, 171);
-    selection.png = await png.value.crop(
-      selection.start,
-      Size.fromPoints(selection.start, selection.end),
-    );
-    await findRelativeColor();
-  }, 200);
+  // setTimeout(async () => {
+  //   if (!png.value) return;
+  //   selection.start = new Point(68, 108);
+  //   selection.end = new Point(133, 171);
+  //   selection.png = await png.value.crop(
+  //     selection.start,
+  //     Size.fromPoints(selection.start, selection.end),
+  //   );
+  //   await findRelativeColor();
+  // }, 200);
   // test code end
 });
 
