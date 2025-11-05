@@ -1,7 +1,7 @@
 {
   "name": "kiwi-app",
   "private": true,
-  "version": "0.1.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "npm run sync-version && vite",
