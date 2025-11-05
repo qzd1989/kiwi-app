@@ -185,10 +185,10 @@ impl Engine {
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
             println!("{}", stderr.to_string());
-            return Err(anyhow!(t!(
-                "Failed to initialize Python project.",
-                error = stderr.to_string()
-            )));
+            return Err(anyhow!(
+                "Failed to initialize Python project. ({:?})",
+                stderr
+            ));
         }
 
         Ok(())

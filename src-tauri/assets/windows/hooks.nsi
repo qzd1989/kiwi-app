@@ -74,8 +74,8 @@ Function Cleanup
     Call RemoveDirectory
   ${EndIf}
 
-  ${If} ${FileExists} "$INSTDIR\zip"
-    Push "$INSTDIR\zip"
+  ${If} ${FileExists} "$INSTDIR\python\interpreter.zip"
+    Push "$INSTDIR\python\interpreter.zip"
     Call RemoveDirectory
   ${EndIf}
   DetailPrint "Installation completed successfully!"
