@@ -7,6 +7,7 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
 };
+use tauri_build::is_dev;
 
 const PYTHON_VERSION: &str = "3.14";
 const PYTHON_TYPE: &str = "cpython";
@@ -106,7 +107,7 @@ fn install_uv() {
         None => panic!("Uv wheel not found."),
     };
     let find_links = format!("--find-links={}", &wheels_path.to_string_lossy());
-    let output = python_command()
+    let output = system_python_command()
         .arg("-m")
         .arg("pip")
         .arg("install")
@@ -183,86 +184,106 @@ fn build_whl() {
         .join("python")
         .join("project_template")
         .join("wheels");
-    let kiwi_whl_file = format!("kiwi-{}-py3-none-any.whl", kiwi_whl_version());
-    let kiwi_whl_path = wheels_dir.join(&kiwi_whl_file);
+    let kiwi_whl_file_name = format!("kiwi-{}-py3-none-any.whl", kiwi_whl_version());
+    let kiwi_whl_path = wheels_dir.join(&kiwi_whl_file_name);
 
-    if kiwi_whl_path.exists() {
-        return;
+    // debug模式下如果已经存在 kiwi whl 则跳过构建
+    {
+        if is_dev() && kiwi_whl_path.exists() {
+            println!("cargo:warning=skip build kiwi whl in dev mode");
+            return;
+        }
     }
 
-    println!("cargo:warning=upgrade target python module: pip");
-    let output = python_command()
-        .args(&["-u", "-m", "pip", "install", "--upgrade", "pip"])
-        .output()
-        .expect("Failed to upgrade pip");
-
-    if !output.status.success() {
-        panic!("Build_whl upgarde pip failed.");
+    println!("cargo:warning=clean dir project_template/wheels");
+    {
+        if wheels_dir.exists() {
+            fs::remove_dir_all(&wheels_dir).expect("Failed to clean wheels dir.");
+        }
+        fs::create_dir_all(&wheels_dir).expect("Failed to create wheels dir.");
     }
 
-    println!("cargo:warning=install target python module: build");
-    let output = python_command()
-        .args(&["-u", "-m", "pip", "install", "build"])
-        .output()
-        .expect("Failed to install build");
+    println!("cargo:warning=upgrade system python module: pip");
+    {
+        let output = system_python_command()
+            .args(&["-u", "-m", "pip", "install", "--upgrade", "pip"])
+            .output()
+            .expect("Failed to upgrade pip");
 
-    if !output.status.success() {
-        panic!("Build_whl install build failed.");
+        if !output.status.success() {
+            panic!("Build_whl upgarde pip failed.");
+        }
     }
 
-    println!("cargo:warning=build python module: kiwi");
-    let output = python_command()
-        .args(&[
-            "-u",
-            "-m",
-            "build",
-            "-o",
-            wheels_dir.to_str().unwrap(),
-            kiwi_package_dir.to_str().unwrap(),
-        ])
-        .output()
-        .expect("Failed to build kiwi whl");
+    println!("cargo:warning=install system python module: build");
+    {
+        let output = system_python_command()
+            .args(&["-u", "-m", "pip", "install", "build"])
+            .output()
+            .expect("Failed to install build");
 
-    if !output.status.success() {
-        panic!("Build_whl build kiwi whl failed.");
+        if !output.status.success() {
+            panic!("Build_whl install build failed.");
+        }
+    }
+
+    println!("cargo:warning=build module: kiwi");
+    {
+        let output = system_python_command()
+            .args(&[
+                "-u",
+                "-m",
+                "build",
+                "-o",
+                wheels_dir.to_str().unwrap(),
+                kiwi_package_dir.to_str().unwrap(),
+            ])
+            .output()
+            .expect("Failed to build kiwi whl");
+
+        if !output.status.success() {
+            panic!("Build_whl build kiwi whl failed.");
+        }
     }
 
     println!("cargo:warning=download dependencies of python module kiwi");
-    let output = python_command()
-        .args(&[
-            "-u",
-            "-m",
-            "pip",
-            "download",
-            kiwi_whl_path.to_str().unwrap(),
-            "-d",
-            wheels_dir.to_str().unwrap(),
-        ])
-        .output()
-        .expect("Failed to download dependencies of kiwi whl");
+    {
+        let output = system_python_command()
+            .args(&[
+                "-u",
+                "-m",
+                "pip",
+                "download",
+                kiwi_whl_path.to_str().unwrap(),
+                "-d",
+                wheels_dir.to_str().unwrap(),
+            ])
+            .output()
+            .expect("Failed to download dependencies of kiwi whl");
 
-    if !output.status.success() {
-        panic!("Build_whl download dependencies of kiwi whl failed.");
+        if !output.status.success() {
+            panic!("Build_whl download dependencies of kiwi whl failed.");
+        }
     }
 
-    println!("cargo:warning=delete project_template/wheels/*.tar and *.tar.gz");
-    find_all_files_in_dir(&wheels_dir, r".*\.tar(\.gz)?$")
-        .iter()
-        .for_each(|file| {
-            fs::remove_file(file).expect("Failed to delete .tar or .tar.gz file.");
-        });
-
-    println!("cargo:warning=delete old kiwi whl");
-    find_all_files_in_dir(&wheels_dir, r"^kiwi.*\.whl$")
-        .iter()
-        .for_each(|file| {
-            if file != &kiwi_whl_path {
-                fs::remove_file(file).expect("Failed to delete old kiwi whl file.");
-            }
-        });
+    println!("cargo:warning=delete project_template/wheels/*.tar and *.tar.gz and old kiwi whls");
+    {
+        find_all_files_in_dir(&wheels_dir, r".*\.tar(\.gz)?$")
+            .iter()
+            .for_each(|file| {
+                fs::remove_file(file).expect("Failed to delete .tar or .tar.gz file.");
+            });
+        find_all_files_in_dir(&wheels_dir, r"^kiwi.*\.whl$")
+            .iter()
+            .for_each(|file| {
+                if file != &kiwi_whl_path {
+                    fs::remove_file(file).expect("Failed to delete old kiwi whl file.");
+                }
+            });
+    }
 }
 
-fn python_command() -> Command {
+fn system_python_command() -> Command {
     let path = {
         if os() == "macos" {
             target_dir()
