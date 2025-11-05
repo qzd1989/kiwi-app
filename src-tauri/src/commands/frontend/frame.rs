@@ -96,7 +96,7 @@ pub fn find_relative_colors(
 ) -> CommandResult<Option<ColoredPoint>> {
     let frame = origin.to_frame().unwrap();
     let size = Size::new_from_start_end_points(start_point, end_point)?;
-    let result = frame.find_relative_colors(points, start_point, size, rgb_offset)?;
+    let result = frame.find_relative_colors(&points, &start_point, &size, &rgb_offset)?;
     let _ = app::get()
         .app_handle()
         .emit(EmitEvent::UpdateExecutionTime.into(), result.1);
@@ -113,7 +113,7 @@ pub fn find_colors(
 ) -> CommandResult<Vec<ColoredPoint>> {
     let frame = origin.to_frame().unwrap();
     let size = Size::new_from_start_end_points(start_point, end_point)?;
-    let result = frame.find_colors(&hex_colors, start_point, size, rgb_offset)?;
+    let result = frame.find_colors(&hex_colors, &start_point, &size, &rgb_offset)?;
     let _ = app::get()
         .app_handle()
         .emit(EmitEvent::UpdateExecutionTime.into(), result.1);

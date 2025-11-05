@@ -33,7 +33,7 @@ pub fn find_relative_colors(args: Value) -> Result<Value> {
     let size = Size::new_from_start_end_points(start_point, end_point)?;
     let rgb_offset = get_required_rgb_offset(&args, "rgb_offset")?;
     let frame = app::get().get_frame()?;
-    let result = frame.find_relative_colors(points, start_point, size, rgb_offset)?;
+    let result = frame.find_relative_colors(&points, &start_point, &size, &rgb_offset)?;
     Ok(serde_json::to_value(result.0)?)
 }
 
@@ -44,7 +44,7 @@ pub fn find_colors(args: Value) -> Result<Value> {
     let size = Size::new_from_start_end_points(start_point, end_point)?;
     let rgb_offset = get_required_rgb_offset(&args, "rgb_offset")?;
     let frame = app::get().get_frame()?;
-    let result = frame.find_colors(&hex_colors, start_point, size, rgb_offset)?;
+    let result = frame.find_colors(&hex_colors, &start_point, &size, &rgb_offset)?;
     Ok(serde_json::to_value(result.0)?)
 }
 

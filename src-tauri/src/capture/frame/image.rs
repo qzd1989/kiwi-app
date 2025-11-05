@@ -69,7 +69,7 @@ impl Frame {
                 1.0
             }
         };
-        let cropped_frame = self.to_buffer()?.crop(start_point, size);
+        let cropped_frame = self.to_buffer()?.crop(&start_point, &size);
         let (frame_width, frame_height) = cropped_frame.dimensions();
         let gray_frame = {
             if factor != 1.0 {
@@ -153,7 +153,7 @@ impl Frame {
                 1.0
             }
         };
-        let cropped_frame = self.to_buffer()?.crop(start_point, size);
+        let cropped_frame = self.to_buffer()?.crop(&start_point, &size);
         let (frame_width, frame_height) = cropped_frame.dimensions();
         let mut image = {
             if factor != 1.0 {

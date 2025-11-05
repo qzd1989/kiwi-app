@@ -17,7 +17,7 @@ impl Frame {
                 "The find area size must not be larger than the frame size."
             )));
         }
-        let rgb_image = self.to_buffer()?.crop(start_point, size).to_rgb()?;
+        let rgb_image = self.to_buffer()?.crop(&start_point, &size).to_rgb()?;
         OCR.get_or_init(move || -> Mutex<OcrLite> {
             let ocr = Mutex::new(OcrLite::new());
             match (

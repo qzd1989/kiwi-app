@@ -6,7 +6,7 @@ use image::{DynamicImage::ImageRgba8, GrayImage, ImageBuffer, Luma, RgbImage, Rg
 pub trait ImageBufferRgbaExt: Sized {
     fn to_rgb(&self) -> Result<RgbImage>;
     fn to_base64png(&self) -> Result<Base64Png>;
-    fn crop(&self, point: Point, size: Size) -> Self;
+    fn crop(&self, point: &Point, size: &Size) -> Self;
     fn crop_alpha_edges(&self) -> Result<Self>;
     fn to_mask(&self) -> GrayImage; //转换为grayimage并且将透明度为0的象素点设为0,以便不参与templat_matching匹配.
     fn to_gray(&self) -> GrayImage;
@@ -41,7 +41,7 @@ impl ImageBufferRgbaExt for ImageBuffer<Rgba<u8>, Vec<u8>> {
         ))
     }
 
-    fn crop(&self, point: Point, size: Size) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
+    fn crop(&self, point: &Point, size: &Size) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
         imageops::crop_imm(
             self,
             point.x as u32,
