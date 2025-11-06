@@ -10,12 +10,12 @@ class System:
             time.sleep(milliseconds / 1000.0)
 
     @staticmethod
-    def timer_tick(interval_ms: int, *args, immediate: bool = True):
+    def tick(interval_ms: int, *args, immediate: bool = True):
         """
         每隔 interval_ms 毫秒执行一次 callback。
         支持两种调用方式：
-        1. timer_tick(interval_ms, callback)
-        2. timer_tick(interval_ms, key, callback)
+        1. tick(interval_ms, callback)
+        2. tick(interval_ms, key, callback)
 
         immediate: 第一次调用是否立即执行，默认为 True
         """
@@ -29,7 +29,7 @@ class System:
             key, callback = args
         else:
             raise ValueError(
-                "timer_tick expects interval_ms + callback, or interval_ms + key + callback"
+                "tick expects interval_ms + callback, or interval_ms + key + callback"
             )
 
         if not callable(callback):

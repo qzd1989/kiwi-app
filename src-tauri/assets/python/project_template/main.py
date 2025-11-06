@@ -15,6 +15,6 @@ from kiwi import (
 client = Client()
 
 while True:
-    data = client.get_mouse_location().data
-    print("location:", data, data.x, data.y)
+    point = client.get_mouse_location()
+    print("point:", point, point.x, point.y)
     System.sleep(milliseconds=1000)

@@ -1,11 +1,15 @@
 import argparse
+import atexit
+import json
+import sys
+import math
+import time
+
 from websocket import create_connection
 from types import SimpleNamespace
 from typing import Any
 from typing import Optional, cast, Union
-import atexit
-import json
-import sys
+
 from .point import Point
 from .colored_point import ColoredPoint
 from .relative_colored_point import RelativeColoredPoint
@@ -180,11 +184,12 @@ class Client:
         response = self._send_and_receive("save_frame", args)
         return BoolResponse._from(response=response)
 
-    def get_mouse_location(self) -> Optional[PointResponse]:
+    def get_mouse_location(self) -> Point:
         args = {}
         response = self._send_and_receive("get_mouse_location", args)
-        response.data = Point._from_namespace(response.data)
-        return PointResponse._from(response=response)
+        if response is None or response.data is None:
+            return Point(0, 0)
+        return Point._from_namespace(response.data)
 
     def click_left(self):
         args = {}
@@ -210,13 +215,11 @@ class Client:
         args = {}
         self._send_and_receive("release_right", args)
 
-    def move_absolute(self, x: int, y: int):
-        absolute_point = Point(x, y)
+    def move_absolute(self, absolute_point: Point):
         args = {"absolute_point": absolute_point._to_dict()}
         self._send_and_receive("move_absolute", args)
 
-    def move_relative(self, x: int, y: int):
-        offset = Point(x, y)
+    def move_relative(self, offset: Point):
         args = {"offset": offset._to_dict()}
         self._send_and_receive("move_relative", args)
 
@@ -242,6 +245,50 @@ class Client:
         key_val = key.value if isinstance(key, Key) else key
         args = {"key": key_val}
         self._send_and_receive("click_key", args)
+
+    def drag(
+        self,
+        src_point: Point,
+        dst_point: Point,
+        duration_ms: int = 600,
+        release: bool = True,
+    ):
+
+        self.move_absolute(src_point)
+        System.sleep(10)
+
+        # 按下左键
+        self.press_left()
+
+        # 起点与终点坐标差
+        dx = dst_point.x - src_point.x
+        dy = dst_point.y - src_point.y
+
+        # 记录起始时间
+        start_time = time.time()
+
+        while True:
+            elapsed = (time.time() - start_time) * 1000  # 毫秒
+            t = min(elapsed / duration_ms, 1.0)
+            # 使用ease-in-out函数：慢-快-慢
+            ease = 0.5 - 0.5 * math.cos(math.pi * t)
+            # 当前点
+            x = src_point.x + dx * ease
+            y = src_point.y + dy * ease
+            self.move_absolute(Point(int(x), int(y)))
+
+            if t >= 1.0:
+                break
+
+            frame_interval = max(duration_ms / 100.0, 5)
+            System.sleep(frame_interval)
+
+        self.move_absolute(dst_point)
+
+        # 松开左键（可选）
+        if release:
+            System.sleep(20)
+            self.release_left()
 
     def copy(self):
         system = System()
