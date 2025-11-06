@@ -252,7 +252,7 @@ impl Engine {
         }
     }
 
-    fn uv_add_kiwi(&self, path: &PathBuf) -> Result<()> {
+    fn uv_add_kiwi(&self, project_path: &PathBuf) -> Result<()> {
         // copy app wheels to the project to avoid using an outdated Kiwi wheel.
         {
             let from = app::get()
@@ -260,14 +260,16 @@ impl Engine {
                 .join("python")
                 .join(self.project_template_name())
                 .join("wheels");
-            let to = path.join("wheels");
-            let options = fs_extra::dir::CopyOptions::new().overwrite(true);
-            fs_extra::copy_items(&[from], &to, &options)?;
+            let to = project_path.join("wheels");
+            let options = fs_extra::dir::CopyOptions::new()
+                .overwrite(true)
+                .content_only(true);
+            fs_extra::dir::copy(&from, &to, &options)?;
         }
 
         // install kiwi
         {
-            let wheels_dir = path.join("wheels");
+            let wheels_dir = project_path.join("wheels");
             let latest_kiwi_filename = self
                 .find_latest_kiwi_whl_filename(&wheels_dir)
                 .ok_or_else(|| anyhow!("Kiwi whl not found."))?;
@@ -279,7 +281,7 @@ impl Engine {
                 .arg("--no-index")
                 .arg(&find_links)
                 .arg("--directory")
-                .arg(&path)
+                .arg(&project_path)
                 .arg(&latest_kiwi_path)
                 .output()?;
 
@@ -376,6 +378,14 @@ impl Engine {
             let venv_path = path.join(".venv");
             if venv_path.exists() {
                 fs::remove_dir_all(&venv_path)?;
+            }
+        }
+
+        // rm uv.lock
+        {
+            let lock_path = path.join("uv.lock");
+            if lock_path.exists() {
+                fs::remove_file(&lock_path)?;
             }
         }
 

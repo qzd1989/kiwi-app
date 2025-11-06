@@ -60,6 +60,11 @@ const setToLan = async () => {
   connect(formRef.value);
 };
 
+const setToHW = async () => {
+  form.address = "192.168.5.100:9927";
+  connect(formRef.value);
+};
+
 onMounted(async () => {
   await loadServerAddress();
 });
@@ -97,6 +102,9 @@ onUnmounted(async () => {});
         <el-button type="info" plain @click="props.close()">Close</el-button>
         <el-button type="primary" @click="setToLocal()">
           Use Local Server
+        </el-button>
+        <el-button type="primary" @click="setToHW()">
+          Use 192.168.5.100 Server
         </el-button>
         <el-button type="primary" @click="setToLan()" v-show="false">
           Use Lan Server

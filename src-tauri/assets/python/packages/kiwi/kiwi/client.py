@@ -219,9 +219,30 @@ class Client:
         args = {"absolute_point": absolute_point._to_dict()}
         self._send_and_receive("move_absolute", args)
 
-    def move_relative(self, offset: Point):
-        args = {"offset": offset._to_dict()}
-        self._send_and_receive("move_relative", args)
+    def move_absolute_smooth(self, to_point: Point, duration_ms: int = 600):
+        src_point = self.get_mouse_location()
+        dx = to_point.x - src_point.x
+        dy = to_point.y - src_point.y
+
+        start_time = time.time()
+
+        while True:
+            elapsed = (time.time() - start_time) * 1000  # 毫秒
+            t = min(elapsed / duration_ms, 1.0)
+            # 使用ease-in-out函数：慢-快-慢
+            ease = 0.5 - 0.5 * math.cos(math.pi * t)
+            # 当前点
+            x = src_point.x + dx * ease
+            y = src_point.y + dy * ease
+            self.move_absolute(Point(int(x), int(y)))
+
+            if t >= 1.0:
+                break
+
+            frame_interval = max(duration_ms / 100.0, 5)
+            System.sleep(frame_interval)
+
+        self.move_absolute(to_point)
 
     def scroll_vertical(self, length: int):
         args = {"length": length}

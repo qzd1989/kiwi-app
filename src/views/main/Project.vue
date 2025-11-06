@@ -104,7 +104,6 @@ const stopCapturer = async () => {
 
 const runProject = async () => {
   try {
-    activeTab.value = "log";
     await Project.runScript();
   } catch (e) {
     msgError(e);
@@ -114,7 +113,6 @@ const runProject = async () => {
 const runScript = async () => {
   if (!entryFile.value) return;
   try {
-    activeTab.value = "log";
     await Project.runScript(entryFile.value);
   } catch (e) {
     msgError(e);
@@ -123,7 +121,6 @@ const runScript = async () => {
 
 const stopRunScript = async () => {
   try {
-    activeTab.value = "log";
     await Project.stopRunScript();
   } catch (e) {
     msgError(e);
@@ -159,7 +156,7 @@ const initRemoteAliveTimer = async () => {
       isRemoteServerAlive.value = false;
       msgError(e);
     }
-  }, 200);
+  }, 1000);
 };
 
 const initCapturerStatusTimer = async () => {

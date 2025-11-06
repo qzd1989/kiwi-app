@@ -17,3 +17,6 @@ class Point:
         if ns is None:
             return None
         return Point(x=ns.x, y=ns.y)
+
+    def offset(self, dx: int, dy: int) -> Point:
+        return Point(self.x + dx, self.y + dy)

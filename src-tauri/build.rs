@@ -4,7 +4,7 @@ use regex::Regex;
 use std::{
     env, fs,
     path::{Path, PathBuf},
-    process::Command,
+    process::{Command, Stdio},
 };
 use tauri_build::is_dev;
 
@@ -169,18 +169,19 @@ fn install_app_python_uv() {
         None => panic!("Uv wheel not found."),
     };
     let find_links = format!("--find-links={}", &wheels_path.to_string_lossy());
-    let output = app_python_command()
-        .arg("-m")
+    let mut cmd = app_python_command();
+    cmd.arg("-m")
         .arg("pip")
         .arg("install")
         .arg("--no-index")
         .arg(&find_links)
         .arg(&uv_path)
-        .output()
-        .expect("Failed to install uv.");
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit());
 
-    if !output.status.success() {
-        panic!("Install uv wheel failed.");
+    let status = cmd.status().expect("Failed to execute uv install");
+    if !status.success() {
+        panic!("Install uv wheel failed");
     }
 }
 
