@@ -3,7 +3,7 @@ use super::code::PythonCode;
 use crate::{
     app,
     extensions::CommandExt as _,
-    interpreter::{Interpreter, code::Code},
+    interpreter::{Interpreter, code::Code, macos_attr},
     utils::common::find_file_in_dir,
 };
 use anyhow::{Result, anyhow};
@@ -244,13 +244,21 @@ impl Engine {
         latest.map(|(_, _, _, name)| name)
     }
 
+    fn project_template_name(&self) -> &str {
+        if cfg!(debug_assertions) {
+            ".project_template"
+        } else {
+            "project_template"
+        }
+    }
+
     fn uv_add_kiwi(&self, path: &PathBuf) -> Result<()> {
         // copy app wheels to the project to avoid using an outdated Kiwi wheel.
         {
             let from = app::get()
                 .resource_dir()
                 .join("python")
-                .join("project_template")
+                .join(self.project_template_name())
                 .join("wheels");
             let to = path.join("wheels");
             let options = fs_extra::dir::CopyOptions::new().overwrite(true);
@@ -298,7 +306,7 @@ impl Engine {
             let template_path = app::get()
                 .resource_dir()
                 .join("python")
-                .join("project_template");
+                .join(self.project_template_name());
 
             let options = fs_extra::dir::CopyOptions::new()
                 .overwrite(true)
@@ -313,17 +321,17 @@ impl Engine {
     }
 
     pub fn should_reinit(&self, project_path: &PathBuf) -> Result<bool> {
-        // system interpreter is moved?
+        // app interpreter is moved?
         {
             let cfg_path = project_path.join(".venv").join("pyvenv.cfg");
             let content = fs::read_to_string(&cfg_path)?;
-            let system_interpreter_dir = self
+            let app_interpreter_dir = self
                 .path
                 .parent()
                 .ok_or_else(|| anyhow!("Python bin folder not found."))?
                 .to_str()
                 .ok_or_else(|| anyhow!("Convert Path to String failed."))?;
-            if let None = content.find(system_interpreter_dir) {
+            if let None = content.find(app_interpreter_dir) {
                 return Ok(true);
             }
         }
@@ -349,7 +357,7 @@ impl Engine {
                 let wheels_path = app::get()
                     .resource_dir()
                     .join("python")
-                    .join("project_template")
+                    .join(self.project_template_name())
                     .join("wheels");
                 find_file_in_dir(&wheels_path, pattern)
                     .ok_or_else(|| anyhow!("Kiwi lib not found."))?
@@ -375,18 +383,31 @@ impl Engine {
         self.uv_add_kiwi(&path)?;
         Ok(())
     }
+
+    pub fn app_python_path() -> PathBuf {
+        let python_dir = if cfg!(debug_assertions) {
+            app::get()
+                .resource_dir()
+                .join("python")
+                .join(".interpreter")
+        } else {
+            app::get().resource_dir().join("python").join("interpreter")
+        };
+
+        let path = if cfg!(target_os = "windows") {
+            python_dir.join("python.exe")
+        } else {
+            python_dir
+                .join("bin")
+                .join(format!("python{}", PYTHON_VERSION))
+        };
+        path
+    }
 }
 
 impl Default for Engine {
     fn default() -> Self {
-        let base_path = app::get().resource_dir().join("python").join("interpreter");
-        let path = if cfg!(target_os = "windows") {
-            base_path.join("python.exe")
-        } else {
-            base_path
-                .join("bin")
-                .join(format!("python{}", PYTHON_VERSION))
-        };
+        let path = Engine::app_python_path();
         let pid = Arc::new(AtomicU32::new(0));
         Self { path, pid }
     }

@@ -12,6 +12,37 @@ use tauri_build::is_dev;
 const PYTHON_VERSION: &str = "3.14";
 const PYTHON_TYPE: &str = "cpython";
 
+fn main() {
+    if os() == "windows" && arch() == "aarch64" {
+        // windows arm needs onnxruntime todo
+        println!("cargo:rustc-link-search=native=C:\\onnxruntime\\lib");
+        println!("cargo:rustc-link-lib=onnxruntime");
+    }
+
+    init_python();
+
+    if os() == "macos" {
+        macos_attr(&system_python_path());
+    }
+
+    build_whl();
+
+    if os() == "macos" {
+        tauri_build_macos();
+    }
+
+    if os() == "windows" {
+        tauri_build_windows();
+    }
+
+    install_system_python_uv();
+
+    if os() == "macos" {
+        macos_attr(&app_python_path());
+        install_app_python_uv();
+    }
+}
+
 fn profile() -> String {
     let profile = env::var("PROFILE").unwrap();
     match profile.as_str() {
@@ -56,11 +87,7 @@ fn os() -> String {
     }
 }
 
-/**
- * create assets/zips/interpreter.zip
- */
 fn init_python() {
-    let zip_dir = assets_dir().join("zips");
     let src_dir = assets_dir()
         .join("python")
         .join("interpreters")
@@ -71,31 +98,48 @@ fn init_python() {
             os(),
             arch()
         ));
-    let dst_zip = assets_dir().join("zips").join("interpreter.zip");
-    let dst_dir = target_dir().join("python").join("interpreter");
 
-    if !zip_dir.exists() {
-        dir::create_all(&zip_dir, true).expect("Failed to create assets/zips dir.");
+    let options = dir::CopyOptions::new().overwrite(true).content_only(true);
+    //安装后move .interpreter to interpreter
+    {
+        let dst_dir = assets_dir().join("python").join(".interpreter");
+        if !dst_dir.exists() {
+            println!("cargo:warning=copy default interpreter to assets_dir/python/.interpreter");
+            dir::create_all(&dst_dir, true)
+                .expect("Failed to create {assets_dir}/python/.interpreter");
+            dir::copy(&src_dir, &dst_dir, &options)
+                .expect("Failed to copy source python to {assets_dir}/python/.interpreter");
+        }
     }
 
-    if !dst_zip.exists() {
-        println!("cargo:warning=compress python interpreter");
-        compress(&src_dir, &dst_zip).expect("Compress python interpreter failed.");
-    }
-
-    if !dst_dir.exists() {
-        println!("cargo:warning=extract python interpreter to target");
-        dir::create_all(&dst_dir, true).expect("Failed to create target/python/interpreter dir.");
-        extract(fs::File::open(dst_zip).unwrap(), &dst_dir, true)
-            .expect("Failed to extract python interpreter.");
+    // build后续使用的interpreter
+    {
+        let dst_dir = target_dir().join("python").join("system_interpreter");
+        if !dst_dir.exists() {
+            println!("cargo:warning=extract python interpreter to target");
+            dir::create_all(&dst_dir, true)
+                .expect("Failed to create {target_dir}/python/system_interpreter");
+            dir::copy(&src_dir, &dst_dir, &options)
+                .expect("Failed to copy source python to {target_dir}/python/system_interpreter");
+        }
     }
 }
 
-fn install_uv() {
-    println!("cargo:warning=install_uv");
+fn macos_attr(path: &PathBuf) {
+    let output = Command::new(&"xattr")
+        .args(&["-r", "-d", "com.apple.quarantine", path.to_str().unwrap()])
+        .output()
+        .expect("Failed to xattr target_python_interpreter.");
+    if !output.status.success() {
+        println!("cargo:warning=init_attr xattr target_python_interpreter failed");
+    }
+}
+
+fn install_system_python_uv() {
+    println!("cargo:warning=install_system_python_uv");
     let wheels_path = target_dir()
         .join("python")
-        .join("project_template")
+        .join(".project_template")
         .join("wheels");
     let pattern = r"^uv-.*\.whl$";
     let uv_path = match find_one_file_in_dir(&wheels_path, pattern) {
@@ -118,25 +162,31 @@ fn install_uv() {
     }
 }
 
-fn main() {
-    if os() == "windows" && arch() == "aarch64" {
-        // windows arm needs onnxruntime todo
-        println!("cargo:rustc-link-search=native=C:\\onnxruntime\\lib");
-        println!("cargo:rustc-link-lib=onnxruntime");
+fn install_app_python_uv() {
+    println!("cargo:warning=install_app_python_uv");
+    let wheels_path = target_dir()
+        .join("python")
+        .join(".project_template")
+        .join("wheels");
+    let pattern = r"^uv-.*\.whl$";
+    let uv_path = match find_one_file_in_dir(&wheels_path, pattern) {
+        Some(p) => p,
+        None => panic!("Uv wheel not found."),
+    };
+    let find_links = format!("--find-links={}", &wheels_path.to_string_lossy());
+    let output = app_python_command()
+        .arg("-m")
+        .arg("pip")
+        .arg("install")
+        .arg("--no-index")
+        .arg(&find_links)
+        .arg(&uv_path)
+        .output()
+        .expect("Failed to install uv.");
+
+    if !output.status.success() {
+        panic!("Install uv wheel failed.");
     }
-
-    init_python();
-    build_whl();
-
-    if os() == "macos" {
-        tauri_build_macos();
-    }
-
-    if os() == "windows" {
-        tauri_build_windows();
-    }
-
-    install_uv();
 }
 
 fn tauri_build_macos() {
@@ -178,7 +228,7 @@ fn build_whl() {
     let kiwi_package_dir = assets_dir().join("python").join("packages").join("kiwi");
     let wheels_dir = assets_dir()
         .join("python")
-        .join("project_template")
+        .join(".project_template")
         .join("wheels");
     let kiwi_whl_file_name = format!("kiwi-{}-py3-none-any.whl", kiwi_whl_version());
     let kiwi_whl_path = wheels_dir.join(&kiwi_whl_file_name);
@@ -191,7 +241,7 @@ fn build_whl() {
         }
     }
 
-    println!("cargo:warning=clean dir project_template/wheels");
+    println!("cargo:warning=clean dir .project_template/wheels");
     {
         if wheels_dir.exists() {
             fs::remove_dir_all(&wheels_dir).expect("Failed to clean wheels dir.");
@@ -262,7 +312,7 @@ fn build_whl() {
         }
     }
 
-    println!("cargo:warning=delete project_template/wheels/*.tar and *.tar.gz and old kiwi whls");
+    println!("cargo:warning=delete .project_template/wheels/*.tar and *.tar.gz and old kiwi whls");
     {
         find_all_files_in_dir(&wheels_dir, r".*\.tar(\.gz)?$")
             .iter()
@@ -279,25 +329,56 @@ fn build_whl() {
     }
 }
 
+fn app_python_command() -> Command {
+    let python_path = app_python_path();
+    Command::new(&python_path)
+}
+
 fn system_python_command() -> Command {
+    let python_path = system_python_path();
+    Command::new(&python_path)
+}
+
+fn app_python_path() -> PathBuf {
     let path = {
         if os() == "macos" {
             target_dir()
                 .join("python")
-                .join("interpreter")
+                .join(".interpreter")
                 .join("bin")
                 .join(format!("python{}", PYTHON_VERSION))
         } else {
             target_dir()
                 .join("python")
-                .join("interpreter")
+                .join(".interpreter")
                 .join("python.exe")
         }
     };
     if !path.exists() {
         panic!("{} is not exist.", path.to_str().unwrap());
     }
-    Command::new(&path)
+    path
+}
+
+fn system_python_path() -> PathBuf {
+    let path = {
+        if os() == "macos" {
+            target_dir()
+                .join("python")
+                .join("system_interpreter")
+                .join("bin")
+                .join(format!("python{}", PYTHON_VERSION))
+        } else {
+            target_dir()
+                .join("python")
+                .join("system_interpreter")
+                .join("python.exe")
+        }
+    };
+    if !path.exists() {
+        panic!("{} is not exist.", path.to_str().unwrap());
+    }
+    path
 }
 
 fn kiwi_whl_version() -> String {

@@ -1,9 +1,18 @@
 !include "LogicLib.nsh"
 ShowInstDetails show
 
+; new structure
+; python/.interpreter
+; python/.project_template
+
+; installed structure
+; python/interpreter
+; python/project_template
+
+
 !macro NSIS_HOOK_POSTINSTALL
-  Call RemoveAllTemporaryDirectories
-  Call ExtractAll
+  ; Call RemoveAllTemporaryDirectories
+  ; Call ExtractAll
   Call CheckProcessesAndWait
   Call DoInstall
   Call Cleanup
@@ -16,17 +25,17 @@ Function RemoveAllTemporaryDirectories
   ${EndIf}
 FunctionEnd
 
-Function ExtractAll
-  CreateDirectory "$INSTDIR\.python\interpreter"
-  DetailPrint "Extracting python..."
-  nsExec::ExecToLog 'powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Expand-Archive -Path \"$INSTDIR\python\interpreter.zip\" -DestinationPath \"$INSTDIR\.python\interpreter\" -Force; exit 0 } catch { Write-Host $_.Exception.Message; exit 1 }"'
-  Pop $0
-  ${If} $0 != "0"
-    Abort "Failed to extract python into $INSTDIR\.python\interpreter\."
-  ${EndIf}
+; Function ExtractAll
+;   CreateDirectory "$INSTDIR\.python\interpreter"
+;   DetailPrint "Extracting python..."
+;   nsExec::ExecToLog 'powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Expand-Archive -Path \"$INSTDIR\python\interpreter.zip\" -DestinationPath \"$INSTDIR\.python\interpreter\" -Force; exit 0 } catch { Write-Host $_.Exception.Message; exit 1 }"'
+;   Pop $0
+;   ${If} $0 != "0"
+;     Abort "Failed to extract python into $INSTDIR\.python\interpreter\."
+;   ${EndIf}
 
-  DetailPrint "All ZIP files were extracted successfully."
-FunctionEnd
+;   DetailPrint "All ZIP files were extracted successfully."
+; FunctionEnd
 
 ; Only check python process
 Function CheckProcessesAndWait
@@ -61,10 +70,22 @@ Function DoInstall
     Call RemoveDirectory
   ${EndIf}
 
-  ; rename .python\interpreter to python\interpreter
-  Rename "$INSTDIR\.python\interpreter" "$INSTDIR\python\interpreter"
+  ; rename python\.interpreter to python\interpreter
+  Rename "$INSTDIR\python\.interpreter" "$INSTDIR\python\interpreter"
   ${If} ${Errors}
-    Abort "Rename $INSTDIR\.python\interpreter to $INSTDIR\python\interpreter failed!"
+    Abort "Rename $INSTDIR\python\.interpreter to $INSTDIR\python\interpreter failed!"
+  ${EndIf}
+
+  ; remove python\project_template
+  ${If} ${FileExists} "$INSTDIR\python\project_template"
+    Push "$INSTDIR\python\project_template"
+    Call RemoveDirectory
+  ${EndIf}
+
+  ; rename python\.project_template to python\project_template
+  Rename "$INSTDIR\python\.project_template" "$INSTDIR\python\project_template"
+  ${If} ${Errors}
+    Abort "Rename $INSTDIR\python\.project_template to $INSTDIR\python\project_template failed!"
   ${EndIf}
 
   ; install uv
