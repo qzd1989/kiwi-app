@@ -1,4 +1,3 @@
 *pyproject-build*
-project_template/wheels/*.tar.gz
-
 .interpreter
+.project_template/wheels/*

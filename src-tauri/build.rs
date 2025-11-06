@@ -1,7 +1,6 @@
 use fs_extra::dir;
 use pyproject::PyProject;
 use regex::Regex;
-use simple_zip::{compress, extract};
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -13,12 +12,6 @@ const PYTHON_VERSION: &str = "3.14";
 const PYTHON_TYPE: &str = "cpython";
 
 fn main() {
-    if os() == "windows" && arch() == "aarch64" {
-        // windows arm needs onnxruntime todo
-        println!("cargo:rustc-link-search=native=C:\\onnxruntime\\lib");
-        println!("cargo:rustc-link-lib=onnxruntime");
-    }
-
     init_python();
 
     if os() == "macos" {
@@ -37,8 +30,10 @@ fn main() {
 
     install_system_python_uv();
 
-    if os() == "macos" {
-        macos_attr(&app_python_path());
+    if is_dev() {
+        if os() == "macos" {
+            macos_attr(&app_python_path());
+        }
         install_app_python_uv();
     }
 }
