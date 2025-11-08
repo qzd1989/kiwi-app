@@ -131,7 +131,7 @@ onUnmounted(async () => {
       class="-mr-1"
       @click="captureAndExport"
     >
-      capture and export
+      screenshot
     </el-button>
   </el-tooltip>
   <el-button type="warning" @click="propos.resetPng" plain size="small">

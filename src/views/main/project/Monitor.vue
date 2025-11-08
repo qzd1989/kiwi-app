@@ -93,7 +93,7 @@ const captureAndExportPng = async () => {
       defaultExportName(),
       png.value.base64,
     );
-    msgSuccess("Image exported successfully!");
+    msgSuccess("Screenshot successfully!");
   } catch (e) {
     msgError(e);
   } finally {
