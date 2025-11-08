@@ -83,6 +83,12 @@ fn os() -> String {
 }
 
 fn init_python() {
+    // delete target/python
+    {
+        let path = target_dir().join("python");
+        fs::remove_dir_all(&path).unwrap();
+    }
+
     let src_dir = assets_dir()
         .join("python")
         .join("interpreters")
@@ -181,6 +187,7 @@ fn install_app_python_uv() {
 
     let status = cmd.status().expect("Failed to execute uv install");
     if !status.success() {
+        println!(">>> {:?}", &cmd);
         panic!("Install uv wheel failed");
     }
 }

@@ -4,7 +4,7 @@ import { ref, onMounted, onUnmounted, reactive, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { sep } from "@tauri-apps/api/path";
 import { Code, Frame, Project, Server, Api } from "@api";
-import { useLoading } from "@utils/common";
+import { msgWarn, useLoading, hash } from "@utils/common";
 import { useAppStore } from "@store";
 import {
   copyText,
@@ -90,6 +90,8 @@ const form = reactive<Form>({
   threshold: 0.99,
   minTemplateSide: 30,
 });
+const templateMd5 = ref<string | null>(null);
+const minTemplateSide = ref<number>(0);
 
 const drawMagnifyingGlass = () => {
   if (!magnifyingGlassCanvasRef.value) return;
@@ -188,6 +190,11 @@ const loadData = () => {
       props.params.png.size.width,
       props.params.png.size.height,
     );
+    if (!form.template) return;
+    minTemplateSide.value = Math.min(
+      form.template.size.width,
+      form.template.size.height,
+    );
   }, 100);
 };
 
@@ -226,9 +233,20 @@ const saveAndCopy = async () => {
   try {
     if (!code.value) return;
     if (!form.template) return;
-    const name = form.name;
+    if (templateMd5.value == (await hash(form.template.base64))) {
+      // 重复保存
+    } else {
+      // 新
+      if (await Project.templateExists(form.name)) {
+        msgWarn(
+          `Template ${form.name}.png already exists, current template name has been changed.`,
+        );
+        form.name = Date.now().toString();
+      }
+    }
     const template = form.template.base64;
     const localAddress = await Server.getLocalAddress();
+    const name = form.name;
     if (localAddress != appStore.remoteServerAddress) {
       const saveResult = await Api.request("save_template", {
         name,
@@ -240,6 +258,8 @@ const saveAndCopy = async () => {
     }
     await Project.saveTemplate(name, template);
     await copyText(code.value);
+    templateMd5.value = await hash(form.template.base64);
+    console.log(templateMd5.value);
     msgSuccess(t("Copy succeeded."));
   } catch (e) {
     msgError(e);
@@ -349,6 +369,10 @@ const updateCode = async () => {
   } catch (e) {
     msgError(e);
   }
+};
+
+const setToFit = () => {
+  form.minTemplateSide = minTemplateSide.value;
 };
 
 listen<MatchingInfo>("backend:update:image_matching_info", async (event) => {
@@ -630,26 +654,45 @@ onUnmounted(async () => {});
               </el-tooltip>
             </el-form-item>
             <el-form-item prop="minTemplateLength" class="mb-0!">
-              <el-tooltip
-                effect="dark"
-                :content="
-                  $t(
-                    'If the template’s shortest side is larger than this value, it will be scaled down to this value, and the target image will be scaled by the same factor before matching. You can adjust it to improve matching performance if you understand its effect.',
-                  )
-                "
-                placement="bottom"
+              <el-input-number
+                :controls="false"
+                :min="1"
+                v-model="form.minTemplateSide"
+                class="w-full!"
               >
-                <el-input-number
-                  :controls="false"
-                  :min="1"
-                  v-model="form.minTemplateSide"
-                  class="w-full!"
-                >
-                  <template #prefix>
+                <template #prefix>
+                  <el-tooltip
+                    effect="dark"
+                    :content="
+                      $t(
+                        'If the template’s shortest side is larger than this value, it will be scaled down to this value, and the target image will be scaled by the same factor before matching. You can adjust it to improve matching performance if you understand its effect.',
+                      )
+                    "
+                    placement="bottom"
+                  >
                     <span>{{ $t("Min Template Side") }}</span>
-                  </template>
-                </el-input-number>
-              </el-tooltip>
+                  </el-tooltip>
+                </template>
+                <template #suffix>
+                  <el-tooltip
+                    effect="dark"
+                    :content="$t('set to fit')"
+                    placement="bottom"
+                  >
+                    <el-icon
+                      class="cursor-pointer"
+                      @click="setToFit"
+                      :color="
+                        minTemplateSide == form.minTemplateSide
+                          ? '#67C23A'
+                          : '#909399'
+                      "
+                    >
+                      <Select />
+                    </el-icon>
+                  </el-tooltip>
+                </template>
+              </el-input-number>
             </el-form-item>
           </template>
         </Item>

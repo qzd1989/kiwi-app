@@ -4,7 +4,7 @@ import { useAppStore } from "@store";
 import { Api, Code, Common } from "@api";
 import bgUrl from "@assets/canvas-bg-light.png";
 import { Png, Point, Size } from "@types";
-import { copyText, msgError } from "@utils";
+import { copyText, msgError, msgWarn, useLoading } from "@utils";
 import FindImage from "./monitor/FindImage.vue";
 import FindColor from "./monitor/FindColor.vue";
 import FindRelativeColor from "./monitor/FindRelativeColor.vue";
@@ -27,6 +27,7 @@ type Params = {
 };
 
 const { t } = useI18n();
+const { loading, startLoading, endLoading } = useLoading();
 const appStore = useAppStore();
 const findImageRef = ref<InstanceType<typeof FindImage> | null>(null);
 const findRelativeColorRef = ref<InstanceType<typeof FindRelativeColor> | null>(
@@ -53,7 +54,8 @@ const minimumSelectionLength = 10;
 const shouldDrawSelection = ref(false);
 const shouldShowSelectionToolbar = ref(false);
 const isDraggingAside = ref(false);
-const minimumAsideWidth = 550;
+const minimumAsideWidth = 10;
+const defaultAsideWidth = 550;
 const asideWidth = ref(0);
 const asideTag = ref<
   "None" | "FindImage" | "FindColor" | "FindRelativeColor" | "RecognizeText"
@@ -66,6 +68,39 @@ const loadPngFromFile = async (pngTarget: Png) => {
   await draw();
 };
 
+// 默认文件名 {Ymdhis}.png
+const defaultExportName = (): string => {
+  return new Date().toISOString().replace(/[-:T]/g, "").split(".")[0];
+};
+
+const captureAndExportPng = async () => {
+  if (!png.value) {
+    msgError("No image to export.");
+    return;
+  }
+  if (!appStore.project) {
+    msgError("Project not found.");
+    return;
+  }
+  if (loading.value != null) {
+    msgWarn("Saving, please wait...");
+    return;
+  }
+  try {
+    startLoading();
+    await capture();
+    await appStore.project.saveScreenShot(
+      defaultExportName(),
+      png.value.base64,
+    );
+    msgSuccess("Image exported successfully!");
+  } catch (e) {
+    msgError(e);
+  } finally {
+    endLoading();
+  }
+};
+
 const exportPng = async () => {
   if (!png.value) {
     msgError("No image to export.");
@@ -73,12 +108,9 @@ const exportPng = async () => {
   }
 
   try {
-    // 弹出系统保存对话框，默认文件名 {Ymdhis}.png
-    const defaultFileName =
-      new Date().toISOString().replace(/[-:T]/g, "").split(".")[0] + ".png";
-
-    const path = await save({
-      defaultPath: defaultFileName,
+    const filename = defaultExportName() + ".png";
+    const filepath = await save({
+      defaultPath: filename,
       filters: [
         {
           name: "PNG Image",
@@ -86,16 +118,8 @@ const exportPng = async () => {
         },
       ],
     });
-
-    if (!path) return; // 用户取消保存
-
-    // 从 base64 获取二进制数据
-    const base64Data = png.value.base64.replace(/^data:image\/png;base64,/, "");
-    const bytes = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
-
-    // 写入文件
-    await writeFile(path, bytes);
-
+    if (!filepath) return; // 用户取消保存
+    await writeFile(filepath, png.value.bytes);
     msgSuccess("Image exported successfully!");
   } catch (e) {
     msgError(e?.toString() || "Failed to export image.");
@@ -235,7 +259,7 @@ const onCanvasMouseOut = () => {
 };
 
 const openAside = () => {
-  asideWidth.value = minimumAsideWidth;
+  asideWidth.value = defaultAsideWidth;
 };
 
 const closeAside = () => {
@@ -341,6 +365,7 @@ defineExpose({
   resetPng,
   capture,
   exportPng,
+  captureAndExportPng,
 });
 
 onMounted(async () => {

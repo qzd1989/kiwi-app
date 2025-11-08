@@ -9,18 +9,18 @@ import MonitorButtons from "@views/main/project/MonitorButtons.vue";
 import ConnectToServerModal from "./project/ConnectToServerModal.vue";
 import Item from "@views/components/Item.vue";
 import { Png } from "@types";
-import { delay, msgError, msgWarn } from "@utils";
+import {
+  delay,
+  msgError,
+  msgWarn,
+  safeRegisterHotkey,
+  safeUnregisterHotkey,
+} from "@utils";
 import { Capturer, Project } from "@api";
 import LogButtons from "./project/LogButtons.vue";
 import { platform } from "@tauri-apps/plugin-os";
-import {
-  register,
-  ShortcutHandler,
-  unregister,
-} from "@tauri-apps/plugin-global-shortcut";
 
-interface HotKeys {
-  runScript: string;
+interface Hotkeys {
   runProject: string;
   stopAll: string;
 }
@@ -41,11 +41,12 @@ const isRemoteServerAlive = ref<boolean>(false);
 const isCapturerRunning = ref<boolean>(false);
 const shouldShowCapturer = ref<boolean>(false);
 const entryFile = ref<string | null>(null);
-const hotKeys = reactive<HotKeys>({
-  runScript: "F10",
-  runProject: "F11",
-  stopAll: "F12",
-});
+const hotkeySetting = {
+  windows: { runProject: "Ctrl+F9", stopAll: "Ctrl+F10" },
+  macos: { runProject: "F9", stopAll: "F10" },
+};
+
+const hotkeys = reactive<Hotkeys>(hotkeySetting.macos);
 
 const closeConnectToServerModal = async () => {
   showConnectToServerModal.value = false;
@@ -66,6 +67,10 @@ const resetPng = async () => {
 
 const exportPng = async () => {
   await monitorRef.value?.exportPng();
+};
+
+const captureAndExportPng = async () => {
+  await monitorRef.value?.captureAndExportPng();
 };
 
 const clearLog = async () => {
@@ -183,47 +188,25 @@ const removeCapturerStatusTimer = () => {
   }
 };
 
-const initHotKeys = async () => {
+const initHotkeys = async () => {
   if ((await platform()) == "windows") {
-    hotKeys.runScript = "Ctrl+F10";
-    hotKeys.runProject = "Ctrl+F11";
-    hotKeys.stopAll = "Ctrl+F12";
-  }
-};
-
-const safeUnregisterHotkey = async (key: string) => {
-  try {
-    await unregister(key);
-  } catch (error) {
-    // unregister失败会报错,并且用isRegistered也会误判,所以此处就不显示错误了
-  }
-};
-
-const safeRegisterHotkey = async (key: string, handler: ShortcutHandler) => {
-  await safeUnregisterHotkey(key);
-  try {
-    await register(key, handler);
-  } catch (e: unknown) {
-    msgError(e);
+    hotkeys.runProject = hotkeySetting.windows.runProject;
+    hotkeys.stopAll = hotkeySetting.windows.stopAll;
   }
 };
 
 const registerHotkeys = async () => {
-  await safeRegisterHotkey(hotKeys.runScript, async (event) => {
-    if (event.state === "Released") await runScript();
-  });
-  await safeRegisterHotkey(hotKeys.runProject, async (event) => {
+  await safeRegisterHotkey(hotkeys.runProject, async (event) => {
     if (event.state === "Released") await runProject();
   });
-  await safeRegisterHotkey(hotKeys.stopAll, async (event) => {
+  await safeRegisterHotkey(hotkeys.stopAll, async (event) => {
     if (event.state === "Released") await stopRunScript();
   });
 };
 
 const unregisterHotkeys = async () => {
-  await safeUnregisterHotkey(hotKeys.runScript);
-  await safeUnregisterHotkey(hotKeys.runProject);
-  await safeUnregisterHotkey(hotKeys.stopAll);
+  await safeUnregisterHotkey(hotkeys.runProject);
+  await safeUnregisterHotkey(hotkeys.stopAll);
 };
 
 onMounted(async () => {
@@ -234,7 +217,7 @@ onMounted(async () => {
   await initCapturerStatusTimer();
 
   // register hotkeys
-  await initHotKeys();
+  await initHotkeys();
   await delay(100);
   await registerHotkeys();
 });
@@ -328,7 +311,7 @@ onUnmounted(async () => {
               <div class="ml-2">
                 <el-tooltip
                   effect="dark"
-                  :content="hotKeys.runProject"
+                  :content="hotkeys.runProject"
                   placement="right-start"
                 >
                   <el-icon
@@ -355,7 +338,7 @@ onUnmounted(async () => {
               <div class="ml-2">
                 <el-tooltip
                   effect="dark"
-                  :content="hotKeys.stopAll"
+                  :content="hotkeys.stopAll"
                   placement="right-start"
                 >
                   <el-icon
@@ -431,25 +414,11 @@ onUnmounted(async () => {
       <el-header
         class="flex h-auto! items-center gap-2 p-0! pb-2!"
         v-show="!isFullScreen"
+        style="display: none"
       >
         <el-input v-model="entryFile" size="large"></el-input>
-        <el-button class="group" type="primary" @click="runScript" size="large">
-          <div class="flex items-center">
-            <div>Run File</div>
-            <div class="ml-2">
-              <el-tooltip
-                effect="dark"
-                :content="hotKeys.runScript"
-                placement="left"
-              >
-                <el-icon
-                  class="mt-0.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                >
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </div>
-          </div>
+        <el-button type="primary" @click="runScript" size="large">
+          <div class="flex items-center">Run File</div>
         </el-button>
       </el-header>
       <el-main class="relative p-0!">
@@ -482,7 +451,7 @@ onUnmounted(async () => {
             </el-button>
             <LogButtons :clear="clearLog" />
           </div>
-          <div v-show="activeTab == 'monitor'">
+          <div v-show="activeTab == 'monitor'" class="flex items-center">
             <el-button
               type="primary"
               @click="toggleFullScreen"
@@ -497,6 +466,7 @@ onUnmounted(async () => {
               :capture="capture"
               :resetPng="resetPng"
               :exportPng="exportPng"
+              :captureAndExportPng="captureAndExportPng"
             />
           </div>
         </div>

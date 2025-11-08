@@ -10,6 +10,8 @@ import {
   cropAlphaEdgesFromCanvas,
   useLoading,
   delay,
+  safeRegisterHotkey,
+  safeUnregisterHotkey,
 } from "./common";
 
 export {
@@ -24,4 +26,6 @@ export {
   cropAlphaEdgesFromCanvas,
   useLoading,
   delay,
+  safeRegisterHotkey,
+  safeUnregisterHotkey,
 };

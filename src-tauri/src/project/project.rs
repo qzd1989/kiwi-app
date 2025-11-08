@@ -53,6 +53,18 @@ impl Project {
     pub fn log(&self) -> Log {
         Log::new(self.path.clone())
     }
+
+    pub fn data_path(&self) -> PathBuf {
+        self.path.join("data")
+    }
+
+    pub fn template_path(&self) -> PathBuf {
+        self.data_path().join("templates")
+    }
+
+    pub fn screenshot_path(&self) -> PathBuf {
+        self.data_path().join("screenshots")
+    }
 }
 
 impl Project {

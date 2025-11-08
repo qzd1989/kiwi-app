@@ -105,6 +105,22 @@ class Project {
       throw e;
     }
   }
+
+  static async templateExists(name: string): Promise<boolean> {
+    try {
+      return await invoke("template_exists", { name });
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async saveScreenShot(name: string, base64: string): Promise<boolean> {
+    try {
+      return await invoke("save_screenshot", { name, base64 });
+    } catch (e) {
+      throw e;
+    }
+  }
 }
 
 export { Project };

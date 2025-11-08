@@ -79,6 +79,8 @@ pub fn run() {
             commands::frontend::project::get_project_entry_file,
             commands::frontend::project::is_project_running,
             commands::frontend::project::set_project_pid,
+            commands::frontend::project::template_exists,
+            commands::frontend::project::save_screenshot,
             commands::frontend::frame::find_image,
             commands::frontend::frame::find_images,
             commands::frontend::frame::find_relative_colors,

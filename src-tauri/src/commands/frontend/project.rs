@@ -247,6 +247,29 @@ pub fn is_project_running() -> CommandResult<bool> {
     Ok(pid > 0)
 }
 
+#[tauri::command]
+pub fn template_exists(name: String) -> CommandResult<bool> {
+    let app = app::get();
+    let template_path = app.try_with_project(|project| project.template_path())?;
+    let file_name = format!("{}.png", &name);
+    Ok(template_path.join(&file_name).exists())
+}
+
+#[tauri::command]
+pub fn save_screenshot(name: String, base64: Base64Png) -> CommandResult<bool> {
+    let app = app::get();
+    let screenshot_dir_path = app.try_with_project(|project| project.screenshot_path())?;
+    let file_name = format!("{}.png", &name);
+    let screenshot_path = screenshot_dir_path.join(&file_name);
+
+    if screenshot_path.exists() {
+        return Ok(false);
+    }
+
+    base64.to_buffer()?.save(&screenshot_path)?;
+    Ok(true)
+}
+
 fn output_handle<R, F>(reader: BufReader<R>, mut line_handler: F)
 where
     R: Read + Send + 'static,

@@ -3,6 +3,11 @@ import { Png, Point, Size } from "@types";
 import { ElLoading, ElMessage } from "element-plus";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import {
+  register,
+  ShortcutHandler,
+  unregister,
+} from "@tauri-apps/plugin-global-shortcut";
 
 const copyText = async (text: string) => {
   await writeText(text);
@@ -222,7 +227,42 @@ const useLoading = () => {
   return { loading, startLoading, endLoading };
 };
 
+const hash = async (text: string): Promise<string> => {
+  // 1. 把 Base64 字符串转换成 Uint8Array
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+
+  // 2. 使用浏览器内置 crypto.subtle 计算 SHA-256
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+
+  // 3. 转成十六进制字符串
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return hashHex;
+};
+
+const safeUnregisterHotkey = async (key: string) => {
+  try {
+    await unregister(key);
+  } catch (e) {
+    // unregister失败会报错,并且用isRegistered也会误判,所以此处就不显示错误了
+  }
+};
+
+const safeRegisterHotkey = async (key: string, handler: ShortcutHandler) => {
+  await safeUnregisterHotkey(key);
+  try {
+    await register(key, handler);
+  } catch (e) {
+    msgError(e);
+  }
+};
+
 export {
+  safeRegisterHotkey,
+  safeUnregisterHotkey,
   delay,
   msgError,
   msgSuccess,
@@ -234,4 +274,5 @@ export {
   drawText,
   cropAlphaEdgesFromCanvas,
   useLoading,
+  hash,
 };
