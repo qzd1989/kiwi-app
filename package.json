@@ -25,6 +25,7 @@
     "@tauri-apps/plugin-store": "^2.4.1",
     "@tauri-apps/plugin-websocket": "^2.4.1",
     "element-plus": "^2.11.4",
+    "firebase": "^12.5.0",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.5.0",
     "tailwindcss": "^4.1.14",

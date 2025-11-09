@@ -53,6 +53,21 @@ const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 app.use(pinia);
 
+// firebase
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+const firebaseConfig = {
+  apiKey: "AIzaSyDR_xgBK2-HdpNAaF_92CxSwezZxAOUnNs",
+  authDomain: "kiwi-app-7dbb6.firebaseapp.com",
+  projectId: "kiwi-app-7dbb6",
+  storageBucket: "kiwi-app-7dbb6.firebasestorage.app",
+  messagingSenderId: "596016300611",
+  appId: "1:596016300611:web:2f10ef1c8293d5995e4af6",
+  measurementId: "G-WKPJWZ2EF2",
+};
+const firebaseApp = initializeApp(firebaseConfig);
+const analytics = getAnalytics(firebaseApp);
+
 app.mount("#app");
 
 // disable right-click in production environment
