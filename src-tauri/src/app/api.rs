@@ -4,8 +4,7 @@ use serde::de::DeserializeOwned;
 use std::collections::HashMap;
 use std::time::Duration;
 
-// const API_URL_DEV: &str = "http://localhost:9992";
-const API_URL_DEV: &str = "https://kiwi.biexi.com";
+const API_URL_DEV: &str = "http://localhost:9992";
 const API_URL_PRO: &str = "https://kiwi.biexi.com";
 
 pub struct Api {

@@ -157,7 +157,7 @@ onUnmounted(async () => {});
     <div class="mt-4 text-sm text-gray-400 underline">
       Version: {{ app_version }}
     </div>
-    <div class="absolute top-2 right-2 text-2xl">
+    <div class="absolute top-2 right-2 hidden text-2xl">
       <el-icon
         class="transform cursor-pointer transition duration-300 hover:rotate-45"
       >
