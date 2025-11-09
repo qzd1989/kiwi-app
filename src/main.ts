@@ -66,7 +66,7 @@ const firebaseConfig = {
   measurementId: "G-WKPJWZ2EF2",
 };
 const firebaseApp = initializeApp(firebaseConfig);
-const analytics = getAnalytics(firebaseApp);
+getAnalytics(firebaseApp);
 
 app.mount("#app");
 

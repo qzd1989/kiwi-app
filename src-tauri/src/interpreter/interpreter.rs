@@ -28,4 +28,6 @@ pub trait Interpreter {
     fn set_pid(&self, pid: u32);
 
     fn entry_file(&self) -> String;
+
+    // fn xattr() -> Result<()>;
 }

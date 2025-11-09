@@ -5,15 +5,15 @@ class Common {
   static async pathExists(path: string): Promise<boolean> {
     try {
       return await invoke("path_exists", { path });
-    } catch (e: unknown) {
+    } catch (e) {
       throw e;
     }
   }
 
-  static async xattrPython(): Promise<void> {
+  static async xattrInterpreter(): Promise<void> {
     try {
-      return await invoke("xattr_python");
-    } catch (e: unknown) {
+      return await invoke("xattr_interpreter");
+    } catch (e) {
       throw e;
     }
   }
@@ -21,7 +21,7 @@ class Common {
   static async protectWindows(windows: windowLabel[]): Promise<void> {
     try {
       return await invoke("protect_windows", { windows });
-    } catch (e: unknown) {
+    } catch (e) {
       throw e;
     }
   }
@@ -29,7 +29,7 @@ class Common {
   static async unprotectWindows(windows: windowLabel[]): Promise<void> {
     try {
       return await invoke("unprotect_windows", { windows });
-    } catch (e: unknown) {
+    } catch (e) {
       throw e;
     }
   }

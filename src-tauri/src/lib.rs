@@ -45,7 +45,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             commands::frontend::common::path_exists,
-            // commands::frontend::common::xattr_python,
+            commands::frontend::common::xattr_interpreter,
             commands::frontend::common::unprotect_windows,
             commands::frontend::common::protect_windows,
             commands::frontend::server::shutdown_server,

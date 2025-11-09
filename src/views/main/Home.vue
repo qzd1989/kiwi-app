@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Project, App } from "@api";
+import { Project, App, Common } from "@api";
 import { msgError } from "@utils";
 import { useAppStore, useLocalStore } from "@store";
 import CreateModal from "@views/main/project/CreateModal.vue";
@@ -78,9 +78,18 @@ const goOfficialWebsite = async () => {
   await openUrl(url);
 };
 
+const xattrInterpreter = async () => {
+  try {
+    await Common.xattrInterpreter();
+  } catch (e) {
+    msgError(e);
+  }
+};
+
 onMounted(async () => {
   await openLocalServer();
   await initApp();
+  await xattrInterpreter();
   await checkRelease();
 });
 onUnmounted(async () => {});

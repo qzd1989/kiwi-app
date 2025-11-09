@@ -3,7 +3,7 @@ use super::code::PythonCode;
 use crate::{
     app,
     extensions::CommandExt as _,
-    interpreter::{Interpreter, code::Code, macos_attr},
+    interpreter::{Interpreter, code::Code},
     utils::common::find_file_in_dir,
 };
 use anyhow::{Result, anyhow};
@@ -143,6 +143,23 @@ impl Interpreter for Engine {
 }
 
 impl Engine {
+    pub fn xattr() -> Result<()> {
+        let app_interpreter = Engine::default();
+        let app_python_path = app_interpreter.path;
+        Command::new("xattr")
+            .args(&["-r", "-d", "com.apple.quarantine"])
+            .arg(&app_python_path)
+            .no_window()
+            .spawn()
+            .and_then(|mut child| child.wait())
+            .map_err(|e| {
+                anyhow!(t!(
+                    "Failed to remove quarantine attribute from Python.",
+                    error = e.to_string()
+                ))
+            })?;
+        Ok(())
+    }
     pub fn new_from_project(project_path: impl AsRef<Path>) -> Self {
         let project_path = project_path.as_ref().to_path_buf();
         let python_path = {
