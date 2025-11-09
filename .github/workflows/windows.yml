@@ -2,8 +2,8 @@ name: windows-build-on-push
 
 on:
   #private or public?
-  #push:
-  release:
+  push:
+  # release:
 
 jobs:
   build:
