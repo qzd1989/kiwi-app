@@ -15,6 +15,7 @@ import { u8 } from "./u8";
 import { u16 } from "./u16";
 import { weightPoint } from "./weight-point";
 import { windowLabel } from "./window-label";
+import { Release } from "./release";
 // import { Locale, AppLocale, locales } from "./locale";
 // import { EmitMsg } from "./emit-msg";
 import {
@@ -52,6 +53,7 @@ export type {
   rgbColor,
   weightPoint,
   windowLabel,
+  Release,
 };
 
 // export // Language,

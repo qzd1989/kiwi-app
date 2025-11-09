@@ -43,6 +43,10 @@ class LocalStore {
     await this.ensureReady();
     await this.store.save();
   }
+
+  public async clear(): Promise<void> {
+    await this.store.clear();
+  }
 }
 
 const useLocalStore = (): LocalStore => {

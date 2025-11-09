@@ -64,7 +64,7 @@ pub fn run() {
             commands::frontend::capture::run_capturer,
             commands::frontend::capture::stop_capturer,
             commands::frontend::capture::is_capturer_running,
-            // commands::frontend::app::get_release,
+            commands::frontend::app::get_release,
             commands::frontend::project::create_project,
             // commands::frontend::project::verify_project,
             // commands::frontend::project::init_project,

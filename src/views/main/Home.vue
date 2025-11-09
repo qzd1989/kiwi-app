@@ -2,18 +2,23 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Project } from "@api";
+import { Project, App } from "@api";
 import { msgError } from "@utils";
 import { useAppStore, useLocalStore } from "@store";
 import CreateModal from "@views/main/project/CreateModal.vue";
 import { Server } from "@api/Server";
-import { delay } from "@utils/common";
-import { App } from "@api";
+import { delay, msgSuccess } from "@utils/common";
+import { Release } from "@types";
+import { open as openUrl } from "@tauri-apps/plugin-shell";
+import ReleaseModal from "./ReleaseModal.vue";
 
+const isDev = import.meta.env.DEV;
 const appStore = useAppStore();
 const localStore = useLocalStore();
 const router = useRouter();
 const showCreateModal = ref(false);
+const app_version = ref<string | null>(null);
+const release = ref<Release | null>(null);
 
 const closeCreateModal = () => {
   showCreateModal.value = false;
@@ -52,39 +57,31 @@ const openLocalServer = async () => {
   }
 };
 
-// test code
-// const openAnyServer = async () => {
-//   try {
-//     await Server.shutdown();
-//     await delay(200);
-//     await Server.startAny();
-//     await Server.setRemoteAddress(await Server.getLanAddress());
-//     appStore.remoteServerAddress = await Server.getRemoteAddress();
-//   } catch (e) {
-//     appStore.remoteServerAddress = null;
-//     msgError(e);
-//   }
-// };
-// test code end
+const initApp = async () => {
+  try {
+    app_version.value = await App.version();
+  } catch (e) {
+    msgError(e);
+  }
+};
+const checkRelease = async () => {
+  release.value = await App.checkRelease();
+};
+
+const clearLocalStore = async () => {
+  await localStore.clear();
+  msgSuccess("Local storage cleared.");
+};
+
+const goOfficialWebsite = async () => {
+  const url = "https://kiwi.biexi.com";
+  await openUrl(url);
+};
 
 onMounted(async () => {
   await openLocalServer();
-  // test code
-  // await openAnyServer();
-  // await App.toListener(); //模拟listener用户，这样websocket::find_image/find_images就会去resource_dir/.cache/data/templates目录里找模板
-  // setTimeout(async () => {
-  //   try {
-  //     const project = await Project.open("/Users/kiwi/Desktop/god");
-  //     appStore.project = project;
-  //     router.push({
-  //       path: "/project",
-  //       query: { path: "/Users/kiwi/Desktop/god" },
-  //     });
-  //   } catch (e) {
-  //     msgError(e);
-  //   }
-  // }, 100);
-  // test code end
+  await initApp();
+  await checkRelease();
 });
 onUnmounted(async () => {});
 </script>
@@ -134,18 +131,32 @@ onUnmounted(async () => {});
         </el-button>
       </li>
       <li class="min-w-md">
-        <el-button type="info" plain @click="" size="large" class="w-full">
+        <el-button
+          type="info"
+          plain
+          size="large"
+          class="w-full"
+          @click="goOfficialWebsite"
+        >
           Official Website
         </el-button>
       </li>
-      <li class="hidden min-w-md">
-        <el-button type="info" plain @click="" size="large" class="w-full">
+      <li class="min-w-md" v-show="isDev">
+        <el-button
+          type="info"
+          plain
+          @click="clearLocalStore"
+          size="large"
+          class="w-full"
+        >
           ClearLocalStore
         </el-button>
       </li>
     </ul>
 
-    <div class="mt-4 text-sm text-gray-400 underline">Version: 1.0.0</div>
+    <div class="mt-4 text-sm text-gray-400 underline">
+      Version: {{ app_version }}
+    </div>
     <div class="absolute top-2 right-2 text-2xl">
       <el-icon
         class="transform cursor-pointer transition duration-300 hover:rotate-45"
@@ -154,6 +165,7 @@ onUnmounted(async () => {});
       </el-icon>
     </div>
   </div>
+  <ReleaseModal v-if="release != null" :release="release" />
   <CreateModal v-if="showCreateModal" :close="closeCreateModal" />
 </template>
 <style scoped></style>

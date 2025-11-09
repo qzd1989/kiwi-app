@@ -32,26 +32,26 @@ pub fn get_app_version() -> CommandResult<String> {
     Ok(app::get().version().to_string())
 }
 
-// #[tauri::command]
-// pub async fn get_release() -> CommandResult<Option<PlatformInfo>> {
-//     let release = app::get()
-//         .api_get::<Release>("/version.json", [("locale", app::get().locale())])
-//         .await
-//         .map_err(|e| e.to_string())?;
-//     let os = std::env::consts::OS;
-//     let arch = std::env::consts::ARCH;
-//     let key = format!("{}-{}", os, arch);
+#[tauri::command]
+pub async fn get_release() -> CommandResult<Option<PlatformInfo>> {
+    let release = app::get()
+        .api_get::<Release>("/version.json", [("locale", app::get().locale())])
+        .await
+        .map_err(|e| e.to_string())?;
+    let os = std::env::consts::OS;
+    let arch = std::env::consts::ARCH;
+    let key = format!("{}-{}", os, arch);
 
-//     if let Some(platform_info) = release.platforms.get(&key) {
-//         if compare_versions(&platform_info.version, &app::get().version())
-//             == VersionOrdering::Greater
-//         {
-//             return Ok(Some(platform_info.clone()));
-//         }
-//     }
+    if let Some(platform_info) = release.platforms.get(&key) {
+        if compare_versions(&platform_info.version, &app::get().version())
+            == VersionOrdering::Greater
+        {
+            return Ok(Some(platform_info.clone()));
+        }
+    }
 
-//     Ok(None)
-// }
+    Ok(None)
+}
 
 pub fn compare_versions(v1: &str, v2: &str) -> VersionOrdering {
     let a: Vec<u32> = v1.split('.').filter_map(|s| s.parse().ok()).collect();
