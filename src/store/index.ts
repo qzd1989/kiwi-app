@@ -1,2 +1,4 @@
 import { useAppStore } from "./app";
-export { useAppStore };
+import { useLocalStore } from "./local";
+
+export { useAppStore, useLocalStore };

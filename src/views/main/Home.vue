@@ -4,13 +4,14 @@ import { useRouter } from "vue-router";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Project } from "@api";
 import { msgError } from "@utils";
-import { useAppStore } from "@store";
+import { useAppStore, useLocalStore } from "@store";
 import CreateModal from "@views/main/project/CreateModal.vue";
 import { Server } from "@api/Server";
 import { delay } from "@utils/common";
 import { App } from "@api";
 
 const appStore = useAppStore();
+const localStore = useLocalStore();
 const router = useRouter();
 const showCreateModal = ref(false);
 

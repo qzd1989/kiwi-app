@@ -2,14 +2,16 @@
 import { ref, onMounted, onUnmounted, reactive } from "vue";
 import { FormInstance, FormRules } from "element-plus";
 import { Server } from "@api/Server";
-import { useAppStore } from "@store";
+import { useAppStore, useLocalStore } from "@store";
 import { msgError, msgSuccess } from "@utils";
+import { Delete } from "@element-plus/icons-vue";
 
 type Form = {
   address: string;
 };
 
 const appStore = useAppStore();
+const localStore = useLocalStore();
 const props = defineProps(["close", "capture"]);
 const formRef = ref<FormInstance>();
 const form = reactive<Form>({
@@ -26,6 +28,8 @@ const rules = reactive<FormRules<Form>>({
   ],
 });
 const visible = ref<boolean>(true);
+const recentAddresses = ref<string[]>([]);
+
 const connect = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   try {
@@ -35,6 +39,7 @@ const connect = async (formEl: FormInstance | undefined) => {
       await Server.setRemoteAddress(form.address);
       appStore.remoteServerAddress = form.address;
       msgSuccess(`Server ${form.address} is alive.`);
+      await addAddress(form.address);
       await props.capture();
       await props.close();
     } else {
@@ -55,23 +60,43 @@ const setToLocal = async () => {
   connect(formRef.value);
 };
 
-const setToLan = async () => {
-  form.address = await Server.getLanAddress();
-  connect(formRef.value);
+const setAddress = async (address: string) => {
+  form.address = address;
 };
 
-const setToHW = async () => {
-  form.address = "192.168.5.100:9927";
-  connect(formRef.value);
+const initAddresses = async () => {
+  recentAddresses.value = (await localStore.get("recentAddresses")) ?? [];
 };
 
-const setToPD = async () => {
-  form.address = "192.168.5.16:9927";
-  connect(formRef.value);
+const deleteAddress = async (address: string) => {
+  // 过滤掉要删除的地址
+  recentAddresses.value = recentAddresses.value.filter((a) => a !== address);
+
+  // 保存到 localStore
+  await localStore.set("recentAddresses", recentAddresses.value);
+};
+
+const addAddress = async (address: string) => {
+  if (!address) return;
+
+  // 如果数组还没初始化或 undefined，先赋空数组
+  if (!recentAddresses.value) recentAddresses.value = [];
+
+  // 避免重复添加
+  if (!recentAddresses.value.includes(address)) {
+    recentAddresses.value.unshift(address); // 插入到最前面
+  }
+
+  // 可限制数组长度，例如保留最近 20 条
+  recentAddresses.value = recentAddresses.value.slice(0, 20);
+
+  // 保存到 localStore
+  await localStore.set("recentAddresses", recentAddresses.value);
 };
 
 onMounted(async () => {
   await loadServerAddress();
+  await initAddresses();
 });
 
 onUnmounted(async () => {});
@@ -100,6 +125,27 @@ onUnmounted(async () => {});
           spellcheck="false"
         ></el-input>
       </el-form-item>
+      <div class="flex flex-wrap gap-1">
+        <div v-for="address in recentAddresses" class="flex">
+          <el-button-group>
+            <el-button
+              type="info"
+              size="small"
+              plain
+              @click="setAddress(address)"
+            >
+              {{ address }}
+            </el-button>
+            <el-button
+              type="info"
+              size="small"
+              plain
+              :icon="Delete"
+              @click="deleteAddress(address)"
+            />
+          </el-button-group>
+        </div>
+      </div>
     </el-form>
 
     <template #footer>
@@ -107,15 +153,6 @@ onUnmounted(async () => {});
         <el-button type="info" plain @click="props.close()">Close</el-button>
         <el-button type="primary" @click="setToLocal()">
           Use Local Server
-        </el-button>
-        <el-button type="primary" @click="setToHW()">
-          Use 192.168.5.100 Server
-        </el-button>
-        <el-button type="primary" @click="setToPD()">
-          Use 192.168.5.16 Server
-        </el-button>
-        <el-button type="primary" @click="setToLan()" v-show="false">
-          Use Lan Server
         </el-button>
         <el-button type="primary" @click="connect(formRef)">Connect</el-button>
       </div>
