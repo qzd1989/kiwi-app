@@ -86,7 +86,9 @@ fn init_python() {
     // delete target/python
     {
         let path = target_dir().join("python");
-        fs::remove_dir_all(&path).unwrap();
+        if path.exists() {
+            fs::remove_dir_all(&path).unwrap();
+        }
     }
 
     let src_dir = assets_dir()

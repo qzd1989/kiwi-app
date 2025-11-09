@@ -359,10 +359,23 @@ onUnmounted(async () => {
             type="info"
             plain
             size="large"
-            class="w-full"
+            class="group w-full"
             @click="editProjectInEditor"
           >
-            Edit
+            <div>Edit</div>
+            <div class="ml-2">
+              <el-tooltip
+                effect="dark"
+                content="If vscode is installed and in your system path."
+                placement="right-start"
+              >
+                <el-icon
+                  class="mt-0.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                >
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </div>
           </el-button>
         </el-col>
       </el-row>
