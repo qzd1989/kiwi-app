@@ -1,6 +1,7 @@
 use crate::app;
 use crate::extensions::AppHandleExt as _;
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum Level {
     Info,
@@ -40,10 +41,12 @@ impl Log {
         )
     }
 
+    #[allow(dead_code)]
     pub fn info(message: impl Into<String>) -> Self {
         Self::new(Level::Info, message)
     }
 
+    #[allow(dead_code)]
     pub fn warn(message: impl Into<String>) -> Self {
         Self::new(Level::Warn, message)
     }

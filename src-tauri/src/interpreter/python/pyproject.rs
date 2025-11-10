@@ -1,4 +1,4 @@
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 use serde::Deserialize;
 use std::any::Any;
 use std::fs;
@@ -12,6 +12,7 @@ pub struct PyProject {
     pub tool: Tool,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 pub struct Project {
     pub name: String,

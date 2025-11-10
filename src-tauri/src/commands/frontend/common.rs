@@ -1,4 +1,4 @@
-use crate::{interpreter::PythonInterpreter, project::Project};
+use crate::interpreter::PythonInterpreter;
 
 use super::utils::*;
 use std::path::PathBuf;
@@ -31,22 +31,4 @@ pub fn xattr_interpreter() -> CommandResult<()> {
         PythonInterpreter::xattr()?;
     }
     Ok(())
-
-    // let interpreter = {
-    //     let default_interpreter = get_default_interpreter();
-    //     default_interpreter.to_str().unwrap().to_string()
-    // };
-    // Command::new("xattr")
-    //     .args(&["-r", "-d", "com.apple.quarantine", &interpreter])
-    //     .no_window()
-    //     .spawn()
-    //     .and_then(|mut child| child.wait())
-    //     .map_err(|e| {
-    //         anyhow!(t!(
-    //             "Failed to remove quarantine attribute from Python.",
-    //             error = e.to_string()
-    //         ))
-    //         .to_string()
-    //     })?;
-    // Ok(())
 }

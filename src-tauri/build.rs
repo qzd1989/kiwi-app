@@ -1,10 +1,10 @@
-use fs_extra::dir::{self, CopyOptions};
+use fs_extra::dir;
 use pyproject::PyProject;
 use regex::Regex;
 use std::{
     env, fs,
     path::{Path, PathBuf},
-    process::{Command, Stdio},
+    process::Command,
 };
 use tauri_build::is_dev;
 
@@ -12,73 +12,16 @@ const PYTHON_VERSION: &str = "3.14";
 const PYTHON_TYPE: &str = "cpython";
 
 fn main() {
-    // 1 init things and prepare to sync to {target_dir}
+    // 1 init things and prepare to sync to target_dir
     {
         // 1.1 init python
         init_python();
-        // 1.2 build wheels
-        build_wheels();
-        // 1.3 add uv to app python
-        install_uv();
+        // 1.2 build wheels and install uv to app python
+        init_wheels();
     }
 
-    //2 build and sync assets/python to {target_dir}/python
+    //2 build and sync assets/python to target_dir/python
     tauri_build();
-
-    // 3 app python have no uv module in dev mode
-    // if is_dev() {
-    // init_app_python();
-    // }
-}
-
-fn install_uv() {
-    let app = App::new();
-    app.xattr(&app.assets_app_python_path());
-    let wheels_path = app.assets_wheels_path();
-    let uv_path = match app.match_one(&wheels_path, r"^uv-.*\.whl$") {
-        Some(p) => p,
-        None => panic!("uv wheel not found."),
-    };
-    let find_links = format!("--find-links={}", &wheels_path.to_string_lossy());
-    let output = app
-        .assets_app_python_command()
-        .arg("-m")
-        .arg("pip")
-        .arg("install")
-        .arg("--no-index")
-        .arg(&find_links)
-        .arg(&uv_path)
-        .output()
-        .expect("Failed to install uv for app python.");
-
-    if !output.status.success() {
-        panic!("Failed to install uv for app python.");
-    }
-}
-
-fn init_app_python() {
-    let app = App::new();
-    app.xattr(&app.target_app_python_path());
-    let wheels_path = app.target_wheels_path();
-    let uv_path = match app.match_one(&wheels_path, r"^uv-.*\.whl$") {
-        Some(p) => p,
-        None => panic!("uv wheel not found."),
-    };
-    let find_links = format!("--find-links={}", &wheels_path.to_string_lossy());
-    let output = app
-        .target_app_python_command()
-        .arg("-m")
-        .arg("pip")
-        .arg("install")
-        .arg("--no-index")
-        .arg(&find_links)
-        .arg(&uv_path)
-        .output()
-        .expect("Failed to install uv for app python.");
-
-    if !output.status.success() {
-        panic!("Failed to install uv for app python.");
-    }
 }
 
 fn init_python() {
@@ -86,19 +29,21 @@ fn init_python() {
     let options = dir::CopyOptions::new().overwrite(true).content_only(true);
     let from = app.assets_source_python_dir();
     let to = app.assets_app_python_dir();
-    dir::copy(&from, &to, &options)
-        .expect("copy assets_source_python to assets_app_python failed.");
+    if !to.exists() {
+        dir::copy(&from, &to, &options)
+            .expect("copy assets_source_python to assets_app_python failed.");
+    }
     // for build whl
     let to = app.target_temp_python_dir();
     if !to.exists() {
         fs::create_dir_all(&to).expect("Failed to create target_temp_python_dir.");
+        dir::copy(&from, &to, &options)
+            .expect("copy assets_source_python to target_temp_python_dir failed.");
     }
-    dir::copy(&from, &to, &options)
-        .expect("copy assets_source_python to target_temp_python_dir failed.");
     app.xattr(&to);
 }
 
-fn build_wheels() {
+fn init_wheels() {
     let app = App::new();
     let package_dir = app
         .assets_dir()
@@ -116,7 +61,7 @@ fn build_wheels() {
     );
     let kiwi_wheel_path = wheels_dir.join(&kiwi_wheel_file_name);
 
-    // skip build if in debug mode
+    // Skip the build if the Kiwi wheel exists in debug mode.
     {
         if is_dev() && kiwi_wheel_path.exists() {
             return;
@@ -210,6 +155,31 @@ fn build_wheels() {
                         .expect(&format!("Failed to delete old kiwi wheel: {:?}", file));
                 }
             });
+    }
+
+    // install uv to app python
+    {
+        app.xattr(&app.assets_app_python_path());
+        let wheels_path = app.assets_wheels_path();
+        let uv_path = match app.match_one(&wheels_path, r"^uv-.*\.whl$") {
+            Some(p) => p,
+            None => panic!("uv wheel not found."),
+        };
+        let find_links = format!("--find-links={}", &wheels_path.to_string_lossy());
+        let output = app
+            .assets_app_python_command()
+            .arg("-m")
+            .arg("pip")
+            .arg("install")
+            .arg("--no-index")
+            .arg(&find_links)
+            .arg(&uv_path)
+            .output()
+            .expect("Failed to install uv for app python.");
+
+        if !output.status.success() {
+            panic!("Failed to install uv for app python.");
+        }
     }
 }
 
@@ -364,24 +334,20 @@ impl Profile {
 }
 
 enum Arch {
-    x86_64,
+    X86_64,
     Aarch64,
 }
 
 impl Arch {
     pub fn to_str(&self) -> &'static str {
         match self {
-            Arch::x86_64 => "x86_64",
+            Arch::X86_64 => "x86_64",
             Arch::Aarch64 => "aarch64",
         }
     }
 }
 
 impl System {
-    fn is_macos() -> bool {
-        System::os() == Os::Macos
-    }
-
     fn os() -> Os {
         if cfg!(target_os = "windows") {
             Os::Windows
@@ -402,7 +368,7 @@ impl System {
 
     fn arch() -> Arch {
         if cfg!(target_arch = "x86_64") {
-            Arch::x86_64
+            Arch::X86_64
         } else if cfg!(target_arch = "aarch64") {
             Arch::Aarch64
         } else {
@@ -496,36 +462,6 @@ impl App {
 
     fn target_temp_python_command(&self) -> Command {
         Command::new(&self.target_temp_python_path())
-    }
-
-    // {target_dir}/python/interpreter/
-    fn target_app_python_dir(&self) -> PathBuf {
-        self.target_dir().join("python").join("interpreter")
-    }
-
-    // target/{profile}/python/interpreter/(bin/python{version}|python.exe)
-    fn target_app_python_path(&self) -> PathBuf {
-        match System::os() {
-            Os::Macos => self
-                .target_app_python_dir()
-                .join("bin")
-                .join(format!("python{}", PYTHON_VERSION)),
-            Os::Windows => self.target_app_python_dir().join("python.exe"),
-        }
-    }
-
-    fn target_app_python_command(&self) -> Command {
-        Command::new(&self.target_app_python_path())
-    }
-
-    // target/{profile}/python/project_template/
-    fn target_project_template_dir(&self) -> PathBuf {
-        self.target_dir().join("python").join("project_template")
-    }
-
-    // target/{profile}/python/project_template/wheels/
-    fn target_wheels_path(&self) -> PathBuf {
-        self.target_project_template_dir().join("wheels")
     }
 
     fn xattr(&self, path: &PathBuf) {
