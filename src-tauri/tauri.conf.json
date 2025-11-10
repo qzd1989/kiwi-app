@@ -34,8 +34,8 @@
       "icons/icon.ico"
     ],
     "resources": {
-      "assets/python/.interpreter/": "python/.interpreter/",
-      "assets/python/.project_template/": "python/.project_template/"
+      "assets/python/interpreter/": "python/interpreter/",
+      "assets/python/project_template/": "python/project_template/"
     }
   }
 }

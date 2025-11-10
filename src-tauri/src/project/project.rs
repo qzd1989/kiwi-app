@@ -113,7 +113,7 @@ impl Project {
 
     pub fn open_in_editor(&self) -> Result<()> {
         if cfg!(target_os = "macos") {
-            Command::new("code")
+            Command::new("/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code")
                 .arg(self.path.clone())
                 .no_window()
                 .spawn()?;

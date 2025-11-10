@@ -366,7 +366,7 @@ onUnmounted(async () => {
             <div class="ml-2">
               <el-tooltip
                 effect="dark"
-                content="If vscode is installed and in your system path."
+                content="If vscode is installed."
                 placement="right-start"
               >
                 <el-icon

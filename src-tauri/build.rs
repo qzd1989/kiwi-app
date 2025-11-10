@@ -1,4 +1,4 @@
-use fs_extra::dir;
+use fs_extra::dir::{self, CopyOptions};
 use pyproject::PyProject;
 use regex::Regex;
 use std::{
@@ -12,145 +12,36 @@ const PYTHON_VERSION: &str = "3.14";
 const PYTHON_TYPE: &str = "cpython";
 
 fn main() {
-    init_python();
-
-    if os() == "macos" {
-        macos_attr(&system_python_path());
-    }
-
-    build_whl();
-
-    if os() == "macos" {
-        tauri_build_macos();
-    }
-
-    if os() == "windows" {
-        tauri_build_windows();
-    }
-
-    install_system_python_uv();
-
-    if is_dev() {
-        if os() == "macos" {
-            macos_attr(&app_python_path());
-        }
-        install_app_python_uv();
-    }
-}
-
-fn profile() -> String {
-    let profile = env::var("PROFILE").unwrap();
-    match profile.as_str() {
-        "debug" | "release" => profile,
-        _ => panic!("Unsupported profile: {}", profile),
-    }
-}
-
-fn target_dir() -> PathBuf {
-    let cargo_manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let profile = profile();
-    let dir = PathBuf::from(&cargo_manifest_dir)
-        .join("target")
-        .join(&profile);
-    if !dir.exists() {
-        panic!("Target directory does not exist: {}", dir.display());
-    }
-    dir
-}
-
-fn assets_dir() -> PathBuf {
-    PathBuf::from(&env::var("CARGO_MANIFEST_DIR").unwrap()).join("assets")
-}
-
-fn arch() -> String {
-    if cfg!(target_arch = "x86_64") {
-        "x86_64".to_string()
-    } else if cfg!(target_arch = "aarch64") {
-        "aarch64".to_string()
-    } else {
-        panic!("Unsupported architecture");
-    }
-}
-
-fn os() -> String {
-    if cfg!(target_os = "windows") {
-        "windows".to_string()
-    } else if cfg!(target_os = "macos") {
-        "macos".to_string()
-    } else {
-        panic!("Unsupported operating system");
-    }
-}
-
-fn init_python() {
-    // delete target/python
+    // 1 init things and prepare to sync to {target_dir}
     {
-        let path = target_dir().join("python");
-        if path.exists() {
-            fs::remove_dir_all(&path).unwrap();
-        }
+        // 1.1 init python
+        init_python();
+        // 1.2 build wheels
+        build_wheels();
+        // 1.3 add uv to app python
+        install_uv();
     }
 
-    let src_dir = assets_dir()
-        .join("python")
-        .join("interpreters")
-        .join(format!(
-            "{}-{}-{}-{}",
-            PYTHON_TYPE,
-            PYTHON_VERSION,
-            os(),
-            arch()
-        ));
+    //2 build and sync assets/python to {target_dir}/python
+    tauri_build();
 
-    let options = dir::CopyOptions::new().overwrite(true).content_only(true);
-    //安装后move .interpreter to interpreter
-    {
-        let dst_dir = assets_dir().join("python").join(".interpreter");
-        if !dst_dir.exists() {
-            println!("cargo:warning=copy default interpreter to assets_dir/python/.interpreter");
-            dir::create_all(&dst_dir, true)
-                .expect("Failed to create {assets_dir}/python/.interpreter");
-            dir::copy(&src_dir, &dst_dir, &options)
-                .expect("Failed to copy source python to {assets_dir}/python/.interpreter");
-        }
-    }
-
-    // build后续使用的interpreter
-    {
-        let dst_dir = target_dir().join("python").join("system_interpreter");
-        if !dst_dir.exists() {
-            println!("cargo:warning=extract python interpreter to target");
-            dir::create_all(&dst_dir, true)
-                .expect("Failed to create {target_dir}/python/system_interpreter");
-            dir::copy(&src_dir, &dst_dir, &options)
-                .expect("Failed to copy source python to {target_dir}/python/system_interpreter");
-        }
-    }
+    // 3 app python have no uv module in dev mode
+    // if is_dev() {
+    // init_app_python();
+    // }
 }
 
-fn macos_attr(path: &PathBuf) {
-    let output = Command::new(&"xattr")
-        .args(&["-r", "-d", "com.apple.quarantine", path.to_str().unwrap()])
-        .output()
-        .expect("Failed to xattr target_python_interpreter.");
-    if !output.status.success() {
-        println!("cargo:warning=init_attr xattr target_python_interpreter failed");
-    }
-}
-
-fn install_system_python_uv() {
-    println!("cargo:warning=install_system_python_uv");
-    let wheels_path = target_dir()
-        .join("python")
-        .join(".project_template")
-        .join("wheels");
-    let pattern = r"^uv-.*\.whl$";
-    let uv_path = match find_one_file_in_dir(&wheels_path, pattern) {
+fn install_uv() {
+    let app = App::new();
+    app.xattr(&app.assets_app_python_path());
+    let wheels_path = app.assets_wheels_path();
+    let uv_path = match app.match_one(&wheels_path, r"^uv-.*\.whl$") {
         Some(p) => p,
-        None => panic!("Uv wheel not found."),
+        None => panic!("uv wheel not found."),
     };
     let find_links = format!("--find-links={}", &wheels_path.to_string_lossy());
-    let output = system_python_command()
+    let output = app
+        .assets_app_python_command()
         .arg("-m")
         .arg("pip")
         .arg("install")
@@ -158,50 +49,176 @@ fn install_system_python_uv() {
         .arg(&find_links)
         .arg(&uv_path)
         .output()
-        .expect("Failed to install uv.");
+        .expect("Failed to install uv for app python.");
 
     if !output.status.success() {
-        panic!("Install uv wheel failed.");
+        panic!("Failed to install uv for app python.");
     }
 }
 
-fn install_app_python_uv() {
-    println!("cargo:warning=install_app_python_uv");
-    let wheels_path = target_dir()
-        .join("python")
-        .join(".project_template")
-        .join("wheels");
-    let pattern = r"^uv-.*\.whl$";
-    let uv_path = match find_one_file_in_dir(&wheels_path, pattern) {
+fn init_app_python() {
+    let app = App::new();
+    app.xattr(&app.target_app_python_path());
+    let wheels_path = app.target_wheels_path();
+    let uv_path = match app.match_one(&wheels_path, r"^uv-.*\.whl$") {
         Some(p) => p,
-        None => panic!("Uv wheel not found."),
+        None => panic!("uv wheel not found."),
     };
     let find_links = format!("--find-links={}", &wheels_path.to_string_lossy());
-    let mut cmd = app_python_command();
-    cmd.arg("-m")
+    let output = app
+        .target_app_python_command()
+        .arg("-m")
         .arg("pip")
         .arg("install")
         .arg("--no-index")
         .arg(&find_links)
         .arg(&uv_path)
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit());
+        .output()
+        .expect("Failed to install uv for app python.");
 
-    let status = cmd.status().expect("Failed to execute uv install");
-    if !status.success() {
-        println!(">>> {:?}", &cmd);
-        panic!("Install uv wheel failed");
+    if !output.status.success() {
+        panic!("Failed to install uv for app python.");
     }
 }
 
-fn tauri_build_macos() {
-    tauri_build::build()
+fn init_python() {
+    let app = App::new();
+    let options = dir::CopyOptions::new().overwrite(true).content_only(true);
+    let from = app.assets_source_python_dir();
+    let to = app.assets_app_python_dir();
+    dir::copy(&from, &to, &options)
+        .expect("copy assets_source_python to assets_app_python failed.");
+    // for build whl
+    let to = app.target_temp_python_dir();
+    if !to.exists() {
+        fs::create_dir_all(&to).expect("Failed to create target_temp_python_dir.");
+    }
+    dir::copy(&from, &to, &options)
+        .expect("copy assets_source_python to target_temp_python_dir failed.");
+    app.xattr(&to);
 }
 
-/// 程序启动时会弹出 UAC 提示，要求用户允许管理员权限。
-fn tauri_build_windows() {
-    let windows = tauri_build::WindowsAttributes::new().app_manifest(
-        r#"
+fn build_wheels() {
+    let app = App::new();
+    let package_dir = app
+        .assets_dir()
+        .join("python")
+        .join("packages")
+        .join("kiwi");
+    let wheels_dir = app
+        .assets_dir()
+        .join("python")
+        .join("project_template")
+        .join("wheels");
+    let kiwi_wheel_file_name = format!(
+        "kiwi-{}-py3-none-any.whl",
+        PyProject::default().project.version
+    );
+    let kiwi_wheel_path = wheels_dir.join(&kiwi_wheel_file_name);
+
+    // skip build if in debug mode
+    {
+        if is_dev() && kiwi_wheel_path.exists() {
+            return;
+        }
+    }
+
+    // clean wheels dir
+    {
+        if wheels_dir.exists() {
+            fs::remove_dir_all(&wheels_dir).expect("Failed to clean wheels dir.");
+        }
+        fs::create_dir_all(&wheels_dir).expect("Failed to create wheels dir.");
+    }
+
+    // target_temp_python_command init
+    {
+        let output = app
+            .target_temp_python_command()
+            .args(&["-u", "-m", "pip", "install", "--upgrade", "pip"])
+            .output()
+            .expect("Failed to upgrade target_temp_python_command module `pip`");
+
+        if !output.status.success() {
+            panic!("Failed to upgrade target_temp_python_command module `pip`");
+        }
+
+        let output = app
+            .target_temp_python_command()
+            .args(&["-u", "-m", "pip", "install", "build"])
+            .output()
+            .expect("Failed to install target_temp_python_command module `build`");
+
+        if !output.status.success() {
+            panic!("Failed to install target_temp_python_command module `build`");
+        }
+    }
+
+    // build kiwi
+    {
+        let output = app
+            .target_temp_python_command()
+            .args(&[
+                "-u",
+                "-m",
+                "build",
+                "-o",
+                wheels_dir.to_str().unwrap(),
+                package_dir.to_str().unwrap(),
+            ])
+            .output()
+            .expect("Failed to build module `kiwi`");
+
+        if !output.status.success() {
+            panic!("Failed to build module `kiwi`");
+        }
+    }
+
+    // download kiwi dependencies
+    {
+        let output = app
+            .target_temp_python_command()
+            .args(&[
+                "-u",
+                "-m",
+                "pip",
+                "download",
+                kiwi_wheel_path.to_str().unwrap(),
+                "-d",
+                wheels_dir.to_str().unwrap(),
+            ])
+            .output()
+            .expect("Failed to download dependencies of `kiwi` module");
+
+        if !output.status.success() {
+            panic!("Failed to download dependencies of `kiwi` module");
+        }
+    }
+
+    // clean up unnecessary and old files
+    {
+        app.match_mutiple(&wheels_dir, r".*\.tar(\.gz)?$")
+            .iter()
+            .for_each(|file| {
+                fs::remove_file(file).expect(&format!("Failed to delete {:?}", file));
+            });
+        app.match_mutiple(&wheels_dir, r"^kiwi.*\.whl$")
+            .iter()
+            .for_each(|file| {
+                if &kiwi_wheel_path != file {
+                    fs::remove_file(file)
+                        .expect(&format!("Failed to delete old kiwi wheel: {:?}", file));
+                }
+            });
+    }
+}
+
+fn tauri_build() {
+    match System::os() {
+        Os::Macos => tauri_build::build(),
+        Os::Windows => {
+            let windows = tauri_build::WindowsAttributes::new().app_manifest(
+                r#"
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <dependency>
     <dependentAssembly>
@@ -224,172 +241,12 @@ fn tauri_build_windows() {
   </trustInfo>
 </assembly>
 "#,
-    );
-    tauri_build::try_build(tauri_build::Attributes::new().windows_attributes(windows))
-        .expect("Failed to run build script.");
-}
-
-fn build_whl() {
-    let kiwi_package_dir = assets_dir().join("python").join("packages").join("kiwi");
-    let wheels_dir = assets_dir()
-        .join("python")
-        .join(".project_template")
-        .join("wheels");
-    let kiwi_whl_file_name = format!("kiwi-{}-py3-none-any.whl", kiwi_whl_version());
-    let kiwi_whl_path = wheels_dir.join(&kiwi_whl_file_name);
-
-    // debug模式下如果已经存在 kiwi whl 则跳过构建
-    {
-        if is_dev() && kiwi_whl_path.exists() {
-            println!("cargo:warning=skip build kiwi whl in dev mode");
-            return;
+            );
+            tauri_build::try_build(tauri_build::Attributes::new().windows_attributes(windows))
+                .expect("Failed to run windows tauri_build.")
         }
-    }
-
-    println!("cargo:warning=clean dir .project_template/wheels");
-    {
-        if wheels_dir.exists() {
-            fs::remove_dir_all(&wheels_dir).expect("Failed to clean wheels dir.");
-        }
-        fs::create_dir_all(&wheels_dir).expect("Failed to create wheels dir.");
-    }
-
-    println!("cargo:warning=upgrade system python module: pip");
-    {
-        let output = system_python_command()
-            .args(&["-u", "-m", "pip", "install", "--upgrade", "pip"])
-            .output()
-            .expect("Failed to upgrade pip");
-
-        if !output.status.success() {
-            panic!("Build_whl upgarde pip failed.");
-        }
-    }
-
-    println!("cargo:warning=install system python module: build");
-    {
-        let output = system_python_command()
-            .args(&["-u", "-m", "pip", "install", "build"])
-            .output()
-            .expect("Failed to install build");
-
-        if !output.status.success() {
-            panic!("Build_whl install build failed.");
-        }
-    }
-
-    println!("cargo:warning=build module: kiwi");
-    {
-        let output = system_python_command()
-            .args(&[
-                "-u",
-                "-m",
-                "build",
-                "-o",
-                wheels_dir.to_str().unwrap(),
-                kiwi_package_dir.to_str().unwrap(),
-            ])
-            .output()
-            .expect("Failed to build kiwi whl");
-
-        if !output.status.success() {
-            panic!("Build_whl build kiwi whl failed.");
-        }
-    }
-
-    println!("cargo:warning=download dependencies of python module kiwi");
-    {
-        let output = system_python_command()
-            .args(&[
-                "-u",
-                "-m",
-                "pip",
-                "download",
-                kiwi_whl_path.to_str().unwrap(),
-                "-d",
-                wheels_dir.to_str().unwrap(),
-            ])
-            .output()
-            .expect("Failed to download dependencies of kiwi whl");
-
-        if !output.status.success() {
-            panic!("Build_whl download dependencies of kiwi whl failed.");
-        }
-    }
-
-    println!("cargo:warning=delete .project_template/wheels/*.tar and *.tar.gz and old kiwi whls");
-    {
-        find_all_files_in_dir(&wheels_dir, r".*\.tar(\.gz)?$")
-            .iter()
-            .for_each(|file| {
-                fs::remove_file(file).expect("Failed to delete .tar or .tar.gz file.");
-            });
-        find_all_files_in_dir(&wheels_dir, r"^kiwi.*\.whl$")
-            .iter()
-            .for_each(|file| {
-                if file != &kiwi_whl_path {
-                    fs::remove_file(file).expect("Failed to delete old kiwi whl file.");
-                }
-            });
     }
 }
-
-fn app_python_command() -> Command {
-    let python_path = app_python_path();
-    Command::new(&python_path)
-}
-
-fn system_python_command() -> Command {
-    let python_path = system_python_path();
-    Command::new(&python_path)
-}
-
-fn app_python_path() -> PathBuf {
-    let path = {
-        if os() == "macos" {
-            target_dir()
-                .join("python")
-                .join(".interpreter")
-                .join("bin")
-                .join(format!("python{}", PYTHON_VERSION))
-        } else {
-            target_dir()
-                .join("python")
-                .join(".interpreter")
-                .join("python.exe")
-        }
-    };
-    if !path.exists() {
-        panic!("{} is not exist.", path.to_str().unwrap());
-    }
-    path
-}
-
-fn system_python_path() -> PathBuf {
-    let path = {
-        if os() == "macos" {
-            target_dir()
-                .join("python")
-                .join("system_interpreter")
-                .join("bin")
-                .join(format!("python{}", PYTHON_VERSION))
-        } else {
-            target_dir()
-                .join("python")
-                .join("system_interpreter")
-                .join("python.exe")
-        }
-    };
-    if !path.exists() {
-        panic!("{} is not exist.", path.to_str().unwrap());
-    }
-    path
-}
-
-fn kiwi_whl_version() -> String {
-    PyProject::default().project.version
-}
-
 mod pyproject {
     use anyhow::Result;
     use serde::Deserialize;
@@ -475,48 +332,256 @@ mod pyproject {
     }
 }
 
-pub fn find_one_file_in_dir(dir: &Path, pattern: &str) -> Option<PathBuf> {
-    let re = Regex::new(pattern).ok()?;
-    let entries = fs::read_dir(dir).ok()?;
+struct System {}
 
-    for entry in entries {
-        if let Ok(entry) = entry {
-            let path = entry.path();
-            if path.is_file() {
-                if let Some(file_name) = path.file_name().and_then(|s| s.to_str()) {
-                    if re.is_match(file_name) {
-                        return Some(path);
+#[derive(PartialEq)]
+enum Os {
+    Macos,
+    Windows,
+}
+
+impl Os {
+    pub fn to_str(&self) -> &'static str {
+        match self {
+            Os::Macos => "macos",
+            Os::Windows => "windows",
+        }
+    }
+}
+
+enum Profile {
+    Debug,
+    Release,
+}
+
+impl Profile {
+    pub fn to_str(&self) -> &'static str {
+        match self {
+            Profile::Debug => "debug",
+            Profile::Release => "release",
+        }
+    }
+}
+
+enum Arch {
+    x86_64,
+    Aarch64,
+}
+
+impl Arch {
+    pub fn to_str(&self) -> &'static str {
+        match self {
+            Arch::x86_64 => "x86_64",
+            Arch::Aarch64 => "aarch64",
+        }
+    }
+}
+
+impl System {
+    fn is_macos() -> bool {
+        System::os() == Os::Macos
+    }
+
+    fn os() -> Os {
+        if cfg!(target_os = "windows") {
+            Os::Windows
+        } else if cfg!(target_os = "macos") {
+            Os::Macos
+        } else {
+            panic!("Unsupported operating system");
+        }
+    }
+
+    fn profile() -> Profile {
+        match env::var("PROFILE").unwrap().as_str() {
+            "debug" => Profile::Debug,
+            "release" => Profile::Release,
+            _ => panic!("Unsupported profile: {}", env::var("PROFILE").unwrap()),
+        }
+    }
+
+    fn arch() -> Arch {
+        if cfg!(target_arch = "x86_64") {
+            Arch::x86_64
+        } else if cfg!(target_arch = "aarch64") {
+            Arch::Aarch64
+        } else {
+            panic!("Unsupported architecture");
+        }
+    }
+}
+
+struct App {}
+
+impl App {
+    pub fn new() -> Self {
+        Self {}
+    }
+    //
+    fn base_dir(&self) -> PathBuf {
+        PathBuf::from(&env::var("CARGO_MANIFEST_DIR").unwrap())
+    }
+
+    // assets/
+    fn assets_dir(&self) -> PathBuf {
+        self.base_dir().join("assets")
+    }
+
+    // target/{profile}/
+    fn target_dir(&self) -> PathBuf {
+        self.base_dir()
+            .join("target")
+            .join(System::profile().to_str())
+    }
+
+    // assets/python/interpreters/cpython-{version}-{os}-{arch}/
+    fn assets_source_python_dir(&self) -> PathBuf {
+        self.assets_dir()
+            .join("python")
+            .join("interpreters")
+            .join(format!(
+                "{}-{}-{}-{}",
+                PYTHON_TYPE,
+                PYTHON_VERSION,
+                System::os().to_str(),
+                System::arch().to_str()
+            ))
+    }
+
+    // assets/python/interpreter/
+    fn assets_app_python_dir(&self) -> PathBuf {
+        self.assets_dir().join("python").join("interpreter")
+    }
+
+    // assets/python/interpreter/(bin/python{version}|python.exe)
+    fn assets_app_python_path(&self) -> PathBuf {
+        match System::os() {
+            Os::Macos => self
+                .assets_app_python_dir()
+                .join("bin")
+                .join(format!("python{}", PYTHON_VERSION)),
+            Os::Windows => self.assets_app_python_dir().join("python.exe"),
+        }
+    }
+
+    fn assets_app_python_command(&self) -> Command {
+        Command::new(&self.assets_app_python_path())
+    }
+
+    // assets/python/project_template/wheels/
+    fn assets_wheels_path(&self) -> PathBuf {
+        self.assets_dir()
+            .join("python")
+            .join("project_template")
+            .join("wheels")
+    }
+
+    // for temp use
+    // target/{profile}/python/temp_interpreter
+    fn target_temp_python_dir(&self) -> PathBuf {
+        self.target_dir().join("python").join("temp_interpreter")
+    }
+
+    // for temp use
+    // target/{profile}/python/temp_interpreter/(bin/python{version}|python.exe)
+    fn target_temp_python_path(&self) -> PathBuf {
+        match System::os() {
+            Os::Macos => self
+                .target_temp_python_dir()
+                .join("bin")
+                .join(format!("python{}", PYTHON_VERSION)),
+            Os::Windows => self.target_temp_python_dir().join("python.exe"),
+        }
+    }
+
+    fn target_temp_python_command(&self) -> Command {
+        Command::new(&self.target_temp_python_path())
+    }
+
+    // {target_dir}/python/interpreter/
+    fn target_app_python_dir(&self) -> PathBuf {
+        self.target_dir().join("python").join("interpreter")
+    }
+
+    // target/{profile}/python/interpreter/(bin/python{version}|python.exe)
+    fn target_app_python_path(&self) -> PathBuf {
+        match System::os() {
+            Os::Macos => self
+                .target_app_python_dir()
+                .join("bin")
+                .join(format!("python{}", PYTHON_VERSION)),
+            Os::Windows => self.target_app_python_dir().join("python.exe"),
+        }
+    }
+
+    fn target_app_python_command(&self) -> Command {
+        Command::new(&self.target_app_python_path())
+    }
+
+    // target/{profile}/python/project_template/
+    fn target_project_template_dir(&self) -> PathBuf {
+        self.target_dir().join("python").join("project_template")
+    }
+
+    // target/{profile}/python/project_template/wheels/
+    fn target_wheels_path(&self) -> PathBuf {
+        self.target_project_template_dir().join("wheels")
+    }
+
+    fn xattr(&self, path: &PathBuf) {
+        let output = Command::new(&"xattr")
+            .args(&["-r", "-d", "com.apple.quarantine", path.to_str().unwrap()])
+            .output()
+            .expect(&format!("Failed to xattr {:?}", &path));
+        if !output.status.success() {
+            println!("cargo:warning=xattr {:?} failed.", &path);
+        }
+    }
+
+    /// 遍历目录，返回最新的匹配正则 pattern 的文件路径
+    pub fn match_one(&self, dir: &Path, pattern: &str) -> Option<PathBuf> {
+        let re = Regex::new(pattern).ok()?;
+        let entries = fs::read_dir(dir).ok()?;
+
+        for entry in entries {
+            if let Ok(entry) = entry {
+                let path = entry.path();
+                if path.is_file() {
+                    if let Some(file_name) = path.file_name().and_then(|s| s.to_str()) {
+                        if re.is_match(file_name) {
+                            return Some(path);
+                        }
                     }
                 }
             }
         }
+        None
     }
-    None
-}
 
-/// 遍历目录，返回所有匹配正则 pattern 的文件路径
-pub fn find_all_files_in_dir(dir: &Path, pattern: &str) -> Vec<PathBuf> {
-    let mut matched_files = Vec::new();
-    let re = match Regex::new(pattern) {
-        Ok(r) => r,
-        Err(_) => return matched_files, // 正则无效返回空列表
-    };
+    /// 遍历目录，返回所有匹配正则 pattern 的文件路径
+    pub fn match_mutiple(&self, dir: &Path, pattern: &str) -> Vec<PathBuf> {
+        let mut matched_files = Vec::new();
+        let re = match Regex::new(pattern) {
+            Ok(r) => r,
+            Err(_) => return matched_files, // 正则无效返回空列表
+        };
 
-    let entries = match std::fs::read_dir(dir) {
-        Ok(e) => e,
-        Err(_) => return matched_files, // 目录不存在返回空列表
-    };
+        let entries = match std::fs::read_dir(dir) {
+            Ok(e) => e,
+            Err(_) => return matched_files, // 目录不存在返回空列表
+        };
 
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if path.is_file() {
-            if let Some(file_name) = path.file_name().and_then(|s| s.to_str()) {
-                if re.is_match(file_name) {
-                    matched_files.push(path);
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_file() {
+                if let Some(file_name) = path.file_name().and_then(|s| s.to_str()) {
+                    if re.is_match(file_name) {
+                        matched_files.push(path);
+                    }
                 }
             }
         }
-    }
 
-    matched_files
+        matched_files
+    }
 }

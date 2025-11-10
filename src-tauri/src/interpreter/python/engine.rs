@@ -144,20 +144,22 @@ impl Interpreter for Engine {
 
 impl Engine {
     pub fn xattr() -> Result<()> {
-        let app_interpreter = Engine::default();
-        let app_python_path = app_interpreter.path;
-        Command::new("xattr")
-            .args(&["-r", "-d", "com.apple.quarantine"])
-            .arg(&app_python_path)
-            .no_window()
-            .spawn()
-            .and_then(|mut child| child.wait())
-            .map_err(|e| {
-                anyhow!(t!(
-                    "Failed to remove quarantine attribute from Python.",
-                    error = e.to_string()
-                ))
-            })?;
+        if cfg!(target_os = "macos") {
+            let app_interpreter = Engine::default();
+            let app_python_path = app_interpreter.path;
+            Command::new("xattr")
+                .args(&["-r", "-d", "com.apple.quarantine"])
+                .arg(&app_python_path)
+                .no_window()
+                .spawn()
+                .and_then(|mut child| child.wait())
+                .map_err(|e| {
+                    anyhow!(t!(
+                        "Failed to remove quarantine attribute from Python.",
+                        error = e.to_string()
+                    ))
+                })?;
+        }
         Ok(())
     }
     pub fn new_from_project(project_path: impl AsRef<Path>) -> Self {
@@ -261,12 +263,8 @@ impl Engine {
         latest.map(|(_, _, _, name)| name)
     }
 
-    fn project_template_name(&self) -> &str {
-        if cfg!(debug_assertions) {
-            ".project_template"
-        } else {
-            "project_template"
-        }
+    fn project_template_name(&self) -> &'static str {
+        "project_template"
     }
 
     fn uv_add_kiwi(&self, project_path: &PathBuf) -> Result<()> {
@@ -412,15 +410,7 @@ impl Engine {
     }
 
     pub fn app_python_path() -> PathBuf {
-        let python_dir = if cfg!(debug_assertions) {
-            app::get()
-                .resource_dir()
-                .join("python")
-                .join(".interpreter")
-        } else {
-            app::get().resource_dir().join("python").join("interpreter")
-        };
-
+        let python_dir = app::get().resource_dir().join("python").join("interpreter");
         let path = if cfg!(target_os = "windows") {
             python_dir.join("python.exe")
         } else {
