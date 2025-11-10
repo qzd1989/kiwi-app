@@ -465,12 +465,14 @@ impl App {
     }
 
     fn xattr(&self, path: &PathBuf) {
-        let output = Command::new(&"xattr")
-            .args(&["-r", "-d", "com.apple.quarantine", path.to_str().unwrap()])
-            .output()
-            .expect(&format!("Failed to xattr {:?}", &path));
-        if !output.status.success() {
-            println!("cargo:warning=xattr {:?} failed.", &path);
+        if System::os() == Os::Macos {
+            let output = Command::new(&"xattr")
+                .args(&["-r", "-d", "com.apple.quarantine", path.to_str().unwrap()])
+                .output()
+                .expect(&format!("Failed to xattr {:?}", &path));
+            if !output.status.success() {
+                println!("cargo:warning=xattr {:?} failed.", &path);
+            }
         }
     }
 
