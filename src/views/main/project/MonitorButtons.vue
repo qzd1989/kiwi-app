@@ -9,12 +9,14 @@ import {
   safeUnregisterHotkey,
 } from "@utils";
 import { platform } from "@tauri-apps/plugin-os";
+import { useI18n } from "vue-i18n";
 
 interface Hotkeys {
   capture: string;
   captureAndExport: string;
 }
 
+const { t } = useI18n();
 const hotkeySetting = {
   windows: { capture: "Ctrl+F8", captureAndExport: "Ctrl+F12" },
   macos: { capture: "F8", captureAndExport: "F12" },
@@ -98,7 +100,7 @@ onUnmounted(async () => {
 <template>
   <el-tooltip effect="dark" :content="hotkeys.capture" placement="bottom">
     <el-button type="primary" plain size="small" class="-mr-1" @click="capture">
-      capture
+      {{ t("capture") }}
     </el-button>
   </el-tooltip>
   <el-button
@@ -108,7 +110,7 @@ onUnmounted(async () => {
     size="small"
     class="-mr-1"
   >
-    import
+    {{ t("import") }}
   </el-button>
   <el-button
     type="primary"
@@ -117,7 +119,7 @@ onUnmounted(async () => {
     size="small"
     class="-mr-1"
   >
-    export
+    {{ t("export") }}
   </el-button>
   <el-tooltip
     effect="dark"
@@ -131,11 +133,11 @@ onUnmounted(async () => {
       class="-mr-1"
       @click="captureAndExport"
     >
-      screenshot
+      {{ t("screenshot") }}
     </el-button>
   </el-tooltip>
   <el-button type="warning" @click="propos.resetPng" plain size="small">
-    reset
+    {{ t("reset") }}
   </el-button>
 </template>
 <style scoped></style>

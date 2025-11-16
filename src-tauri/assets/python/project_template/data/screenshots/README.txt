@@ -1,3 +1,2 @@
-# 不要修改或删除 data/screenshots 目录
-
-# Don't change or delete data/screenshots directory
+该目录用于存放屏幕截图，请勿修改或删除。
+This directory is used to store screenshots. Please do not modify or delete it.

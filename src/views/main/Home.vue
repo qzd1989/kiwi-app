@@ -11,17 +11,25 @@ import { delay, msgSuccess } from "@utils/common";
 import { Release } from "@types";
 import { open as openUrl } from "@tauri-apps/plugin-shell";
 import ReleaseModal from "./ReleaseModal.vue";
+import SettingModal from "./SettingModal.vue";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const isDev = import.meta.env.DEV;
 const appStore = useAppStore();
 const localStore = useLocalStore();
 const router = useRouter();
 const showCreateModal = ref(false);
+const showSettingModal = ref(false);
 const app_version = ref<string | null>(null);
 const release = ref<Release | null>(null);
 
 const closeCreateModal = () => {
   showCreateModal.value = false;
+};
+
+const closeSettingModal = () => {
+  showSettingModal.value = false;
 };
 
 const selectProject = async () => {
@@ -70,7 +78,7 @@ const checkRelease = async () => {
 
 const clearLocalStore = async () => {
   await localStore.clear();
-  msgSuccess("Local storage cleared.");
+  msgSuccess(t("Local storage cleared."));
 };
 
 const goOfficialWebsite = async () => {
@@ -102,9 +110,11 @@ onUnmounted(async () => {});
       <div class="h-30 w-30 rounded-full">
         <img src="./../../assets/logo.png" />
       </div>
-      <div class="text-4xl font-extrabold text-gray-700">Kiwi</div>
+      <div class="text-4xl font-extrabold text-gray-700">
+        {{ t("Kiwi Assistant") }}
+      </div>
       <div class="text-gray-500">
-        Simplifying your tasks, one click at a time.
+        {{ t("Simplifying your tasks, one click at a time.") }}
       </div>
     </div>
     <ul class="flex flex-col items-center gap-4">
@@ -116,7 +126,7 @@ onUnmounted(async () => {});
           size="large"
           class="w-full"
         >
-          Start Listening
+          {{ t("Start Remote Assistance") }}
         </el-button>
       </li>
       <li class="min-w-md">
@@ -126,7 +136,7 @@ onUnmounted(async () => {});
           size="large"
           class="w-full"
         >
-          Create Project
+          {{ t("Create Project") }}
         </el-button>
       </li>
       <li class="min-w-md">
@@ -136,7 +146,7 @@ onUnmounted(async () => {});
           size="large"
           class="w-full"
         >
-          Open Project
+          {{ t("Open Project") }}
         </el-button>
       </li>
       <li class="min-w-md">
@@ -147,7 +157,7 @@ onUnmounted(async () => {});
           class="w-full"
           @click="goOfficialWebsite"
         >
-          Official Website
+          {{ t("Official Website") }}
         </el-button>
       </li>
       <li class="min-w-md" v-show="isDev">
@@ -158,15 +168,18 @@ onUnmounted(async () => {});
           size="large"
           class="w-full"
         >
-          ClearLocalStore
+          {{ t("ClearLocalStore") }}
         </el-button>
       </li>
     </ul>
 
     <div class="mt-4 text-sm text-gray-400 underline">
-      Version: {{ app_version }}
+      {{ t("Version") }}: {{ app_version }}
     </div>
-    <div class="absolute top-2 right-2 hidden text-2xl">
+    <div
+      class="absolute top-2 right-2 text-2xl"
+      @click="showSettingModal = true"
+    >
       <el-icon
         class="transform cursor-pointer transition duration-300 hover:rotate-45"
       >
@@ -176,5 +189,6 @@ onUnmounted(async () => {});
   </div>
   <ReleaseModal v-if="release != null" :release="release" />
   <CreateModal v-if="showCreateModal" :close="closeCreateModal" />
+  <SettingModal v-if="showSettingModal" :close="closeSettingModal" />
 </template>
 <style scoped></style>

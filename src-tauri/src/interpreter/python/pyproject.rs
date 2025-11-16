@@ -31,7 +31,7 @@ pub struct Tool {
 
 #[derive(Debug, Deserialize)]
 pub struct Uv {
-    // key 为包名（如 "kiwi"），value 为对应的 Source
+    // key 为包名（如 "kiwi_assistant"），value 为对应的 Source
     pub sources: HashMap<String, Source>,
 }
 

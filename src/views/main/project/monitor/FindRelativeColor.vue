@@ -5,7 +5,7 @@ import {
   rgbColor,
   RelativeColoredPoint,
   RelativeColoredPoints,
-  Png,
+  Png
 } from "@types";
 import { copyText, msgError, msgSuccess, msgWarn } from "@utils";
 import { ref, onMounted, onUnmounted, reactive, computed, watch } from "vue";
@@ -41,13 +41,13 @@ const form = reactive<Form>({
   points: new RelativeColoredPoints(),
   offset: { r: 10, g: 10, b: 10 },
   start: new Point(0, 0),
-  end: new Point(0, 0),
+  end: new Point(0, 0)
 });
 
 const pushPoint = (coloredPoint: ColoredPoint) => {
   let point: RelativeColoredPoint = new RelativeColoredPoint(
     coloredPoint,
-    new Point(-1, -1),
+    new Point(-1, -1)
   );
   if (
     form.points
@@ -65,7 +65,7 @@ const pushPoint = (coloredPoint: ColoredPoint) => {
 
 const removePoint = (point: RelativeColoredPoint) => {
   form.points = new RelativeColoredPoints(
-    ...form.points.filter((item) => item.key() !== point.key()),
+    ...form.points.filter((item) => item.key() !== point.key())
   );
   form.points.caculateRelativePoint();
 };
@@ -86,7 +86,7 @@ const loadData = () => {
     form.start = new Point(0, 0);
     form.end = new Point(
       props.params.png.size.width,
-      props.params.png.size.height,
+      props.params.png.size.height
     );
   }, 100);
 };
@@ -100,7 +100,7 @@ const drawItems = async () => {
   // null
   if (!result.value) {
     await emits("drawItems", {
-      callback: (_ctx: CanvasRenderingContext2D) => {},
+      callback: (_ctx: CanvasRenderingContext2D) => {}
     });
     return;
   }
@@ -114,7 +114,7 @@ const drawItems = async () => {
       const titlePoint = new Point(item.point.x - 5, item.point.y - 10);
       drawArc(ctx, item.point, 5);
       drawText(ctx, fullTitle, titlePoint);
-    },
+    }
   });
 };
 
@@ -137,7 +137,7 @@ const findRelativeColor = async () => {
       form.points,
       form.start,
       form.end,
-      form.offset,
+      form.offset
     );
     await updateCode();
     await drawItems();
@@ -160,7 +160,7 @@ const updateCode = async () => {
       form.points,
       form.start,
       form.end,
-      form.offset,
+      form.offset
     );
   } catch (e) {
     msgError(e);
@@ -176,11 +176,11 @@ watch(
       msgError(e);
     }
   },
-  { deep: true },
+  { deep: true }
 );
 
 defineExpose({
-  loadData,
+  loadData
 });
 
 onMounted(async () => {
@@ -212,7 +212,7 @@ onUnmounted(async () => {});
                   props.params.selection.png.size.height * pixelSideLength +
                   'px',
                 transformOrigin: 'top left',
-                gridTemplateColumns: `repeat(${props.params.selection.png.size.width}, ${pixelSideLength}px)`,
+                gridTemplateColumns: `repeat(${props.params.selection.png.size.width}, ${pixelSideLength}px)`
               }"
             >
               <div
@@ -224,13 +224,13 @@ onUnmounted(async () => {});
                         return item.key();
                       })
                       .includes(item.key()),
-                  'border-red-600': isVertex(item),
+                  'border-red-600': isVertex(item)
                 }"
                 v-for="item in pixels"
                 :style="{
                   'background-color': item.hex,
                   width: pixelSideLength + 'px',
-                  height: pixelSideLength + 'px',
+                  height: pixelSideLength + 'px'
                 }"
                 @click="pushPoint(item)"
               ></div>
@@ -288,7 +288,7 @@ onUnmounted(async () => {});
               </template>
             </el-input>
             <el-button type="primary" plain @click="" class="mt-2 w-full">
-              Copy All
+              {{ t("Copy All") }}
             </el-button>
           </template>
         </Item>

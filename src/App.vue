@@ -2,7 +2,10 @@
 import { onMounted, onUnmounted } from "vue";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useAppStore } from "@store";
+import { Locale } from "@api";
+import { useI18n } from "vue-i18n";
 
+const { locale } = useI18n();
 const appStore = useAppStore();
 
 const watchWindow = async () => {
@@ -21,8 +24,13 @@ const watchWindow = async () => {
   });
 };
 
+const initLocal = async () => {
+  locale.value = await Locale.get();
+};
+
 onMounted(async () => {
   await watchWindow();
+  await initLocal();
 });
 
 onUnmounted(async () => {});

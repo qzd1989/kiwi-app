@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // 1. 读取 package.json
 const packageJson = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "package.json"), "utf-8")
+  fs.readFileSync(path.join(__dirname, "package.json"), "utf-8"),
 );
 const version = packageJson.version;
 
@@ -23,7 +23,7 @@ const cargoTomlPath = path.join(__dirname, "src-tauri", "Cargo.toml");
 let cargoToml = fs.readFileSync(cargoTomlPath, "utf-8");
 cargoToml = cargoToml.replace(
   /version\s*=\s*"[^"]+"/,
-  `version = "${version}"`
+  `version = "${version}"`,
 );
 fs.writeFileSync(cargoTomlPath, cargoToml);
 console.log(`✅ Updated Cargo.toml to version ${version}`);
@@ -35,15 +35,15 @@ const pythonKiwiTomlPath = path.join(
   "assets",
   "python",
   "packages",
-  "kiwi",
-  "pyproject.toml"
+  "kiwi_assistant",
+  "pyproject.toml",
 );
 let pythonKiwiToml = fs.readFileSync(pythonKiwiTomlPath, "utf-8");
 pythonKiwiToml = pythonKiwiToml.replace(
   /version\s*=\s*"[^"]+"/,
-  `version = "${version}"`
+  `version = "${version}"`,
 );
 fs.writeFileSync(pythonKiwiTomlPath, pythonKiwiToml);
 console.log(
-  `✅ Updated Python Package Kiwi pyproject.toml to version ${version}`
+  `✅ Updated Python Package Kiwi pyproject.toml to version ${version}`,
 );

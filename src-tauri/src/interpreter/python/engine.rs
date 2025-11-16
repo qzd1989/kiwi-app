@@ -236,8 +236,8 @@ impl Engine {
     }
 
     fn find_latest_kiwi_whl_filename(&self, dir: &Path) -> Option<String> {
-        // 匹配 kiwi-x.y.z-py3-none-any.whl
-        let re = Regex::new(r"^kiwi-(\d+)\.(\d+)\.(\d+)-py3-none-any\.whl$").unwrap();
+        // 匹配 kiwi_assistant-x.y.z-py3-none-any.whl
+        let re = Regex::new(r"^kiwi_assistant-(\d+)\.(\d+)\.(\d+)-py3-none-any\.whl$").unwrap();
 
         let mut latest: Option<(u32, u32, u32, String)> = None;
 
@@ -302,7 +302,10 @@ impl Engine {
 
             if !output.status.success() {
                 let stderr = String::from_utf8_lossy(&output.stderr);
-                return Err(anyhow!("Failed to install kiwi lib. ({:?})", stderr));
+                return Err(anyhow!(
+                    "Failed to install kiwi_assistant lib. ({:?})",
+                    stderr
+                ));
             }
         }
 
@@ -355,22 +358,22 @@ impl Engine {
         // kiwi whl is outdated?
         {
             let project_kiwi = {
-                let pattern = r"kiwi-\d+(\.\d+)*-py3-none-any\.whl$";
+                let pattern = r"kiwi_assistant-\d+(\.\d+)*-py3-none-any\.whl$";
                 let path = project_path.join("pyproject.toml");
                 let pyproject = PyProject::new_from_file(&path)?;
                 let sources = pyproject.tool.uv.sources;
                 let kiwi_source = sources
-                    .get("kiwi")
-                    .ok_or_else(|| anyhow!("Kiwi lib not found"))?;
+                    .get("kiwi_assistant")
+                    .ok_or_else(|| anyhow!("kiwi_assistant lib not found"))?;
                 let re = Regex::new(pattern)?;
                 let path = re
                     .find(&kiwi_source.path)
-                    .ok_or_else(|| anyhow!("Matched pyproject.toml kiwi.path failed."))?
+                    .ok_or_else(|| anyhow!("Matched pyproject.toml kiwi_assistant.path failed."))?
                     .as_str();
                 path.to_string()
             };
             let app_kiwi = {
-                let pattern = r"^kiwi-\d+(\.\d+)*-py3-none-any\.whl$";
+                let pattern = r"^kiwi_assistant-\d+(\.\d+)*-py3-none-any\.whl$";
                 let wheels_path = app::get()
                     .resource_dir()
                     .join("python")

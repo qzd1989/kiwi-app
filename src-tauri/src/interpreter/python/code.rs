@@ -12,7 +12,7 @@ impl Default for PythonCode {
 impl Code for PythonCode {
     fn predefined(&self) -> String {
         format!(
-            r#"from kiwi import ScreenClient, Point, ColoredPoint, RgbOffset, System, Key
+            r#"from kiwi_assistant import ScreenClient, Point, ColoredPoint, RgbOffset, System, Key
 client = ScreenClient()
 "#
         )

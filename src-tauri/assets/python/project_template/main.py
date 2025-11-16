@@ -1,5 +1,5 @@
 import time
-from kiwi import (
+from kiwi_assistant import (
     ColoredPoint,
     Key,
     Point,

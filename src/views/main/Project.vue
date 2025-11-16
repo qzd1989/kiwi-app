@@ -14,17 +14,19 @@ import {
   msgError,
   msgWarn,
   safeRegisterHotkey,
-  safeUnregisterHotkey,
+  safeUnregisterHotkey
 } from "@utils";
 import { Capturer, Project } from "@api";
 import LogButtons from "./project/LogButtons.vue";
 import { platform } from "@tauri-apps/plugin-os";
+import { useI18n } from "vue-i18n";
 
 interface Hotkeys {
   runProject: string;
   stopAll: string;
 }
 
+const { t } = useI18n();
 const appStore = useAppStore();
 const showConnectToServerModal = ref(false);
 const router = useRouter();
@@ -43,7 +45,7 @@ const shouldShowCapturer = ref<boolean>(false);
 const entryFile = ref<string | null>(null);
 const hotkeySetting = {
   windows: { runProject: "Ctrl+F9", stopAll: "Ctrl+F10" },
-  macos: { runProject: "F9", stopAll: "F10" },
+  macos: { runProject: "F9", stopAll: "F10" }
 };
 
 const hotkeys = reactive<Hotkeys>(hotkeySetting.macos);
@@ -98,7 +100,7 @@ const stopCapturer = async () => {
     // if project is running, don't stop.
     let isRunning = await Project.is_running();
     if (isRunning) {
-      msgWarn("Script is running, stop it first.");
+      msgWarn(t("Script is running, stop it first."));
       return;
     }
     await Capturer.stop();
@@ -155,7 +157,7 @@ const initRemoteAliveTimer = async () => {
     try {
       if (!appStore.remoteServerAddress) return;
       isRemoteServerAlive.value = await Server.isRemoteAlive(
-        appStore.remoteServerAddress,
+        appStore.remoteServerAddress
       );
     } catch (e) {
       isRemoteServerAlive.value = false;
@@ -269,7 +271,7 @@ onUnmounted(async () => {
             size="large"
             @click="stopCapturer"
           >
-            Stop Capturer
+            {{ t("Stop Capturer") }}
           </el-button>
 
           <el-button
@@ -280,7 +282,7 @@ onUnmounted(async () => {
             @click="startCapturer"
           >
             <div class="flex items-center">
-              <div>Only Start Capturer</div>
+              <div>{{ t("Only Start Capturer") }}</div>
               <div class="ml-2">
                 <el-tooltip
                   effect="dark"
@@ -307,7 +309,7 @@ onUnmounted(async () => {
             @click="runProject"
           >
             <div class="flex items-center">
-              <div>Run Project</div>
+              <div>{{ t("Run Project") }}</div>
               <div class="ml-2">
                 <el-tooltip
                   effect="dark"
@@ -334,7 +336,7 @@ onUnmounted(async () => {
             @click="stopRunScript"
           >
             <div class="flex items-center">
-              <div>Stop All</div>
+              <div>{{ t("Stop All") }}</div>
               <div class="ml-2">
                 <el-tooltip
                   effect="dark"
@@ -362,7 +364,7 @@ onUnmounted(async () => {
             class="group w-full"
             @click="editProjectInEditor"
           >
-            <div>Edit</div>
+            <div>{{ t("Edit") }}</div>
             <div class="ml-2">
               <el-tooltip
                 effect="dark"
@@ -388,26 +390,33 @@ onUnmounted(async () => {
             class="w-full"
             @click="router.push({ path: '/home' })"
           >
-            Back
+            <div>{{ t("Back") }}</div>
+            <div class="ml-2">
+              <el-icon
+                class="mt-0.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              >
+                <QuestionFilled />
+              </el-icon>
+            </div>
           </el-button>
         </el-col>
       </el-row>
       <Item class="mt-2">
         <template #title>
-          <span class="font-bold">{{ $t("Project Info") }}</span>
+          <span class="font-bold">{{ t("Project Info") }}</span>
         </template>
         <template #content>
           <div class="text-sm text-gray-600">
             <div class="flex border-b border-b-gray-300 py-1 pt-0">
-              <div class="mr-2 shrink-0 font-semibold">Name</div>
+              <div class="mr-2 shrink-0 font-semibold">{{ t("Name") }}</div>
               <div>{{ appStore.project?.name }}</div>
             </div>
             <div class="flex border-b border-b-gray-300 py-1 pt-0">
-              <div class="mr-2 shrink-0 font-semibold">Version</div>
+              <div class="mr-2 shrink-0 font-semibold">{{ t("Version") }}</div>
               <div>{{ appStore.project?.version }}</div>
             </div>
             <div class="flex border-b border-b-gray-300 py-1">
-              <div class="mr-2 shrink-0 font-semibold">Path</div>
+              <div class="mr-2 shrink-0 font-semibold">{{ t("Path") }}</div>
               <div
                 class="cursor-pointer text-blue-400 underline hover:decoration-0"
                 @click="openProjectFolder"
@@ -416,7 +425,9 @@ onUnmounted(async () => {
               </div>
             </div>
             <div class="flex border-b border-b-gray-300 py-1 pt-0">
-              <div class="mr-2 shrink-0 font-semibold">Description</div>
+              <div class="mr-2 shrink-0 font-semibold">
+                {{ t("Description") }}
+              </div>
               <div>{{ appStore.project?.description }}</div>
             </div>
           </div>

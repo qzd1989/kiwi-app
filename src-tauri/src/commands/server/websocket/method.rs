@@ -28,6 +28,7 @@ pub enum Method {
     ReleaseKey,
     ClickKey,
     InputText,
+    UserLoggedIn,
 }
 
 impl TryFrom<&str> for Method {
@@ -59,6 +60,7 @@ impl TryFrom<&str> for Method {
             "input_text" => Ok(Self::InputText),
             "capture" => Ok(Self::Capture),
             "save_template" => Ok(Self::SaveTemplate),
+            "user_logged_in" => Ok(Self::UserLoggedIn),
             other => Err(anyhow!("Unknown method: {}", other)),
         }
     }
@@ -91,6 +93,11 @@ impl Method {
             Method::InputText => input::input_text(args),
             Method::Capture => frame::capture(),
             Method::SaveTemplate => utils::save_template(args),
+            Method::UserLoggedIn => {
+                dbg!("UserLoggedIn");
+                dbg!(&args);
+                Ok(json!({}))
+            },
         }
     }
 }

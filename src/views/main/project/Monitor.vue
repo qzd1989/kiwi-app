@@ -31,7 +31,7 @@ const { loading, startLoading, endLoading } = useLoading();
 const appStore = useAppStore();
 const findImageRef = ref<InstanceType<typeof FindImage> | null>(null);
 const findRelativeColorRef = ref<InstanceType<typeof FindRelativeColor> | null>(
-  null,
+  null
 );
 const findColorRef = ref<InstanceType<typeof FindColor> | null>(null);
 const recognizeTextRef = ref<InstanceType<typeof RecognizeText> | null>(null);
@@ -42,7 +42,7 @@ const mousePoint = reactive(new Point(0, 0));
 const selection = reactive<Selection>({
   start: new Point(0, 0),
   end: new Point(0, 0),
-  png: null,
+  png: null
 });
 const params = ref<Params | null>(null);
 const selectionToolbarPosition = computed<Point>(() => {
@@ -75,15 +75,15 @@ const defaultExportName = (): string => {
 
 const captureAndExportPng = async () => {
   if (!png.value) {
-    msgError("No image to export.");
+    msgError(t("No image to export."));
     return;
   }
   if (!appStore.project) {
-    msgError("Project not found.");
+    msgError(t("Project not found."));
     return;
   }
   if (loading.value != null) {
-    msgWarn("Saving, please wait...");
+    msgWarn(t("Saving, please wait..."));
     return;
   }
   try {
@@ -91,9 +91,9 @@ const captureAndExportPng = async () => {
     await capture();
     await appStore.project.saveScreenShot(
       defaultExportName(),
-      png.value.base64,
+      png.value.base64
     );
-    msgSuccess("Screenshot successfully!");
+    msgSuccess(t("Screenshot successfully!"));
   } catch (e) {
     msgError(e);
   } finally {
@@ -103,7 +103,7 @@ const captureAndExportPng = async () => {
 
 const exportPng = async () => {
   if (!png.value) {
-    msgError("No image to export.");
+    msgError(t("No image to export."));
     return;
   }
 
@@ -114,15 +114,15 @@ const exportPng = async () => {
       filters: [
         {
           name: "PNG Image",
-          extensions: ["png"],
-        },
-      ],
+          extensions: ["png"]
+        }
+      ]
     });
     if (!filepath) return; // 用户取消保存
     await writeFile(filepath, png.value.bytes);
-    msgSuccess("Image exported successfully!");
+    msgSuccess(t("Image exported successfully!"));
   } catch (e) {
-    msgError(e?.toString() || "Failed to export image.");
+    msgError(e?.toString() || t("Failed to export image."));
   }
 };
 
@@ -216,7 +216,7 @@ const copyMoveToAbsolutePositionCode = async () => {
   try {
     const result = await Code.generateMoveToAbsolutePositionCode(mousePoint);
     copyText(result);
-    msgSuccess(t("Copy succeeded."));
+    msgSuccess(t("Mouse position copied successfully."));
   } catch (e) {
     msgError(e);
   }
@@ -239,7 +239,7 @@ const onCanvasMouseUp = async (event: MouseEvent) => {
   shouldShowSelectionToolbar.value = true;
   selection.png = await png.value.crop(
     selection.start,
-    Size.fromPoints(selection.start, selection.end),
+    Size.fromPoints(selection.start, selection.end)
   );
 };
 
@@ -275,8 +275,8 @@ const findImage = async () => {
     selection: {
       png: selection.png.clone(),
       start: selection.start.clone(),
-      end: selection.end.clone(),
-    },
+      end: selection.end.clone()
+    }
   };
   openAside();
   await hideSelectionRect();
@@ -293,8 +293,8 @@ const findRelativeColor = async () => {
     selection: {
       png: selection.png.clone(),
       start: selection.start.clone(),
-      end: selection.end.clone(),
-    },
+      end: selection.end.clone()
+    }
   };
   openAside();
   await hideSelectionRect();
@@ -311,8 +311,8 @@ const findColor = async () => {
     selection: {
       png: selection.png.clone(),
       start: selection.start.clone(),
-      end: selection.end.clone(),
-    },
+      end: selection.end.clone()
+    }
   };
   openAside();
   await hideSelectionRect();
@@ -329,8 +329,8 @@ const recognizeText = async () => {
     selection: {
       png: selection.png.clone(),
       start: selection.start.clone(),
-      end: selection.end.clone(),
-    },
+      end: selection.end.clone()
+    }
   };
   openAside();
   await hideSelectionRect();
@@ -343,7 +343,7 @@ const moveListener = (event: MouseEvent) => {
   if (isDraggingAside.value == false) return;
   asideWidth.value = Math.max(
     appStore.window.width / appStore.window.scaleFactor - event.clientX,
-    minimumAsideWidth,
+    minimumAsideWidth
   );
 };
 
@@ -365,7 +365,7 @@ defineExpose({
   resetPng,
   capture,
   exportPng,
-  captureAndExportPng,
+  captureAndExportPng
 });
 
 onMounted(async () => {
@@ -398,7 +398,7 @@ onUnmounted(() => {});
         <el-main
           class="h-full w-full p-0!"
           :style="{
-            'background-image': `url(${bgUrl})`,
+            'background-image': `url(${bgUrl})`
           }"
         >
           <div class="workspace relative">
@@ -408,7 +408,7 @@ onUnmounted(() => {});
               :style="{
                 display: shouldShowSelectionToolbar ? 'inline-flex' : 'none',
                 top: selectionToolbarPosition.y + 2 + 'px',
-                left: selectionToolbarPosition.x + 'px',
+                left: selectionToolbarPosition.x + 'px'
               }"
             >
               <!-- find image -->
@@ -485,7 +485,7 @@ onUnmounted(() => {});
       </el-container>
       <el-aside
         :style="{
-          width: asideWidth + 'px',
+          width: asideWidth + 'px'
         }"
         class="flex"
         ref="asideRef"

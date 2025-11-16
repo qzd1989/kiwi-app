@@ -6,4 +6,6 @@ export { Frame } from "./Frame";
 export { Project } from "./Project";
 export { Api } from "./Api";
 export { Code } from "./Code";
+export { Locale } from "./Locale";
+
 export type { Response } from "./Api";

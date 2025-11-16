@@ -5,7 +5,9 @@ import { msgError } from "@utils";
 import { delay, copyText, msgSuccess } from "@utils/common";
 import { Server } from "@api/Server";
 import { App, Capturer } from "@api";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const router = useRouter();
 const address = ref<string>("");
 const isConnected = ref<boolean>(false);
@@ -14,7 +16,7 @@ const intervalId = ref<number | undefined>(undefined);
 const copy = async () => {
   try {
     await copyText(address.value);
-    msgSuccess("Copy Successded.");
+    msgSuccess(t("Copy Successded."));
   } catch (e) {
     msgError(e);
   }
@@ -67,7 +69,7 @@ onUnmounted(async () => {
     <el-form>
       <div>
         <el-form-item
-          label="Server Address"
+          :label="t('Your LAN Address')"
           prop="address"
           label-position="top"
         >
@@ -90,9 +92,9 @@ onUnmounted(async () => {
           </el-input>
         </el-form-item>
         <el-button type="info" plain @click="router.push({ path: '/home' })">
-          Back
+          {{ t("Back") }}
         </el-button>
-        <el-button type="primary" @click="copy">Copy</el-button>
+        <el-button type="primary" @click="copy">{{ t("Copy") }}</el-button>
       </div>
     </el-form>
   </div>

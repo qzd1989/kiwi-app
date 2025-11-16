@@ -26,7 +26,7 @@ pub fn find_file_in_dir(dir: &Path, pattern: &str) -> Option<String> {
 ///
 /// # Arguments
 ///
-/// * `pattern` - 例如：`"/path/kiwi-.*-py3-none-any\\.whl"`
+/// * `pattern` - 例如：`"/path/kiwi_assistant-.*-py3-none-any\\.whl"`
 ///
 /// # Returns
 ///

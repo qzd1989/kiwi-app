@@ -12,7 +12,7 @@ import {
   drawRect,
   drawText,
   msgError,
-  msgSuccess,
+  msgSuccess
 } from "@utils";
 import { listen } from "@tauri-apps/api/event";
 
@@ -88,7 +88,7 @@ const form = reactive<Form>({
   start: new Point(0, 0),
   endPoint: new Point(0, 0),
   threshold: 0.99,
-  minTemplateSide: 30,
+  minTemplateSide: 30
 });
 const templateMd5 = ref<string | null>(null);
 const minTemplateSide = ref<number>(0);
@@ -104,7 +104,7 @@ const drawMagnifyingGlass = () => {
     mousePoint.x - magnifyingGlassSideLength / 2,
     mousePoint.y - magnifyingGlassSideLength / 2,
     magnifyingGlassSideLength,
-    magnifyingGlassSideLength,
+    magnifyingGlassSideLength
   );
   magnifyingGlassCanvasRef.value.width = magnifyingGlassSideLength;
   magnifyingGlassCanvasRef.value.height = magnifyingGlassSideLength;
@@ -116,7 +116,7 @@ const drawMagnifyingGlass = () => {
     magnifyingGlassSideLength / 2 - eraserSideLength.value / 2,
     magnifyingGlassSideLength / 2 - eraserSideLength.value / 2,
     eraserSideLength.value,
-    eraserSideLength.value,
+    eraserSideLength.value
   );
 };
 
@@ -162,7 +162,7 @@ const erase = () => {
     mousePoint.x - eraserSideLength.value / 2,
     mousePoint.y - eraserSideLength.value / 2,
     eraserSideLength.value,
-    eraserSideLength.value,
+    eraserSideLength.value
   );
   for (var i = 0; i < imageData.data.length; i += 4) {
     imageData.data[i + 3] = 0;
@@ -170,7 +170,7 @@ const erase = () => {
   ctx.putImageData(
     imageData,
     mousePoint.x - eraserSideLength.value / 2,
-    mousePoint.y - eraserSideLength.value / 2,
+    mousePoint.y - eraserSideLength.value / 2
   );
   drawMagnifyingGlass();
 };
@@ -188,12 +188,12 @@ const loadData = () => {
     form.start = new Point(0, 0);
     form.endPoint = new Point(
       props.params.png.size.width,
-      props.params.png.size.height,
+      props.params.png.size.height
     );
     if (!form.template) return;
     minTemplateSide.value = Math.min(
       form.template.size.width,
-      form.template.size.height,
+      form.template.size.height
     );
   }, 100);
 };
@@ -239,7 +239,10 @@ const saveAndCopy = async () => {
       // 新
       if (await Project.templateExists(form.name)) {
         msgWarn(
-          `Template ${form.name}.png already exists, current template name has been changed.`,
+          t(
+            "template already exists, current template name has been changed.",
+            { name: form.name }
+          )
         );
         form.name = Date.now().toString();
       }
@@ -250,7 +253,7 @@ const saveAndCopy = async () => {
     if (localAddress != appStore.remoteServerAddress) {
       const saveResult = await Api.request("save_template", {
         name,
-        template,
+        template
       });
       if (saveResult.status == "error") {
         throw saveResult.message;
@@ -259,7 +262,6 @@ const saveAndCopy = async () => {
     await Project.saveTemplate(name, template);
     await copyText(code.value);
     templateMd5.value = await hash(form.template.base64);
-    console.log(templateMd5.value);
     msgSuccess(t("Copy succeeded."));
   } catch (e) {
     msgError(e);
@@ -283,7 +285,7 @@ const findImage = async () => {
       form.start,
       form.endPoint,
       form.threshold,
-      form.minTemplateSide,
+      form.minTemplateSide
     );
   } catch (e) {
     msgError(e);
@@ -307,7 +309,7 @@ const findImages = async () => {
       form.start,
       form.endPoint,
       form.threshold,
-      form.minTemplateSide,
+      form.minTemplateSide
     );
   } catch (e) {
     msgError(e);
@@ -321,7 +323,7 @@ const drawItems = async () => {
   // null
   if (!result.value) {
     await emits("drawItems", {
-      callback: (_ctx: CanvasRenderingContext2D) => {},
+      callback: (_ctx: CanvasRenderingContext2D) => {}
     });
     return;
   }
@@ -339,7 +341,7 @@ const drawItems = async () => {
           drawText(ctx, item.weight.toString(), textPoint);
         }
         return;
-      },
+      }
     });
   } else {
     // weightPoint
@@ -352,7 +354,7 @@ const drawItems = async () => {
         drawRect(ctx, point, size);
         drawText(ctx, item.weight.toString(), textPoint);
         return;
-      },
+      }
     });
   }
 };
@@ -364,7 +366,7 @@ const updateCode = async () => {
       form.start,
       form.endPoint,
       form.threshold,
-      form.minTemplateSide,
+      form.minTemplateSide
     );
   } catch (e) {
     msgError(e);
@@ -373,6 +375,10 @@ const updateCode = async () => {
 
 const setToFit = () => {
   form.minTemplateSide = minTemplateSide.value;
+};
+
+const toggleBg = () => {
+  bgUrl.value = bgUrl.value == bgDark ? bgLight : bgDark;
 };
 
 listen<MatchingInfo>("backend:update:image_matching_info", async (event) => {
@@ -395,7 +401,7 @@ listen<[string, weightPoint | null]>(
     result.value = weightPoint;
     await updateCode();
     await drawItems();
-  },
+  }
 );
 
 listen<[string, weightPoint[]]>(
@@ -413,10 +419,10 @@ listen<[string, weightPoint[]]>(
       form.start,
       form.endPoint,
       form.threshold,
-      form.minTemplateSide,
+      form.minTemplateSide
     );
     await drawItems();
-  },
+  }
 );
 
 watch(
@@ -428,11 +434,11 @@ watch(
       msgError(e);
     }
   },
-  { deep: true },
+  { deep: true }
 );
 
 defineExpose({
-  loadData,
+  loadData
 });
 
 onMounted(async () => {
@@ -457,7 +463,7 @@ onUnmounted(async () => {});
                   props.params.selection.png.size.width + extSideLength + 'px',
                 height:
                   props.params.selection.png.size.height + extSideLength + 'px',
-                'background-image': `url(${bgUrl})`,
+                'background-image': `url(${bgUrl})`
               }"
             >
               <canvas
@@ -476,7 +482,7 @@ onUnmounted(async () => {});
               :style="{
                 left: mousePoint.x + magnifyingGlassSideLength + 'px',
                 top: mousePoint.y - magnifyingGlassSideLength + 'px',
-                'background-image': `url(${bgUrl})`,
+                'background-image': `url(${bgUrl})`
               }"
             >
               <canvas
@@ -523,10 +529,10 @@ onUnmounted(async () => {});
           <el-button
             type="primary"
             :plain="bgUrl == bgLight ? true : false"
-            @click="bgUrl == bgDark ? bgLight : bgDark"
+            @click="toggleBg"
             style="min-width: 80px"
           >
-            {{ bgUrl == bgDark ? "Light" : "Dark" }}
+            {{ bgUrl == bgDark ? t("Light Mode") : t("Dark Mode") }}
           </el-button>
         </div>
         <Item>
@@ -537,7 +543,7 @@ onUnmounted(async () => {});
                 effect="dark"
                 :content="
                   $t!(
-                    'The template name can be a string or a relative path, such as a/b.',
+                    'The template name can be a string or a relative path, such as a/b.'
                   )
                 "
                 placement="left"
@@ -665,7 +671,7 @@ onUnmounted(async () => {});
                     effect="dark"
                     :content="
                       $t(
-                        'If the template’s shortest side is larger than this value, it will be scaled down to this value, and the target image will be scaled by the same factor before matching. You can adjust it to improve matching performance if you understand its effect.',
+                        'If the template’s shortest side is larger than this value, it will be scaled down to this value, and the target image will be scaled by the same factor before matching. You can adjust it to improve matching performance if you understand its effect.'
                       )
                     "
                     placement="bottom"

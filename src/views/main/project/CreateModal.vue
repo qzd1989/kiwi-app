@@ -8,6 +8,7 @@ import { Project } from "@api";
 import { useRouter } from "vue-router";
 import { useAppStore } from "@store";
 import { documentDir } from "@tauri-apps/api/path";
+import { useI18n } from "vue-i18n";
 
 const appStore = useAppStore();
 const router = useRouter();
@@ -19,6 +20,7 @@ type Form = {
   rootPath: string;
 };
 
+const { t } = useI18n();
 const props = defineProps(["close"]);
 const formRef = ref<FormInstance>();
 const form = reactive<Form>({
@@ -31,16 +33,18 @@ const rules = reactive<FormRules<Form>>({
   name: [
     {
       pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9]+$/,
-      message:
+      message: t(
         "Can only contain Chinese characters, English letters, digits, and underscores.",
+      ),
       trigger: "blur",
     },
   ],
   folder: [
     {
       pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9]+$/,
-      message:
+      message: t(
         "Can only contain Chinese characters, English letters, digits, and underscores.",
+      ),
       trigger: "blur",
     },
     {
@@ -48,7 +52,7 @@ const rules = reactive<FormRules<Form>>({
         if (!form.rootPath || form.rootPath.trim() === "") {
           callback(
             new Error(
-              "Select the root path by clicking the icon on the right.",
+              t("Select the root path by clicking the icon on the right."),
             ),
           );
         } else {
@@ -113,10 +117,10 @@ onUnmounted(async () => {});
     :close-on-press-escape="false"
     :align-center="true"
   >
-    <template #header>Create Project</template>
+    <template #header>{{ t("Create Project") }}</template>
     <el-form ref="formRef" :model="form" :rules="rules">
       <el-form-item
-        label="Project Name"
+        :label="t('Project Name')"
         prop="name"
         :required="true"
         label-position="top"
@@ -129,7 +133,7 @@ onUnmounted(async () => {});
         ></el-input>
       </el-form-item>
       <el-form-item
-        label="Project Folder Name"
+        :label="t('Project Folder Name')"
         prop="folder"
         :required="true"
         label-position="top"
@@ -152,8 +156,12 @@ onUnmounted(async () => {});
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button type="info" plain @click="props.close()">Close</el-button>
-        <el-button type="primary" @click="save(formRef)">Create</el-button>
+        <el-button type="info" plain @click="props.close()">
+          {{ t("Close") }}
+        </el-button>
+        <el-button type="primary" @click="save(formRef)">
+          {{ t("Create") }}
+        </el-button>
       </div>
     </template>
   </el-dialog>

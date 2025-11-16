@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Kiwi",
+  "productName": "Kiwi Assistant",
   "version": "2.0.0",
   "identifier": "com.biexi.kiwi",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Kiwi",
+        "title": "Kiwi Assistant",
         "width": 1024,
         "height": 768,
         "minWidth": 1024,

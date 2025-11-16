@@ -3,10 +3,10 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "kiwi"
+name = "kiwi-assistant"
 version = "2.0.0"
-description = "kiwi lib"
-authors = [{ name = "kiwi", email = "kiwi@kiwi.kiwi" }]
+description = "kiwi assistant lib"
+authors = [{ name = "kiwi-assistant", email = "kiwi-assistant@biexi.com" }]
 readme = "README.md"
 requires-python = ">=3.13"
 
@@ -15,4 +15,4 @@ requires-python = ">=3.13"
 dependencies = ["websocket-client","uv"] 
 
 [tool.setuptools]
-packages = ["kiwi"]
+packages = ["kiwi_assistant"]

@@ -3,6 +3,7 @@ import { ref, nextTick } from "vue";
 import { listen } from "@tauri-apps/api/event";
 import { Stack } from "@types";
 import { ElScrollbar } from "element-plus";
+import { useI18n } from "vue-i18n";
 
 interface EmitLog {
   data: string;
@@ -48,6 +49,7 @@ class Log {
   }
 }
 
+const { t } = useI18n();
 const logScrollbarRef = ref<InstanceType<typeof ElScrollbar> | null>(null);
 const logs = ref<Stack<Log>>(new Stack(100));
 

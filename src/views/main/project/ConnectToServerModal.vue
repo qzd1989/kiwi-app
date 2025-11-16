@@ -5,27 +5,28 @@ import { Server } from "@api/Server";
 import { useAppStore, useLocalStore } from "@store";
 import { msgError, msgSuccess } from "@utils";
 import { Delete } from "@element-plus/icons-vue";
+import { useI18n } from "vue-i18n";
 
 type Form = {
   address: string;
 };
-
+const { t } = useI18n();
 const appStore = useAppStore();
 const localStore = useLocalStore();
 const props = defineProps(["close", "capture"]);
 const formRef = ref<FormInstance>();
 const form = reactive<Form>({
-  address: "",
+  address: ""
 });
 const rules = reactive<FormRules<Form>>({
   address: [
     {
       pattern:
         /^(?:(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d):(?:\d{1,4}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/,
-      message: "Invalid Address format.",
-      trigger: "blur",
-    },
-  ],
+      message: t("Invalid Address format."),
+      trigger: "blur"
+    }
+  ]
 });
 const visible = ref<boolean>(true);
 const recentAddresses = ref<string[]>([]);
@@ -38,12 +39,12 @@ const connect = async (formEl: FormInstance | undefined) => {
     if (isAlive) {
       await Server.setRemoteAddress(form.address);
       appStore.remoteServerAddress = form.address;
-      msgSuccess(`Server ${form.address} is alive.`);
+      msgSuccess(t("Server is alive.", { address: form.address }));
       await addAddress(form.address);
       await props.capture();
       await props.close();
     } else {
-      msgError("Remote Server is not alive.");
+      msgError(t("Remote Server is not alive."));
     }
   } catch (e) {
     msgError(e);
@@ -110,10 +111,10 @@ onUnmounted(async () => {});
     :close-on-press-escape="false"
     :align-center="true"
   >
-    <template #header>Connect to Remote Server</template>
+    <template #header>{{ t("Connect to Remote Server") }}</template>
     <el-form ref="formRef" :model="form" :rules="rules">
       <el-form-item
-        label="Address"
+        :label="t('Address')"
         prop="address"
         :required="true"
         label-position="top"
@@ -150,11 +151,15 @@ onUnmounted(async () => {});
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button type="info" plain @click="props.close()">Close</el-button>
-        <el-button type="primary" @click="setToLocal()">
-          Use Local Server
+        <el-button type="info" plain @click="props.close()">
+          {{ t("Close") }}
         </el-button>
-        <el-button type="primary" @click="connect(formRef)">Connect</el-button>
+        <el-button type="primary" @click="setToLocal()">
+          {{ t("Use Local Server") }}
+        </el-button>
+        <el-button type="primary" @click="connect(formRef)">
+          {{ t("Connect") }}
+        </el-button>
       </div>
     </template>
   </el-dialog>

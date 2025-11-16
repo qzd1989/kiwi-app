@@ -9,7 +9,7 @@ import {
   drawText,
   msgSuccess,
   msgWarn,
-  useLoading,
+  useLoading
 } from "@utils";
 import Item from "@views/components/Item.vue";
 import { Code, Frame } from "@api";
@@ -41,7 +41,7 @@ const form = reactive<Form>({
   points: [],
   offset: { r: 5, g: 5, b: 5 },
   start: new Point(0, 0),
-  end: new Point(0, 0),
+  end: new Point(0, 0)
 });
 
 const pushPoint = (point: ColoredPoint) => {
@@ -85,7 +85,7 @@ const drawItems = async () => {
   // null
   if (!result.value) {
     await emits("drawItems", {
-      callback: (_ctx: CanvasRenderingContext2D) => {},
+      callback: (_ctx: CanvasRenderingContext2D) => {}
     });
     return;
   }
@@ -100,7 +100,7 @@ const drawItems = async () => {
         drawArc(ctx, item.point, 5);
         drawText(ctx, title, titlePoint);
       }
-    },
+    }
   });
 };
 
@@ -121,7 +121,7 @@ const findColors = async () => {
       hexColors,
       form.start,
       form.end,
-      form.offset,
+      form.offset
     );
     await updateCode();
     await drawItems();
@@ -141,7 +141,7 @@ const updateCode = async () => {
       hexColors,
       form.start,
       form.end,
-      form.offset,
+      form.offset
     );
   } catch (e) {
     msgError(e);
@@ -157,11 +157,11 @@ watch(
       msgError(e);
     }
   },
-  { deep: true },
+  { deep: true }
 );
 
 defineExpose({
-  loadData,
+  loadData
 });
 
 onMounted(async () => {
@@ -193,7 +193,7 @@ onUnmounted(async () => {});
                   props.params.selection.png.size.height * pixelSideLength +
                   'px',
                 transformOrigin: 'top left',
-                gridTemplateColumns: `repeat(${props.params.selection.png.size.width}, ${pixelSideLength}px)`,
+                gridTemplateColumns: `repeat(${props.params.selection.png.size.width}, ${pixelSideLength}px)`
               }"
             >
               <div
@@ -204,13 +204,13 @@ onUnmounted(async () => {});
                       .map((item) => {
                         return item.point.toString();
                       })
-                      .includes(item.point.toString()),
+                      .includes(item.point.toString())
                 }"
                 v-for="item in pixels"
                 :style="{
                   'background-color': item.hex,
                   width: pixelSideLength + 'px',
-                  height: pixelSideLength + 'px',
+                  height: pixelSideLength + 'px'
                 }"
                 @click="pushPoint(item)"
               ></div>
@@ -255,7 +255,7 @@ onUnmounted(async () => {});
               </template>
             </el-input>
             <el-button type="primary" plain @click="" class="mt-2 w-full">
-              Copy All
+              {{ t("Copy All") }}
             </el-button>
           </template>
         </Item>

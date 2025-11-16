@@ -22,6 +22,13 @@ fn main() {
 
     //2 build and sync assets/python to target_dir/python
     tauri_build();
+
+    xattrs();
+}
+
+fn xattrs() {
+    let app = App::new();
+    app.xattr(&app.target_app_python_path());
 }
 
 fn init_python() {
@@ -40,7 +47,10 @@ fn init_python() {
         dir::copy(&from, &to, &options)
             .expect("copy assets_source_python to target_temp_python_dir failed.");
     }
-    app.xattr(&to);
+
+    // xattr
+    app.xattr(&app.target_temp_python_path());
+    app.xattr(&app.assets_app_python_path());
 }
 
 fn init_wheels() {
@@ -49,14 +59,14 @@ fn init_wheels() {
         .assets_dir()
         .join("python")
         .join("packages")
-        .join("kiwi");
+        .join("kiwi_assistant");
     let wheels_dir = app
         .assets_dir()
         .join("python")
         .join("project_template")
         .join("wheels");
     let kiwi_wheel_file_name = format!(
-        "kiwi-{}-py3-none-any.whl",
+        "kiwi_assistant-{}-py3-none-any.whl",
         PyProject::default().project.version
     );
     let kiwi_wheel_path = wheels_dir.join(&kiwi_wheel_file_name);
@@ -101,7 +111,7 @@ fn init_wheels() {
 
     // build kiwi
     {
-        let output = app
+        let output = match app
             .target_temp_python_command()
             .args(&[
                 "-u",
@@ -112,10 +122,19 @@ fn init_wheels() {
                 package_dir.to_str().unwrap(),
             ])
             .output()
-            .expect("Failed to build module `kiwi`");
+        {
+            Ok(o) => o,
+            Err(e) => panic!(
+                "Failed to build module `kiwi_assistant`: {:?}",
+                e.to_string()
+            ),
+        };
 
         if !output.status.success() {
-            panic!("Failed to build module `kiwi`");
+            panic!(
+                "Failed to build module `kiwi_assistant`: {:?}",
+                String::from_utf8_lossy(&output.stderr)
+            );
         }
     }
 
@@ -159,7 +178,6 @@ fn init_wheels() {
 
     // install uv to app python
     {
-        app.xattr(&app.assets_app_python_path());
         let wheels_path = app.assets_wheels_path();
         let uv_path = match app.match_one(&wheels_path, r"^uv-.*\.whl$") {
             Some(p) => p,
@@ -241,7 +259,7 @@ mod pyproject {
                 .join("assets")
                 .join("python")
                 .join("packages")
-                .join("kiwi")
+                .join("kiwi_assistant")
                 .join("pyproject.toml");
             let toml_content = fs::read_to_string(&toml_path)
                 .unwrap()
@@ -464,10 +482,36 @@ impl App {
         Command::new(&self.target_temp_python_path())
     }
 
+    // assets/python/interpreter/(bin/python{version}|python.exe)
+    fn target_app_python_path(&self) -> PathBuf {
+        match System::os() {
+            Os::Macos => self
+                .target_dir()
+                .join("python")
+                .join("interpreter")
+                .join("bin")
+                .join(format!("python{}", PYTHON_VERSION)),
+            Os::Windows => self.assets_app_python_dir().join("python.exe"),
+        }
+    }
+
     fn xattr(&self, path: &PathBuf) {
         if System::os() == Os::Macos {
             let output = Command::new(&"xattr")
                 .args(&["-r", "-d", "com.apple.quarantine", path.to_str().unwrap()])
+                .output()
+                .expect(&format!("Failed to xattr {:?}", &path));
+            if !output.status.success() {
+                println!("cargo:warning=xattr {:?} failed.", &path);
+            }
+            let python_bin_path = path.parent().unwrap().join("python");
+            let output = Command::new(&"xattr")
+                .args(&[
+                    "-r",
+                    "-d",
+                    "com.apple.quarantine",
+                    python_bin_path.to_str().unwrap(),
+                ])
                 .output()
                 .expect(&format!("Failed to xattr {:?}", &path));
             if !output.status.success() {
