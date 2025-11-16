@@ -1,7 +1,7 @@
 {
   "Kiwi Assistant": "奇异果助手",
   "Confirm": "确认",
-  "Simplifying your tasks, one click at a time.": "一键简化你的任务.",
+  "Simplifying your tasks, one click at a time.": "简化你的工作，一次点击即可完成。",
   "Project name is required.": "项目名称是必填项。",
   "WebSocket started successfully.": "WebSocket成功从端口{port}启动.",
   "Language": "语言",
@@ -110,7 +110,7 @@
   "Run Capturer": "启动捕获器",
   "Start Remote Assistance": "启动远程协助",
   "Settings": "配置",
-  "Your LAN Address": "你的局域网IP",
+  "Your LAN Address": "你的局域网IP（目前仅支持局域网远程控制）",
   "Back": "返回",
   "Project Info": "项目信息",
   "Name": "名字",

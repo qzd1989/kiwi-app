@@ -37,13 +37,13 @@ const selectProject = async () => {
     const path = await open({
       directory: true,
       multiple: false,
-      defaultPath: undefined,
+      defaultPath: undefined
     });
     if (path) {
       appStore.project = await Project.open(path);
       router.push({
         path: "/project",
-        query: { path },
+        query: { path }
       });
     }
   } catch (e: unknown) {
@@ -113,7 +113,7 @@ onUnmounted(async () => {});
       <div class="text-4xl font-extrabold text-gray-700">
         {{ t("Kiwi Assistant") }}
       </div>
-      <div class="text-gray-500">
+      <div class="text-2xl text-gray-500">
         {{ t("Simplifying your tasks, one click at a time.") }}
       </div>
     </div>
