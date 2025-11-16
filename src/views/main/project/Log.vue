@@ -3,7 +3,6 @@ import { ref, nextTick } from "vue";
 import { listen } from "@tauri-apps/api/event";
 import { Stack } from "@types";
 import { ElScrollbar } from "element-plus";
-import { useI18n } from "vue-i18n";
 
 interface EmitLog {
   data: string;
@@ -15,7 +14,7 @@ class Log {
     public type: "info" | "warn" | "error" | "success",
     public message: string,
     public time: number,
-    public formattedTime: string,
+    public formattedTime: string
   ) {}
 
   static info(message: string, time: number): Log {
@@ -49,7 +48,6 @@ class Log {
   }
 }
 
-const { t } = useI18n();
 const logScrollbarRef = ref<InstanceType<typeof ElScrollbar> | null>(null);
 const logs = ref<Stack<Log>>(new Stack(100));
 
@@ -95,7 +93,7 @@ listen<EmitLog>("project:log:success", (event) => {
 });
 
 defineExpose({
-  clear,
+  clear
 });
 </script>
 <template>
@@ -108,7 +106,7 @@ defineExpose({
           'text-gray-400': log.type == 'info',
           'text-amber-400': log.type == 'warn',
           'text-red-400': log.type == 'error',
-          'text-green-400': log.type == 'success',
+          'text-green-400': log.type == 'success'
         }"
       >
         <div class="table-cell py-0.5 pr-2 whitespace-nowrap">
