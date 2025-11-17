@@ -147,5 +147,7 @@
   "Text Length": "文字长度",
   "Light Mode": "浅色背景",
   "Dark Mode": "深色背景",
-  "Mouse position copied successfully.": "鼠标坐标已复制."
+  "Mouse position copied successfully.": "鼠标坐标已复制.",
+  "You can run file in vscode.": "你可以在vscode中运行文件.",
+  "If vscode is installed.": "如果已安装vscode."
 }

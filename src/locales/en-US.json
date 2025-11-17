@@ -147,5 +147,7 @@
   "Text Length": "Text Length",
   "Light Mode": "Light",
   "Dark Mode": "Dark",
-  "Mouse position copied successfully.": "Mouse position copied successfully."
+  "Mouse position copied successfully.": "Mouse position copied successfully.",
+  "You can run file in vscode.": "You can run file in vscode.",
+  "If vscode is installed.": "If vscode is installed."
 }

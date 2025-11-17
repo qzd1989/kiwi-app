@@ -286,7 +286,7 @@ onUnmounted(async () => {
               <div class="ml-2">
                 <el-tooltip
                   effect="dark"
-                  content="You can run file in vscode."
+                  :content="t('You can run file in vscode.')"
                   placement="right-start"
                 >
                   <el-icon
@@ -368,7 +368,7 @@ onUnmounted(async () => {
             <div class="ml-2">
               <el-tooltip
                 effect="dark"
-                content="If vscode is installed."
+                :content="t('If vscode is installed.')"
                 placement="right-start"
               >
                 <el-icon
